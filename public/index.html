@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>증강 윷놀이</title>
+<style>
+:root{--bg:#14161c;--card:#1e222b;--card2:#272c38;--tx:#e8eaf0;--mut:#8b93a7;--ac:#ffb84d;--bd:#323848}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;font-size:15px}
+button{font:inherit;color:var(--tx);background:var(--card2);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ac)}
+button:disabled{opacity:.4;cursor:default}
+button.pri{background:var(--ac);color:#1a1300;border-color:var(--ac);font-weight:700}
+input[type=text]{font:inherit;color:var(--tx);background:var(--card2);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;width:100%}
+h1{margin:0 0 4px;font-size:28px}
+.wrap{max-width:1180px;margin:0 auto;padding:12px}
+.center{max-width:420px;margin:8vh auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mut{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:minmax(300px,640px) 1fr;gap:12px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+svg{width:100%;height:auto;background:#222736;border-radius:12px;display:block}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--card2);border:1px solid var(--bd);font-size:12px;margin:2px 3px 2px 0;cursor:help}
+.chip.used{opacity:.4;text-decoration:line-through}
+.res{font-size:18px;font-weight:700;padding:8px 14px}
+.res.sel{background:var(--ac);color:#1a1300;border-color:var(--ac)}
+.cur{outline:2px solid var(--ac)}
+.dead{opacity:.45}
+.log{height:210px;overflow:auto;font-size:13px;line-height:1.55;color:#c8cddb}
+.hint{background:#3a2f12;border:1px solid var(--ac);color:var(--ac);padding:8px 12px;border-radius:8px;margin:8px 0}
+.overlay{position:fixed;inset:0;background:rgba(5,6,10,.82);display:flex;align-items:center;justify-content:center;z-index:10;padding:12px;overflow:auto}
+.modal{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:900px;width:100%}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.opt{text-align:left;padding:14px;background:var(--card2);border-radius:12px;border:2px solid var(--bd);cursor:pointer}
+.opt:hover:not(.lock){border-color:var(--ac)}
+.opt.lock{opacity:.35;cursor:not-allowed}
+.opt b{font-size:17px;display:block;margin-bottom:6px}
+.opt .d{font-size:13px;color:#c8cddb;line-height:1.45}
+.tag{font-size:11px;color:var(--ac);margin-left:6px}
+.augl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:45vh;overflow:auto;margin-top:10px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#552;border:1px solid var(--ac);padding:10px 18px;border-radius:10px;z-index:30;display:none}
+.win{background:linear-gradient(90deg,#4a3500,#1e222b);border-color:var(--ac);font-size:18px}
+.homebox{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.hp{width:22px;height:22px;border-radius:50%;border:2px solid #000;display:inline-block;font-size:11px;text-align:center;line-height:18px;font-weight:700;color:#000}
+.hp.me{cursor:pointer;box-shadow:0 0 0 2px var(--ac)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const RES = ['백도', '도', '개', '걸', '윷', '모'];
+let ws, meta = null, S = null, ui = { ri: 0, mode: null, pid: null };
+let token = localStorage.getItem('yut_token');
+if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('yut_token', token); }
+const AUG = () => Object.fromEntries((meta ? meta.augments : []).map((a) => [a.id, a]));
+
+function connect(first) {
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  ws.onopen = () => {
+    const room = localStorage.getItem('yut_room');
+    if (first && room) ws.send(JSON.stringify({ t: 'join', code: room, name: localStorage.getItem('yut_name') || '', token }));
+  };
+  ws.onmessage = (ev) => {
+    const m = JSON.parse(ev.data);
+    if (m.t === 'joined') { meta = m.meta; localStorage.setItem('yut_room', m.code); }
+    else if (m.t === 'state') { S = m.s; if (S.phase !== 'turn' || S.cur !== S.me) { ui.mode = null; } render(); }
+    else if (m.t === 'err') { toast(m.msg); if (!S) { localStorage.removeItem('yut_room'); render(); } }
+  };
+  ws.onclose = () => { if (S) toast('연결이 끊어졌습니다. 새로고침하면 다시 들어갑니다'); };
+}
+function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
+let tt; function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(tt); tt = setTimeout(() => { t.style.display = 'none'; }, 2800); }
+
+// ---- 보드 좌표 ----
+const C = [[90, 90], [90, 10], [10, 10], [10, 90]], MID = [50, 50];
+const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+function nodeXY(n) {
+  if (n < 20) { const s = Math.floor(n / 5), k = n % 5; return lerp(C[s], C[(s + 1) % 4], k / 5); }
+  if (n === 22) return MID;
+  if (n === 20 || n === 21) return lerp(C[1], MID, (n - 19) / 3);
+  if (n === 23 || n === 24) return lerp(MID, C[3], (n - 22) / 3);
+  if (n === 25 || n === 26) return lerp(C[2], MID, (n - 24) / 3);
+  return lerp(MID, C[0], (n - 26) / 3);
+}
+const isBig = (n) => n === 0 || n === 5 || n === 10 || n === 15 || n === 22;
+
+function boardSVG() {
+  const me = S.players[S.me];
+  const myTurn = S.phase === 'turn' && S.cur === S.me;
+  let s = '<svg viewBox="0 0 100 100">';
+  for (const line of meta.lines) s += `<polyline fill="none" stroke="#4a5368" stroke-width="1.1" points="${line.map((n) => nodeXY(n).join(',')).join(' ')}"/>`;
+  // 이동 가능 칸 강조
+  let hi = new Set();
+  if (ui.mode === 'sniper_node') for (let n = 1; n <= 28; n++) hi.add(n);
+  if (ui.mode === 'tt_target') {
+    const x = me.pieces.find((y) => y.id === ui.pid);
+    if (x) { const r = meta.routes[x.route]; r.slice(0, r.indexOf(x.pos)).forEach((n) => hi.add(n)); }
+  }
+  for (let n = 0; n < 29; n++) {
+    const [x, y] = nodeXY(n); const big = isBig(n);
+    s += `<g data-a="node" data-v="${n}" style="cursor:${hi.has(n) ? 'pointer' : 'default'}"><circle cx="${x}" cy="${y}" r="${big ? 4.4 : 3}" fill="${n === 0 ? '#3a4157' : '#2d3446'}" stroke="${hi.has(n) ? '#ffb84d' : '#5a6580'}" stroke-width="${hi.has(n) ? 1.2 : 0.6}"/>`;
+    if (n === 0) s += `<text x="${x}" y="${y + 1.2}" font-size="3" fill="#aab" text-anchor="middle">출발</text>`;
+    s += '</g>';
+  }
+  // 함정/표시
+  S.poops.forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x}" y="${y + 1.8}" font-size="5" text-anchor="middle" pointer-events="none">💩</text>`; });
+  if (Array.isArray(me.st.garlic)) me.st.garlic.filter((n) => !me.st.garlicGot.includes(n)).forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x + 3}" y="${y - 2}" font-size="4" pointer-events="none">🧄</text>`; });
+  if (Array.isArray(me.st.snipers)) me.st.snipers.forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x - 3}" y="${y - 2}" font-size="4" pointer-events="none">🎯</text>`; });
+  // 말
+  const byNode = {};
+  S.players.forEach((p) => {
+    const st = {};
+    p.pieces.forEach((x) => { if (!x.done && x.pos > 0) (st[x.pos] = st[x.pos] || []).push(x); });
+    Object.keys(st).forEach((n) => (byNode[n] = byNode[n] || []).push({ p, list: st[n] }));
+  });
+  Object.keys(byNode).forEach((n) => {
+    const es = byNode[n]; const [cx, cy] = nodeXY(+n);
+    es.forEach((e, i) => {
+      const x = cx + (i - (es.length - 1) / 2) * 5.2, y = cy;
+      const mine = e.p.idx === S.me; const lead = e.list[0];
+      const frozen = e.list.some((q) => q.frozen), shield = e.list.some((q) => q.shield);
+      const ty = e.list.find((q) => q.type !== 'normal');
+      const letter = ty ? { vanguard: '선', zealot: '광', marathon: '마' }[ty.type] : '';
+      s += `<g data-a="piece" data-v="${lead.id}" ${mine ? 'style="cursor:pointer"' : ''} opacity="${frozen ? 0.55 : 1}">
+        <circle cx="${x}" cy="${y}" r="3.6" fill="${e.p.color}" stroke="${shield ? '#fff' : '#000'}" stroke-width="${shield ? 1 : 0.7}" ${shield ? 'stroke-dasharray="1.2 0.8"' : ''}/>
+        ${e.list.length > 1 ? `<text x="${x}" y="${y + 1.3}" font-size="4" font-weight="700" fill="#000" text-anchor="middle">${e.list.length}</text>` : (letter ? `<text x="${x}" y="${y + 1.2}" font-size="3.4" font-weight="700" fill="#000" text-anchor="middle">${letter}</text>` : '')}
+        ${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
+    });
+  });
+  s += '</svg>';
+  return s;
+}
+
+// ---- 능력 정의 ----
+const ABIL = {
+  timetravel: { once: true, start: 'tt_piece', hint: '되돌릴 내 말을 클릭하세요' },
+  shield: { once: true, start: 'shield_piece', hint: '보호막을 씌울 내 말뭉치를 클릭하세요' },
+  sacrifice: { once: true, start: 'sac_piece', hint: '희생시킬 내 말을 클릭하세요' },
+  sniper: { start: 'sniper_node', hint: '저격할 칸을 클릭하세요 (던지기 기회 1회 소모)', needThrow: true },
+  baduk: { once: true }, handfast: { once: true }, chalice: {}, lastdance: { once: true, confirm: '이번 턴이 끝나면 탈락합니다. 정말 사용할까요?' },
+};
+
+function controlsHTML(me) {
+  const tn = S.tn; let h = '';
+  const A = AUG();
+  if (tn.throws > 0) {
+    h += `<div class="mut">던질 기회: ${tn.throws}회</div><div class="row" style="margin:6px 0">`;
+    if (me.st.nextChoose) h += RES.map((r) => `<button class="pri" data-a="throw" data-v="${r}">${r}</button>`).join('') + '<span class="mut">원하는 결과를 고르세요</span>';
+    else if (me.augs.includes('dogpig')) h += `<button class="pri" data-a="throw" data-v="도">도</button><button class="pri" data-a="throw" data-v="개">개</button>`;
+    else h += `<button class="pri" data-a="throw" data-v="">🎲 윷 던지기</button>`;
+    if (me.augs.includes('doberman') && me.st.coins >= 2) h += `<button data-a="coin" data-v="">🐶 개 코인 2개 → 모 (${me.st.coins})</button>`;
+    h += '</div>';
+  }
+  if (tn.queue.length) {
+    if (ui.ri >= tn.queue.length) ui.ri = 0;
+    h += `<div class="mut">사용할 결과를 고르고 → 말을 클릭</div><div class="row" style="margin:6px 0">` +
+      tn.queue.map((r, i) => `<button class="res ${i === ui.ri ? 'sel' : ''}" data-a="ri" data-v="${i}">${r}</button>`).join('') + '</div>';
+    if (tn.throws > 0) h += '<div class="mut">※ 던질 기회를 모두 쓴 뒤에 말을 움직일 수 있습니다</div>';
+  }
+  const ab = me.augs.filter((id) => ABIL[id]);
+  if (ab.length) {
+    h += '<div class="row" style="margin-top:8px">' + ab.map((id) => `<button data-a="abil" data-v="${id}" ${me.used[id] ? 'disabled' : ''}>⚡ ${esc(A[id].name)}</button>`).join('') + '</div>';
+  }
+  if (ui.mode) {
+    const key = { tt_piece: 'timetravel', tt_target: 'timetravel', shield_piece: 'shield', sac_piece: 'sacrifice', sniper_node: 'sniper' }[ui.mode];
+    const hint = ui.mode === 'tt_target' ? '돌아갈 칸을 클릭하세요 (또는 대기칸)' : ABIL[key].hint;
+    h += `<div class="hint">${hint} <button data-a="cancel">취소</button>${ui.mode === 'tt_target' ? ' <button data-a="tthome">대기칸으로</button>' : ''}</div>`;
+  }
+  return h;
+}
+
+function playerCards() {
+  const A = AUG();
+  return S.players.map((p) => {
+    const home = p.pieces.filter((x) => !x.done && x.pos === 0);
+    const badges = [];
+    if (p.st.coins) badges.push(`🐶${p.st.coins}`);
+    if (p.augs.includes('summon')) badges.push(`🔮${p.st.ritual}/12`);
+    if (p.augs.includes('garlic')) badges.push(`🧄${p.st.garlicGot.length}/3`);
+    if (p.augs.includes('coup')) badges.push(`⚔${p.st.kills}/4`);
+    if (p.augs.includes('cow')) badges.push(`🐂${p.st.backdoCaps}/2`);
+    if (p.augs.includes('score')) badges.push(`🎼${p.st.seen.length}/6`);
+    if (p.augs.includes('nofriend')) badges.push(`🥲${p.st.friendHits.length}/${S.players.filter((q) => q.alive).length - 1}`);
+    if (p.st.poison) badges.push('☠독');
+    if (p.st.lastDance) badges.push('💃라스트댄스');
+    if (p.st.nextChoose) badges.push('✋다음 윷 자유');
+    return `<div class="card ${S.phase === 'turn' && S.cur === p.idx ? 'cur' : ''} ${p.alive ? '' : 'dead'}" style="margin-bottom:8px;padding:10px">
+      <div class="row"><b><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${p.idx === S.me ? ' (나)' : ''}</b>
+      <span class="mut">완주 ${p.finished}/${p.npieces} · 윷 ${p.sticks}개${p.connected ? '' : ' · 접속 끊김'}${p.alive ? '' : ' · 탈락'}</span></div>
+      <div class="homebox" style="margin:6px 0"><span class="mut">대기</span>${home.map((x) => `<span class="hp ${p.idx === S.me ? 'me' : ''}" style="background:${p.color}" ${p.idx === S.me ? `data-a="piece" data-v="${x.id}"` : ''}>${{ vanguard: '선', zealot: '광', marathon: '마' }[x.type] || ''}</span>`).join('') || '<span class="mut">-</span>'}</div>
+      <div>${p.augs.map((id) => `<span class="chip ${p.used[id] ? 'used' : ''}" title="${esc(A[id].desc)}">${esc(A[id].name)}</span>`).join('') || '<span class="mut">증강 없음</span>'}</div>
+      ${badges.length ? `<div class="mut">${badges.join(' · ')}</div>` : ''}</div>`;
+  }).join('');
+}
+
+function pickModal() {
+  const pk = S.pick; const A = AUG(); const pickerP = S.players[pk.picker];
+  const kindName = { start: '시작', mid: '중간', end: '마무리' }[pk.kind];
+  let h = `<div class="overlay"><div class="modal"><h2 style="margin:0">${S.round}라운드 증강 선택 <span class="tag">${kindName} 전용 등장</span></h2>`;
+  h += `<div class="mut">${S.ganTaek ? '🐱 간택 발동 중: 고양이가 나오면 반드시 골라야 합니다 · ' : ''}남은 선택 ${pk.left[pk.picker]}회</div>`;
+  if (pk.picker !== S.me) {
+    h += `<p style="font-size:17px">⏳ <b>${esc(pickerP.name)}</b> 님이 고르는 중...</p>`;
+    h += `<div class="mut">현재 증강 선택 순서: ${Object.keys(pk.left).map((i) => esc(S.players[i].name)).join(' → ')}</div>`;
+  } else if (pk.sub) {
+    if (pk.sub.type === 'player') {
+      h += `<p>${esc(A[pk.sub.aug].name)}: 대상 플레이어를 고르세요</p><div class="row">` +
+        S.players.filter((p) => p.alive && p.idx !== S.me).map((p) => `<button data-a="sub" data-v="${p.idx}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('') + '</div>';
+    } else {
+      h += `<p>${esc(A[pk.sub.aug].name)}: 증강을 하나 고르세요</p><div class="augl">` +
+        meta.augments.map((a) => `<button data-a="sub" data-v="${a.id}" title="${esc(a.desc)}" style="text-align:left">${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작', mid: '중간', end: '마무리' }[a.cat]}</span></button>`).join('') + '</div>';
+    }
+  } else {
+    h += '<div class="opts">' + pk.options.map((o) => { const a = A[o.id]; return `<div class="opt ${o.locked ? 'lock' : ''}" ${o.locked ? '' : `data-a="pick" data-v="${o.id}"`}><b>${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작 전용', mid: '중간 전용', end: '마무리 전용' }[a.cat]}</span></b><div class="d">${esc(a.desc)}</div></div>`; }).join('') + '</div>';
+  }
+  if (pk.banned.length) h += `<div class="mut" style="margin-top:10px">🔍 이번 선택에서 무효화됨: ${pk.banned.map((id) => esc(A[id].name)).join(', ')}</div>`;
+  h += '<div style="margin-top:12px">' + playerCards() + '</div></div></div>';
+  return h;
+}
+
+function landingHTML() {
+  return `<div class="center"><h1>🎲 증강 윷놀이</h1><p class="mut">최대 4인 · 라운드 1/6/12에 증강 선택</p>
+  <div class="card"><div class="mut">이름</div><input type="text" id="nm" maxlength="10" value="${esc(localStorage.getItem('yut_name') || '')}" placeholder="이름">
+  <div class="row" style="margin-top:12px"><button class="pri" data-a="create">새 방 만들기</button></div>
+  <hr style="border-color:#323848;margin:16px 0"><div class="mut">친구가 알려준 방 코드</div>
+  <div class="row"><input type="text" id="cd" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"><button data-a="join">입장</button></div></div></div>`;
+}
+function lobbyHTML() {
+  const host = S.me === 0;
+  return `<div class="center"><h1>방 코드: ${esc(S.code)}</h1><p class="mut">친구에게 이 코드를 알려주세요 (같은 서버 주소로 접속)</p>
+  <div class="card">${S.players.map((p) => `<div><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${p.idx === 0 ? ' 👑' : ''}${p.idx === S.me ? ' (나)' : ''}</div>`).join('')}</div>
+  <div class="card"><label><input type="checkbox" data-a="chaos" ${S.chaos ? 'checked' : ''} ${host ? '' : 'disabled'}> 🌀 혼돈 모드 (증강을 한 번에 2번 고름)</label></div>
+  ${host ? `<button class="pri" data-a="start" ${S.players.length < 2 ? 'disabled' : ''}>게임 시작 (${S.players.length}/4)</button>` : '<div class="mut">방장이 시작하기를 기다리는 중...</div>'}</div>`;
+}
+function gameHTML() {
+  const me = S.players[S.me]; const myTurn = S.phase === 'turn' && S.cur === S.me;
+  let status = '';
+  if (S.phase === 'turn') status = `<b>${esc(S.players[S.cur].name)}</b>의 차례`;
+  else if (S.phase === 'pick') status = '증강 선택 중';
+  let h = `<div class="wrap"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>🎲 ${esc(S.code)} · ${S.round}라운드${S.chaos ? ' · 🌀혼돈' : ''}</b><span>${status}</span></div>`;
+  if (S.phase === 'ended') {
+    const w = S.players[S.winner];
+    h += `<div class="card win">🏆 <b>${esc(w.name)}</b> 승리! <span class="mut">(${esc(S.reason)})</span> <button class="pri" data-a="rematch" style="margin-left:10px">다시 하기</button></div>`;
+  }
+  h += `<div class="grid"><div>${boardSVG()}<div class="card" style="margin-top:10px"><b>${myTurn ? '내 차례' : '대기 중'}</b>${myTurn ? controlsHTML(me) : ''}</div></div>
+  <div>${playerCards()}<div class="card"><div class="mut">진행 기록</div><div class="log" id="log">${S.log.map((l) => `<div>${esc(l)}</div>`).join('')}</div></div></div></div></div>`;
+  if (S.phase === 'pick') h += pickModal();
+  return h;
+}
+function render() {
+  const app = $('app');
+  const keepScroll = $('log') ? $('log').scrollTop : 0;
+  if (!S) app.innerHTML = landingHTML();
+  else if (S.phase === 'lobby') app.innerHTML = lobbyHTML();
+  else app.innerHTML = gameHTML();
+  if ($('log')) $('log').scrollTop = 1e9; else keepScroll;
+}
+
+// ---- 이벤트 ----
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  const a = el.dataset.a; const v = el.dataset.v;
+  const me = S && S.players[S.me];
+  if (a === 'create' || a === 'join') {
+    const name = $('nm').value.trim() || '플레이어'; localStorage.setItem('yut_name', name);
+    if (a === 'join') { const code = $('cd').value.trim().toUpperCase(); if (code.length !== 4) return toast('4글자 방 코드를 입력하세요'); send({ t: 'join', code, name, token }); }
+    else send({ t: 'create', name, token });
+  } else if (a === 'start') send({ t: 'start' });
+  else if (a === 'rematch') send({ t: 'rematch' });
+  else if (a === 'pick') send({ t: 'pick', id: v });
+  else if (a === 'sub') send({ t: 'sub', value: /^\d+$/.test(v) ? +v : v });
+  else if (a === 'throw') send({ t: 'throw', choose: v || undefined });
+  else if (a === 'coin') send({ t: 'throw', coin: true, choose: '도' });
+  else if (a === 'ri') { ui.ri = +v; render(); }
+  else if (a === 'cancel') { ui.mode = null; render(); }
+  else if (a === 'tthome') { send({ t: 'ability', a: 'timetravel', pid: ui.pid, target: 0 }); ui.mode = null; }
+  else if (a === 'abil') {
+    const d = ABIL[v];
+    if (d.confirm && !confirm(d.confirm)) return;
+    if (d.start) { if (d.needThrow && S.tn.throws <= 0) return toast('던지기 기회가 있을 때만 사용할 수 있습니다'); ui.mode = d.start; ui.pid = null; render(); }
+    else send({ t: 'ability', a: v });
+  } else if (a === 'piece') {
+    if (!S || S.phase !== 'turn' || S.cur !== S.me) return;
+    if (!me.pieces.some((x) => x.id === v)) return; // 남의 말
+    if (ui.mode === 'tt_piece') { ui.pid = v; ui.mode = 'tt_target'; render(); }
+    else if (ui.mode === 'shield_piece') { send({ t: 'ability', a: 'shield', pid: v }); ui.mode = null; }
+    else if (ui.mode === 'sac_piece') { send({ t: 'ability', a: 'sacrifice', pid: v }); ui.mode = null; }
+    else send({ t: 'move', ri: ui.ri, pid: v });
+  } else if (a === 'node') {
+    if (ui.mode === 'tt_target') { send({ t: 'ability', a: 'timetravel', pid: ui.pid, target: +v }); ui.mode = null; }
+    else if (ui.mode === 'sniper_node') { send({ t: 'ability', a: 'sniper', node: +v }); ui.mode = null; }
+  }
+});
+document.addEventListener('change', (e) => { if (e.target.dataset && e.target.dataset.a === 'chaos') send({ t: 'chaos', v: e.target.checked }); });
+connect(true);
+render();
+</script>
+</body>
+</html>

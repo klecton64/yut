@@ -1,0 +1,13 @@
+{
+  "name": "augment-yut",
+  "version": "0.1.0",
+  "description": "증강 윷놀이 (최대 4인 온라인 멀티플레이)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/sim.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
