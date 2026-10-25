@@ -67,7 +67,18 @@ wss.on('connection', (ws) => {
       if (!ws.ctx) throw new Error('먼저 방에 입장하세요');
       const { room, p } = ws.ctx; const g = room.g;
       switch (m.t) {
+        case 'leave': {
+          room.conns.delete(p); ws.ctx = null;
+          if (g.phase === 'lobby') G.removePlayer(g, p); else { p.connected = false; G.forfeit(g, p); }
+          send(ws, { t: 'left' });
+          if (room.conns.size === 0) setTimeout(() => { if (room.conns.size === 0) rooms.delete(g.code); }, 30 * 60 * 1000);
+          broadcast(room);
+          return;
+        }
         case 'chaos': if (p.idx !== 0 || g.phase !== 'lobby') throw new Error('방장만 로비에서 설정할 수 있습니다'); g.chaos = !!m.v; break;
+        case 'ranking': if (p.idx !== 0 || g.phase !== 'lobby') throw new Error('방장만 로비에서 설정할 수 있습니다'); g.ranking = !!m.v; break;
+        case 'guess': G.actGuess(g, p, m.value); break;
+        case 'vote': G.actVote(g, p, m.value); break;
         case 'start': if (p.idx !== 0) throw new Error('방장만 시작할 수 있습니다'); if (g.phase !== 'lobby') throw new Error('이미 시작됨'); G.startGame(g); break;
         case 'pick': G.actPick(g, p, m.id); break;
         case 'sub': G.actSub(g, p, m.value); break;
