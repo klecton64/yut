@@ -13,13 +13,19 @@ const EXPECT_KIND = { 1: 'start', 5: 'mid', 10: 'end' };
 function pickPhase(g) {
   const pk = g.pick; const sub = pk.sub;
   if (EXPECT_KIND[g.round] !== pk.kind) throw new Error(`라운드 ${g.round} 선택 종류가 ${pk.kind}`);
-  if (pk.options) pk.options.forEach((o) => { const c = G.BY_ID[o.id].cat; if (c !== 'gen' && c !== pk.kind) throw new Error(`${pk.kind} 선택창에 ${o.id}(${c}) 등장`); });
+  Object.values(pk.opts || {}).forEach((l) => l.forEach((o) => { const c = G.BY_ID[o.id].cat; if (c !== 'gen' && c !== pk.kind) throw new Error(`${pk.kind} 선택창에 ${o.id}(${c}) 등장`); }));
+  if (pk.stage === 'choose') {
+    const who = Object.keys(pk.left).map(Number).filter((i) => pk.left[i] > 0 && g.players[i].alive && !g.players[i].out);
+    if (!who.length) throw new Error('선택할 사람이 없는데 단계가 안 넘어감');
+    const q = g.players[sample(who)];
+    return G.actPick(g, q, sample(pk.opts[q.idx].filter((o) => !o.locked)).id);
+  }
   if (sub && sub.type === 'guess') { const q = g.players[sample(sub.pending)]; return G.actGuess(g, q, Math.floor(Math.random() * 4)); }
   if (sub && sub.type === 'vote') {
     const q = g.players[sample(sub.pending)];
     return G.actVote(g, q, sample(g.players.filter((x) => x.alive && !x.out && x !== q)).idx);
   }
-  const p = g.players[pk.order[pk.pos]];
+  const p = g.players[pk.cur];
   if (sub) {
     switch (sub.type) {
       case 'player': return G.actSub(g, p, sample(g.players.filter((q) => q.alive && !q.out && q !== p)).idx);
@@ -31,7 +37,7 @@ function pickPhase(g) {
       default: throw new Error('알 수 없는 sub ' + sub.type);
     }
   }
-  return G.actPick(g, p, sample(pk.options.filter((o) => !o.locked)).id);
+  throw new Error('공개 단계인데 처리할 sub가 없음');
 }
 
 function stepBot(g) {

@@ -193,7 +193,7 @@ function removePlayer(g, p) {
   g.players.forEach((q, i) => { q.idx = i; q.color = COLORS[i]; q.colorName = COLOR_NAMES[i]; });
 }
 function resetState(g) {
-  g.round = 0; g.cur = 0; g.tn = null; g.pick = null; g.winner = null; g.reason = '';
+  g.round = 0; g.cur = 0; g.order = null; g.tn = null; g.pick = null; g.winner = null; g.reason = '';
   g.poops = []; g.ganTaek = false; g.log = []; g.ranks = []; g.elim = []; g.fixed = {}; g.party = []; g.duels = [];
   g.echo = false; g.fog = null; g.hpOn = false; g.lastThrow = null; g.final = null; g.coWinners = []; g.planWin = null;
 }
@@ -207,49 +207,100 @@ function startGame(g) {
   g.players.forEach(makePieces);
   g.round = 1;
   log(g, g.ranking ? '게임 시작! (순위전)' : '게임 시작!');
+  decideOrder(g);
   startPick(g);
+}
+
+// 시작 전에 모두 윷을 던져 큰 순서대로 차례를 정함 (동점이면 동점자끼리 다시 던짐)
+const RES_VAL = { '백도': 0, '도': 1, '개': 2, '걸': 3, '윷': 4, '모': 5 };
+function decideOrder(g) {
+  const rounds = []; const out = [];
+  const settle = (set, depth) => {
+    if (set.length === 1) { out.push(set[0]); return; }
+    if (depth > 6) { out.push(...shuffle(set)); return; }
+    const rolls = set.map((i) => { const r = rollFaces(4); return { by: i, items: [{ res: r.r, faces: r.faces }], v: RES_VAL[r.r] }; });
+    rounds.push(rolls.map((x) => ({ by: x.by, items: x.items })));
+    const vals = [...new Set(rolls.map((x) => x.v))].sort((a, b) => b - a);
+    for (const v of vals) settle(rolls.filter((x) => x.v === v).map((x) => x.by), depth + 1);
+  };
+  settle(g.players.map((p) => p.idx), 0);
+  g.order = out;
+  g.throwSeq = (g.throwSeq || 0) + 1;
+  g.lastThrow = { seq: g.throwSeq, by: -1, items: [], label: '순서 정하기', rounds, order: out.slice() };
+  rounds.forEach((rd, k) => log(g, `🎲 순서 던지기${rounds.length > 1 ? ` ${k + 1}차` : ''}: ` + rd.map((x) => `${g.players[x.by].name} ${x.items[0].res}`).join(', ')));
+  log(g, `🔢 차례 순서: ${out.map((i) => g.players[i].name).join(' → ')}`);
 }
 
 // ---------- 증강 선택 ----------
 function startPick(g) {
   const kind = ROUND_PICKS[g.round];
   g.phase = 'pick';
-  const order = activeList(g).map((p) => p.idx);
-  const left = {}; order.forEach((i) => { left[i] = g.chaos ? 2 : 1; });
-  g.pick = { kind, order, pos: 0, left, banned: [], options: [], sub: null };
-  log(g, `━ ${g.round}라운드: 증강 선택 (${{ start: '시작', mid: '중간', end: '마무리' }[kind]} 전용 포함) ━`);
+  const order = ordList(g).filter(isActive).map((p) => p.idx);
+  const left = {}, chosen = {}, opts = {};
+  order.forEach((i) => { left[i] = g.chaos ? 2 : 1; chosen[i] = []; });
+  // stage: choose(모두 동시에 고름) → resolve(공개 후 순서대로 효과 적용)
+  g.pick = { kind, order, stage: 'choose', cur: order[0], left, chosen, opts, queue: [], banned: [], options: [], sub: null };
+  log(g, `━ ${g.round}라운드: 증강 선택 (${{ start: '시작', mid: '중간', end: '마무리' }[kind]} 전용 포함) — 모두 동시에 고릅니다 ━`);
   if (!order.length) { finishPick(g); return; }
-  rollOptions(g);
+  order.forEach((i) => rollOptions(g, g.players[i]));
 }
-const picker = (g) => g.players[g.pick.order[g.pick.pos]];
-function rollOptions(g, exclude) {
-  const pk = g.pick; const p = picker(g);
-  const ok = (a) => (a.cat === 'gen' || a.cat === pk.kind) && (!a.rankOnly || g.ranking) && !has(p, a.id) && !pk.banned.includes(a.id);
+const picker = (g) => g.players[g.pick.cur];
+const ordList = (g) => (g.order || g.players.map((p) => p.idx)).map((i) => g.players[i]);
+// 동시 선택 단계에서 각자 받는 선택지 (남들에게는 보이지 않음)
+function rollOptions(g, p, exclude) {
+  const pk = g.pick;
+  const mine = pk.chosen[p.idx] || [];
+  const ok = (a) => (a.cat === 'gen' || a.cat === pk.kind) && (!a.rankOnly || g.ranking) && !has(p, a.id) && !mine.includes(a.id);
   const pool = AUGMENTS.filter((a) => ok(a) && !(exclude || []).includes(a.id));
   const forced = p.st.deliver.filter((id) => BY_ID[id] && ok(BY_ID[id])).slice(0, 3);
   let ids = [...forced];
   for (const a of shuffle(pool.filter((x) => !forced.includes(x.id)))) { if (ids.length >= 3) break; ids.push(a.id); }
   ids = shuffle(ids);
-  pk.options = ids.map((id) => ({ id, locked: false }));
-  if (g.ganTaek && ids.includes('cat')) pk.options.forEach((o) => { o.locked = o.id !== 'cat'; });
-  pk.sub = null;
+  const opts = ids.map((id) => ({ id, locked: false }));
+  if (g.ganTaek && ids.includes('cat')) opts.forEach((o) => { o.locked = o.id !== 'cat'; });
+  pk.opts[p.idx] = opts;
 }
 function actPick(g, p, id) {
   const pk = g.pick;
-  if (g.phase !== 'pick' || !pk) throw E('지금은 증강을 고를 수 없습니다');
-  if (picker(g) !== p) throw E('내 선택 차례가 아닙니다');
-  if (pk.sub) throw E('먼저 대상을 선택하세요');
-  const o = pk.options.find((x) => x.id === id);
+  if (g.phase !== 'pick' || !pk || pk.stage !== 'choose') throw E('지금은 증강을 고를 수 없습니다');
+  if (!(p.idx in pk.left) || pk.left[p.idx] <= 0) throw E('이미 선택을 마쳤습니다');
+  const o = (pk.opts[p.idx] || []).find((x) => x.id === id);
   if (!o) throw E('선택할 수 없는 증강입니다');
   if (o.locked) throw E('간택! 고양이를 골라야 합니다');
-  if (id === 'objection') { log(g, `${p.name}: 이의있음! 다시 고릅니다`); rollOptions(g, ['objection']); return; }
-  p.augs.push(id); p.st.deliver = [];
+  if (id === 'objection') { log(g, `${p.name}: 이의있음! 다시 고릅니다`); rollOptions(g, p, ['objection']); return; }
+  pk.chosen[p.idx].push(id); p.st.deliver = [];
   pk.left[p.idx]--;
-  log(g, `${p.name} 선택 → ${BY_ID[id].name}`);
-  const sub = acquire(g, p, id);
-  if (g.phase === 'ended') return;
-  if (sub) { pk.sub = sub; return; }
-  afterPick(g);
+  if (pk.left[p.idx] > 0) rollOptions(g, p);
+  else { pk.opts[p.idx] = []; log(g, `${p.name}: 선택 완료`); }
+  if (Object.keys(pk.left).every((i) => pk.left[i] <= 0 || !isActive(g.players[i]))) startResolve(g);
+}
+// 모두 고르면 공개하고, 명탐정을 먼저 처리한 뒤 순서대로 효과를 적용
+function startResolve(g) {
+  const pk = g.pick; pk.stage = 'resolve';
+  const items = [];
+  for (const i of pk.order) for (const id of pk.chosen[i]) items.push({ idx: i, id });
+  items.sort((x, y) => (y.id === 'detective') - (x.id === 'detective'));
+  pk.queue = items;
+  g.players.forEach((q) => { if (pk.chosen[q.idx] && pk.chosen[q.idx].length) log(g, `📜 ${q.name}의 선택: ${pk.chosen[q.idx].map((id) => BY_ID[id].name).join(', ')}`); });
+  processQueue(g);
+}
+function processQueue(g) {
+  const pk = g.pick;
+  while (pk.queue.length) {
+    const it = pk.queue.shift(); const p = g.players[it.idx];
+    if (!isActive(p)) continue;
+    const ban = pk.banned.find((b) => b.id === it.id && b.by !== it.idx);
+    if (ban) { log(g, `🔍 ${p.name}의 '${BY_ID[it.id].name}'은(는) ${g.players[ban.by].name}의 명탐정으로 무효화되었습니다`); continue; }
+    pk.cur = it.idx;
+    p.augs.push(it.id);
+    log(g, `${p.name} 선택 → ${BY_ID[it.id].name}`);
+    const sub = acquire(g, p, it.id);
+    if (g.phase === 'ended') return;
+    if (sub) { pk.sub = sub; return; }
+    checkWins(g);
+    if (g.phase === 'ended') return;
+  }
+  finishPick(g);
 }
 function otherTarget(g, p, value) {
   const t = g.players[value];
@@ -258,7 +309,7 @@ function otherTarget(g, p, value) {
 }
 function actSub(g, p, value) {
   const pk = g.pick;
-  if (g.phase !== 'pick' || !pk || !pk.sub || picker(g) !== p) throw E('선택할 항목이 없습니다');
+  if (g.phase !== 'pick' || !pk || pk.stage !== 'resolve' || !pk.sub || picker(g) !== p) throw E('선택할 항목이 없습니다');
   const sub = pk.sub;
   switch (sub.type) {
     case 'player': {
@@ -293,7 +344,7 @@ function actSub(g, p, value) {
     }
     case 'augment': {
       if (!BY_ID[value] || BY_ID[value].cat === 'hidden') throw E('존재하지 않는 증강입니다');
-      if (sub.aug === 'detective') { pk.banned.push(value); log(g, `${p.name}: 명탐정! '${BY_ID[value].name}' 무효화`); }
+      if (sub.aug === 'detective') { pk.banned.push({ id: value, by: p.idx }); log(g, `${p.name}: 명탐정! '${BY_ID[value].name}' 무효화`); }
       if (sub.aug === 'delivery') { p.st.deliver = [value]; log(g, `${p.name}: 배달! 다음 선택창에 '${BY_ID[value].name}' 등장 예약`); }
       break;
     }
@@ -364,15 +415,11 @@ function actVote(g, p, v) {
 function afterPick(g) {
   checkWins(g);
   if (g.phase === 'ended') return;
-  const pk = g.pick; const p = picker(g);
-  if (pk.left[p.idx] > 0 && p.alive && !p.out) { rollOptions(g); return; }
-  pk.pos++;
-  while (pk.pos < pk.order.length && !isActive(g.players[pk.order[pk.pos]])) pk.pos++;
-  if (pk.pos >= pk.order.length) finishPick(g); else rollOptions(g);
+  processQueue(g);
 }
 function finishPick(g) {
   g.pick = null;
-  const first = g.players.find(isActive);
+  const first = ordList(g).find(isActive);
   if (!first) { checkWins(g); return; }
   startTurn(g, first.idx);
 }
@@ -1058,8 +1105,9 @@ function endTurn(g) {
   checkWins(g);
   if (g.phase === 'ended') return;
   if (g.echo && !g.tn.second && isActive(p)) { log(g, `🔁 메아리! ${p.name}의 차례가 한 번 더 옵니다`); startTurn(g, g.cur, true); return; }
-  const n = g.players.length; let nxt = -1, wrap = false;
-  for (let k = 1; k <= n; k++) { const j = (g.cur + k) % n; if (isActive(g.players[j])) { nxt = j; wrap = j <= g.cur; break; } }
+  const ord = g.order || g.players.map((q) => q.idx); const n = ord.length; let nxt = -1, wrap = false;
+  const ci = ord.indexOf(g.cur);
+  for (let k = 1; k <= n; k++) { const pj = (ci + k) % n; const j = ord[pj]; if (isActive(g.players[j])) { nxt = j; wrap = pj <= ci; break; } }
   if (nxt < 0) { checkWins(g); return; }
   if (wrap) {
     g.round++; expireDisguises(g);
@@ -1081,7 +1129,7 @@ function forfeit(g, p) {
   if (!p.alive || g.phase === 'lobby' || g.phase === 'ended') return;
   log(g, `🚪 ${p.name}이(가) 방을 나갔습니다`);
   const wasCur = g.phase === 'turn' && g.cur === p.idx;
-  const pk = g.pick; const wasPicker = g.phase === 'pick' && pk && picker(g) === p;
+  const pk = g.pick; const wasPicker = g.phase === 'pick' && pk && pk.stage === 'resolve' && picker(g) === p;
   eliminate(g, p);
   if (pk && pk.sub) {
     const s = pk.sub;
@@ -1095,6 +1143,7 @@ function forfeit(g, p) {
   if (g.phase === 'ended') return;
   if (wasCur) endTurn(g);
   else if (wasPicker) { if (pk.sub) pk.sub = null; afterPick(g); }
+  else if (g.phase === 'pick' && pk && pk.stage === 'choose' && Object.keys(pk.left).every((i) => pk.left[i] <= 0 || !isActive(g.players[i]))) startResolve(g);
 }
 function undoWins(g) {
   if (!g.ranks.length) { log(g, '취~소! 취소할 승리가 없었습니다'); return; }
@@ -1250,7 +1299,8 @@ function viewFor(g, me) {
       st: pubSt(q, q === me),
     })),
     tn: g.tn && g.phase === 'turn' ? { queue: g.tn.queue, throws: g.tn.throws, thrown: g.tn.thrown, goblin: !!g.tn.goblin, cannon: !!g.tn.cannon } : null,
-    pick: pk ? { kind: pk.kind, picker: pk.order[pk.pos], left: pk.left, sub: pubSub(pk.sub), banned: pk.banned, options: g.players[pk.order[pk.pos]] === me ? pk.options : null } : null,
+    pick: pk ? { kind: pk.kind, stage: pk.stage, picker: pk.cur, left: pk.left, done: pk.order.filter((i) => pk.left[i] <= 0 || !isActive(g.players[i])), sub: pubSub(pk.sub), banned: pk.banned.map((b) => b.id), pending: pk.queue.map((q) => q.idx), mine: pk.chosen[me.idx] || [], options: pk.stage === 'choose' ? (pk.opts[me.idx] || null) : null } : null,
+    order: g.order || g.players.map((q) => q.idx),
     log: g.log.slice(-40), logN: g.logN || 0, lastThrow: g.lastThrow || null,
   };
 }
@@ -1259,5 +1309,5 @@ module.exports = {
   AUGMENTS, BY_ID, ROUTES, LINES, STEPS, RES, ROUND_PICKS,
   createGame, addPlayer, removePlayer, resetGame, startGame,
   actPick, actSub, actGuess, actVote, forfeit, actThrow, actMove, actAbility, viewFor,
-  _internal: { has, usable, stacksOf, picker, isActive },
+  _internal: { has, usable, stacksOf, picker, isActive, endTurn },
 };

@@ -29,13 +29,14 @@ setTimeout(() => {
       const sub = S.pick.sub;
       if (sub && sub.type === 'guess') return sub.pending.includes(S.me) && send(b, { t: 'guess', value: Math.floor(Math.random() * 4) });
       if (sub && sub.type === 'vote') return sub.pending.includes(S.me) && send(b, { t: 'vote', value: sample(S.players.filter((p) => p.idx !== S.me && p.alive && !p.out)).idx });
+      if (S.pick.stage === 'choose') return S.pick.options && S.pick.options.length && send(b, { t: 'pick', id: sample(S.pick.options.filter((o) => !o.locked)).id });
       if (S.pick.picker !== S.me) return;
       if (sub) {
         const others = S.players.filter((p) => p.idx !== S.me && p.alive && !p.out);
         const v = { player: () => sample(others).idx, augment: () => sample(meta.augments).id, owned: () => sample(sub.list), fold: () => sample(['R', 'L', 'T', 'B']), spin: () => 'keep', rank: () => sample(S.players.filter((p) => !sub.picks.includes(p.idx))).idx }[sub.type]();
         return send(b, { t: 'sub', value: v });
       }
-      return send(b, { t: 'pick', id: sample(S.pick.options.filter((o) => !o.locked)).id });
+      return;
     }
     if (S.cur !== S.me) return;
     if (S.tn.throws > 0) { const o = { t: 'throw' }; if (me.st.nextChoose) o.choose = sample(['도', '개', '걸', '윷', '모']); else if (me.augs.includes('dogpig')) o.choose = sample(['도', '개']); return send(b, o); }

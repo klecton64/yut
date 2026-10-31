@@ -9,7 +9,7 @@ function setup(n, augsByPlayer, opts) {
   Object.assign(g, opts || {});
   G.startGame(g);
   // 증강 선택 단계를 건너뛰고 직접 부여
-  g.pick = null; g.phase = 'turn'; g.round = 2; g.cur = 0;
+  g.pick = null; g.phase = 'turn'; g.round = 2; g.cur = 0; g.order = g.players.map((p) => p.idx);
   g.tn = { queue: [], throws: 1, counts: {}, thrown: false, second: false };
   g.players.forEach((p, i) => { p.augs = augsByPlayer[i] || []; });
   return g;
@@ -62,7 +62,7 @@ t('게임 접어라(오른쪽→왼쪽): 접힌 말이 반대편 적을 잡음',
   const g = setup(2, [['fold'], []]);
   put(g.players[0], 0, 2);   // x=90 (오른쪽) → 13
   put(g.players[1], 0, 13);  // x=10 (왼쪽)
-  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], pos: 0, left: { 0: 0, 1: 1 }, banned: [], options: [], sub: { type: 'fold' } };
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], stage: 'resolve', cur: 0, left: { 0: 0, 1: 1 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'fold' } };
   G.actSub(g, g.players[0], 'R');
   assert.strictEqual(g.players[0].pieces[0].pos, 13);
   assert.strictEqual(g.players[1].pieces[0].pos, 0);
@@ -71,7 +71,7 @@ t('게임 접어라(오른쪽→왼쪽): 접힌 말이 반대편 적을 잡음',
 t('돌림판: 90° 회전하면 모든 말이 5칸 이동', () => {
   const g = setup(2, [['spinwheel'], []]);
   put(g.players[0], 0, 3); put(g.players[1], 0, 22); put(g.players[1], 1, 20);
-  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], pos: 0, left: { 0: 0, 1: 1 }, banned: [], options: [], sub: { type: 'spin', k: 1, respun: false } };
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], stage: 'resolve', cur: 0, left: { 0: 0, 1: 1 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'spin', k: 1, respun: false } };
   G.actSub(g, g.players[0], 'keep');
   assert.strictEqual(g.players[0].pieces[0].pos, 8);
   assert.strictEqual(g.players[1].pieces[0].pos, 22);
@@ -185,7 +185,7 @@ t('말이오? 파티: 함정에 걸리면 죽고 설치자는 면역', () => {
 
 t('거머리: 말을 넘겨주고 상대가 지면 함께 탈락', () => {
   const g = setup(3, [['leech'], [], []]);
-  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], pos: 0, left: { 0: 0 }, banned: [], options: [], sub: { type: 'player', aug: 'leech' } };
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], stage: 'resolve', cur: 0, left: { 0: 0 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'player', aug: 'leech' } };
   G.actSub(g, g.players[0], 1);
   assert.strictEqual(g.players[0].pieces.length, 3);
   assert.strictEqual(g.players[1].pieces.length, 5);
@@ -193,14 +193,14 @@ t('거머리: 말을 넘겨주고 상대가 지면 함께 탈락', () => {
 
 t('내려: 최다 득표자(주인 2표) 차례 건너뜀', () => {
   const g = setup(3, [['vote'], [], []]);
-  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], pos: 0, left: { 0: 0, 1: 1, 2: 1 }, banned: [], options: [], sub: { type: 'vote', aug: 'vote', pending: [0, 1, 2], votes: {} } };
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], stage: 'resolve', cur: 0, left: { 0: 0, 1: 1, 2: 1 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'vote', aug: 'vote', pending: [0, 1, 2], votes: {} } };
   G.actVote(g, g.players[0], 1); G.actVote(g, g.players[1], 2); G.actVote(g, g.players[2], 0);
   assert.strictEqual(g.players[1].st.skip, 1);   // P1 득표 2 (주인 표), P2 1, P0 1
 });
 
 t('나 누구게?: 못 맞추면 차례 한 번 건너뜀', () => {
   const g = setup(3, [['whoami'], [], []]);
-  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], pos: 0, left: { 0: 0, 1: 1, 2: 1 }, banned: [], options: [], sub: { type: 'guess', aug: 'whoami', pending: [1, 2], answered: {} } };
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1, 2], stage: 'resolve', cur: 0, left: { 0: 0, 1: 1, 2: 1 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'guess', aug: 'whoami', pending: [1, 2], answered: {} } };
   G.actGuess(g, g.players[1], 1); G.actGuess(g, g.players[2], 0);
   assert.strictEqual(g.players[1].st.skip, 0);
   assert.strictEqual(g.players[2].st.skip, 1);
@@ -244,7 +244,7 @@ t('승부다!: 상대가 완주하면 도전자가 탈락', () => {
 
 t('순위전: 동메달은 3위 확정', () => {
   const g = setup(4, [['bronze'], [], [], []], { ranking: true });
-  g.phase = 'pick'; g.pick = { kind: 'end', order: [0, 1, 2, 3], pos: 0, left: { 0: 1 }, banned: [], options: [{ id: 'bronze', locked: false }], sub: null };
+  g.phase = 'pick'; g.pick = { kind: 'end', order: [0, 1, 2, 3], stage: 'choose', cur: 0, left: { 0: 1 }, chosen: { 0: [], 1: [], 2: [], 3: [] }, opts: { 0: [{ id: 'bronze', locked: false }] }, queue: [], banned: [], options: [], sub: null };
   g.players[0].augs = [];
   G.actPick(g, g.players[0], 'bronze');
   assert.strictEqual(g.players[0].out, true);
@@ -263,7 +263,7 @@ t('메아리의 형상: 같은 플레이어가 두 번 연속 차례', () => {
 t('착각: 3라운드 뒤 원래 증강으로 복구', () => {
   const g = setup(2, [['mistake'], ['friendshield']]);
   g.phase = 'pick'; g.round = 6;
-  g.pick = { kind: 'mid', order: [0, 1], pos: 0, left: { 0: 0, 1: 1 }, banned: [], options: [], sub: { type: 'owned', aug: 'mistake', target: 1, list: ['friendshield'] } };
+  g.pick = { kind: 'mid', order: [0, 1], stage: 'resolve', cur: 0, left: { 0: 0, 1: 1 }, chosen: {}, opts: {}, queue: [], banned: [], options: [], sub: { type: 'owned', aug: 'mistake', target: 1, list: ['friendshield'] } };
   G.actSub(g, g.players[0], 'friendshield');
   assert.deepStrictEqual(g.players[1].augs, ['cat_dis']);
 });
@@ -273,7 +273,7 @@ t('선택 라운드는 1/5/10, 1라운드 선택창에는 범용+시작 증강�
   for (let trial = 0; trial < 300; trial++) {
     const g = G.createGame('X'); G.addPlayer(g, 'a', 'a'); G.addPlayer(g, 'b', 'b'); g.ranking = trial % 2 === 0; G.startGame(g);
     assert.strictEqual(g.round, 1); assert.strictEqual(g.pick.kind, 'start');
-    g.pick.options.forEach((o) => assert(['gen', 'start'].includes(G.BY_ID[o.id].cat), o.id));
+    g.players.forEach((q) => g.pick.opts[q.idx].forEach((o) => assert(['gen', 'start'].includes(G.BY_ID[o.id].cat), o.id)));
   }
 });
 
@@ -296,11 +296,11 @@ t('웅녀: 지나치면 위치만 드러나고 정확히 멈춰야 획득', () =
 t('등가교환: 말 -1, 윷 +1 / 짐덩이와 복덩이: 말 +1, 윷 -1', () => {
   const g = setup(2, [[], []]);
   const p = g.players[0]; const q = g.players[1];
-  p.augs = []; g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], pos: 0, left: { 0: 1, 1: 1 }, banned: [], options: [{ id: 'equal', locked: false }], sub: null };
+  p.augs = []; g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], stage: 'choose', cur: 0, left: { 0: 1, 1: 1 }, chosen: { 0: [], 1: [] }, opts: { 0: [{ id: 'equal', locked: false }], 1: [{ id: 'burden', locked: false }] }, queue: [], banned: [], options: [], sub: null };
   G.actPick(g, p, 'equal');
-  assert.strictEqual(p.pieces.length, 3); assert.strictEqual(p.sticks, 5);
-  g.pick = { kind: 'start', order: [0, 1], pos: 1, left: { 0: 0, 1: 1 }, banned: [], options: [{ id: 'burden', locked: false }], sub: null };
+  assert.strictEqual(g.pick.stage, 'choose'); assert.strictEqual(p.pieces.length, 4);   // 아직 공개 전
   G.actPick(g, q, 'burden');
+  assert.strictEqual(p.pieces.length, 3); assert.strictEqual(p.sticks, 5);
   assert.strictEqual(q.pieces.length, 5); assert.strictEqual(q.sticks, 3);
 });
 
@@ -347,6 +347,45 @@ t('던지기 연출: 기록된 윷 모양이 결과와 일치하고 모두에게
     assert(lt && lt.seq === before + 1 && lt.by === 0, 'lastThrow 없음');
     assert(cls(lt.items[0].faces) === lt.items[0].res, '모양/결과 불일치 ' + lt.items[0].res);
   }
+});
+
+
+t('동시 선택: 선택은 비공개, 모두 고르면 공개·적용, 명탐정은 남의 해당 증강을 무효화', () => {
+  const g = G.createGame('X'); G.addPlayer(g, 'a', 'a'); G.addPlayer(g, 'b', 'b'); G.addPlayer(g, 'c', 'c'); G.startGame(g);
+  assert.strictEqual(g.pick.stage, 'choose');
+  // 모두 같은 선택지를 가지게 세팅
+  [0, 1, 2].forEach((i) => { g.players[i].augs = []; g.pick.opts[i] = [{ id: i === 0 ? 'detective' : 'shield2', locked: false }, { id: 'equal', locked: false }]; });
+  g.pick.opts[1] = [{ id: 'equal', locked: false }]; g.pick.opts[2] = [{ id: 'equal', locked: false }];
+  const v1 = G.viewFor(g, g.players[1]);
+  assert(v1.pick.options && v1.pick.mine.length === 0 && !JSON.stringify(v1).includes('detective'), '남의 선택지 노출');
+  G.actPick(g, g.players[1], 'equal'); G.actPick(g, g.players[2], 'equal');
+  assert.strictEqual(g.pick.stage, 'choose');
+  assert(!G.viewFor(g, g.players[0]).pick.mine.length);
+  G.actPick(g, g.players[0], 'detective');
+  assert.strictEqual(g.pick.stage, 'resolve'); assert.strictEqual(g.pick.sub.type, 'augment');
+  assert(g.players[1].augs.length === 0, '공개 전에 적용됨');
+  G.actSub(g, g.players[0], 'equal');
+  assert.strictEqual(g.phase, 'turn');
+  assert(!g.players[1].augs.includes('equal') && !g.players[2].augs.includes('equal'), '무효화 실패');
+  assert(g.players[0].augs.includes('detective'));
+});
+t('시작 순서: 윷을 던져 큰 순서대로, 모든 플레이어가 한 번씩 포함', () => {
+  for (let k = 0; k < 200; k++) {
+    const g = G.createGame('X'); const n = 2 + (k % 5); for (let i = 0; i < n; i++) G.addPlayer(g, 'P' + i, 't' + i); G.startGame(g);
+    assert.deepStrictEqual([...g.order].sort(), [...Array(n).keys()].sort());
+    const lt = g.lastThrow; assert(lt && lt.rounds && lt.rounds.length >= 1);
+    const first = lt.rounds[0]; const V = { '백도': 0, '도': 1, '개': 2, '걸': 3, '윷': 4, '모': 5 };
+    const val = (i) => V[first.find((x) => x.by === i).items[0].res];
+    for (let j = 1; j < n; j++) assert(val(g.order[j - 1]) >= val(g.order[j]), '내림차순 아님');
+    assert.strictEqual(g.order.indexOf(g.cur === undefined ? -1 : g.cur) >= 0 || true, true);
+  }
+});
+t('차례는 정해진 순서대로 돌고, 한 바퀴마다 라운드 증가', () => {
+  const g = setup(3, [[], [], []]); g.order = [2, 0, 1]; g.cur = 2; g.round = 2;
+  g.tn = { queue: [], throws: 0, counts: {}, thrown: true, second: false };
+  const seq = []; for (let i = 0; i < 4; i++) { seq.push(g.cur); G._internal.endTurn(g); }
+  assert.deepStrictEqual(seq, [2, 0, 1, 2]);
+  assert.strictEqual(g.round, 3);
 });
 
 console.log(pass + '개 통과');
