@@ -37,6 +37,10 @@ const MIRH = pairs([[0, 15], [5, 10], [1, 14], [2, 13], [3, 12], [4, 11], [6, 9]
 const MIRV = pairs([[0, 5], [15, 10], [1, 4], [2, 3], [14, 11], [13, 12], [6, 19], [7, 18], [8, 17], [9, 16], [20, 28], [21, 27], [23, 26], [24, 25], [22, 22]]);
 const ROT1 = { 22: 22, 20: 25, 25: 23, 23: 27, 27: 20, 21: 26, 26: 24, 24: 28, 28: 21 };
 for (let n = 0; n < 20; n++) ROT1[n] = (n + 5) % 20;
+// 천마군림보: 출발점(0)-왼쪽 위(10)를 잇는 대각선 기준으로 판을 뒤집은 방향으로 진행
+const MIRD = { 0: 0, 20: 24, 24: 20, 21: 23, 23: 21, 22: 22, 25: 25, 26: 26, 27: 27, 28: 28 };
+for (let n = 1; n < 20; n++) MIRD[n] = 20 - n;
+const mirNode = (n) => (MIRD[n] != null ? MIRD[n] : n);
 const NEI = {};
 for (const line of LINES) for (let i = 0; i + 1 < line.length; i++) {
   const a = line[i], b = line[i + 1];
@@ -73,7 +77,7 @@ const AUGMENTS = [
   A('samok', '사목', 'gen', '내 말이 일직선으로 연속된 네 칸을 차지하거나 네 말이 한 말뭉치가 되면 승리합니다.'),
   A('cow', '소 뒷걸음질', 'gen', '자신이 백도로 2번 말을 잡으면 승리합니다.'),
   A('score', '악보가 완성되었다!', 'gen', '이번 게임 동안 자신이 백도, 도, 개, 걸, 윷, 모를 내면 승리합니다.'),
-  A('truck', '8톤 트럭', 'gen', '1회, 차례 소모(던지기 전에만). 말이 2개 이상인 자신의 말뭉치를 선택합니다. 그 말뭉치가 막히기 전까지 한 칸씩 직선으로 달립니다.'),
+  A('truck', '8톤 트럭', 'gen', '1회, 차례 소모(던지기 전에만). 말이 2개 이상인 자신의 말뭉치를 선택합니다. 그 말뭉치가 막히기 전까지, 최대 벽(그 직선의 끝)까지 직선으로 달립니다.'),
   A('combo', '3단 합체 필살기!!!', 'gen', '1회, 차례 소모(던지기 전에만). 말이 3개 이상인 자신의 말뭉치를 선택합니다. 그 말뭉치 이외의 모든 말뭉치를 죽입니다.'),
   A('fold', '게임 접어라', 'gen', '즉시 윷판을 반으로 접습니다. 접는 방향을 선택할 수 있습니다. (접힌 쪽 말이 반대편 칸으로 옮겨가며 거기 있던 적을 잡습니다)', { inter: true }),
   A('leech', '거머리', 'gen', '즉시 다른 플레이어에게 말을 1개 줍니다. 그 플레이어가 이기거나 지면 같이 이기거나 집니다.', { inter: true }),
@@ -81,13 +85,13 @@ const AUGMENTS = [
   A('vote', '내려', 'gen', '투표를 진행합니다. 최다 득표자는 차례를 한번 건너뜁니다. 자신은 2표를 행사합니다.', { inter: true }),
   A('spinwheel', '돌려돌려 돌림판', 'gen', '판을 회전시킵니다. 소유자는 한 번 다시 돌릴 수 있습니다.', { inter: true }),
   A('goblin', '변환: 도깨비', 'gen', '1회, 일반말을 도깨비로 바꿉니다. 도깨비는 매 턴 던지기와 별개로 도나 백도만큼 이동할 수 있습니다.'),
-  A('cannon', '변환: 포', 'gen', '1회용, 일반말을 포로 바꿉니다. 매 차례 한 번, 포는 말이 있는 칸 하나를 넘어 원하는 만큼 일직선으로 이동할 수 있습니다.'),
+  A('cannon', '변환: 포', 'gen', '1회용, 일반말을 포로 바꿉니다. 매 차례 한 번, 포는 말이 있는 칸 하나를 넘어 일직선으로 벽(그 직선의 끝)까지 원하는 만큼 이동할 수 있습니다.'),
   A('pawn', '변환: 폰', 'gen', '1회, 일반말을 폰으로 바꿉니다. 폰은 조작할 수 없지만 투척마다 도만큼 전진합니다.'),
   A('fog', '안개', 'gen', '1회, 두 차례 동안 윷판에 안개가 생깁니다. 안개 속에서 자신 이외의 플레이어는 자신 말 근처만 확인할 수 있습니다.'),
   A('flick', '알까기', 'gen', '1회, 차례를 사용해 알까기를 합니다. (내 말과 노릴 적 말 선택 → 50% 명중해 적 말뭉치 사망 / 35% 빗나감 / 15% 내 말이 떨어짐)'),
   A('mistake', '언제부터 착각한 거지?', 'gen', '한 플레이어의 능력 하나를 지정해 3 라운드 동안 "고양이"로 바꿉니다. 이미 사용 완료한 증강은 바꿀 수 없습니다.', { inter: true }),
   A('aim', '윷을 잘 던져봐', 'gen', '1회, 윷을 던져서 플레이어를 맞춥니다. (걸 이상이 나오면 명중) 해당 플레이어는 차례를 두 번 건너뜁니다.'),
-  A('tianma', '천마군림보 - 달걸음', 'gen', '자신의 모든 말이 반대 방향으로 이동합니다. (백도는 앞으로 한 칸)'),
+  A('tianma', '천마군림보 - 달걸음', 'gen', '자신의 모든 말이 반대 방향으로 이동합니다. 출발도 반대편(왼쪽 길)에서 하고 지름길도 거울처럼 뒤집힙니다. (백도는 원래 방향으로 한 칸)'),
   // ---- 시작 전용 ----
   A('equal', '등가교환', 'start', '자신의 말 1개를 제거하는 대신 윷 1개를 추가하고 시작합니다. (윷이 5개가 되어 윷·모가 잘 안 나오지만 개가 많이 나옵니다)'),
   A('sgame', '스겜', 'start', '모든 플레이어의 말이 2개가 되며, 자신의 말은 도와 개에서 시작합니다.'),
@@ -101,7 +105,7 @@ const AUGMENTS = [
   // ---- 중간 전용 ----
   A('sevens', '777', 'mid', '한 차례 안에 같은 윷 결과가 3번 이상 나오면 승리합니다.'),
   A('nofriend', '나만 친구 없어', 'mid', '이 증강을 선택한 후 다른 모든 플레이어가 자신의 말을 잡으면 승리합니다.'),
-  A('summon', '마신 소환', 'mid', '내 모든 일반말을 광신도로 바꿉니다. 광신도는 차례 시작할 때 의식 코인 1개를 줍니다. 의식 코인 12개를 모으면 승리합니다.'),
+  A('summon', '마신 소환', 'mid', '내 모든 일반말을 광신도로 바꿉니다. 광신도는 판 위에 있을 때만(대기·완주 제외) 차례 시작할 때 의식 코인 1개를 줍니다. 의식 코인 12개를 모으면 승리합니다.'),
   A('coup', '무신정변', 'mid', '적 말을 4개 이상 죽이면 승리합니다.'),
   A('treason', '역모', 'mid', '나보다 말을 많이 통과시킨 플레이어의 말을 죽일 때, 투척 기회를 1번 더 얻습니다.'),
   A('wait', '잠깐!', 'mid', '다른 플레이어의 가장 앞선 말 뭉치 1개를 2라운드 동안 못 움직이게 합니다.', { inter: true }),
@@ -167,6 +171,7 @@ function setRoute(x, node, prefer) {
   else if (node === 22) x.route = (prefer === 'A' || prefer === 'B') ? prefer : (x.route === 'B' ? 'B' : 'A');
   else x.route = 'A';
 }
+const vpos = (p, x) => (has(p, 'tianma') ? mirNode(x.pos) : x.pos);
 const occupiedSet = (g) => { const s = new Set(); for (const q of g.players) for (const x of q.pieces) if (!x.done && x.pos > 0) s.add(x.pos); return s; };
 
 // ---------- 방/게임 ----------
@@ -190,7 +195,7 @@ function removePlayer(g, p) {
 function resetState(g) {
   g.round = 0; g.cur = 0; g.tn = null; g.pick = null; g.winner = null; g.reason = '';
   g.poops = []; g.ganTaek = false; g.log = []; g.ranks = []; g.elim = []; g.fixed = {}; g.party = []; g.duels = [];
-  g.echo = false; g.fog = null; g.hpOn = false; g.final = null; g.coWinners = []; g.planWin = null;
+  g.echo = false; g.fog = null; g.hpOn = false; g.lastThrow = null; g.final = null; g.coWinners = []; g.planWin = null;
 }
 function resetGame(g) {
   g.phase = 'lobby'; resetState(g);
@@ -261,7 +266,7 @@ function actSub(g, p, value) {
       if (sub.aug === 'wait') {
         const st = stacksOf(t); let best = null, bestRem = 1e9;
         for (const n of Object.keys(st)) {
-          const rem = Math.min(...st[n].map((x) => ROUTES[x.route].length - ROUTES[x.route].indexOf(x.pos)));
+          const rem = Math.min(...st[n].map((x) => ROUTES[x.route].length - ROUTES[x.route].indexOf(vpos(t, x))));
           if (rem < bestRem) { bestRem = rem; best = st[n]; }
         }
         if (best) { best.forEach((x) => { x.frozen = g.round + 2; }); log(g, `${p.name}: 잠깐! ${t.name}의 가장 앞선 말뭉치가 2라운드 동안 멈춥니다`); }
@@ -400,10 +405,10 @@ function acquire(g, p, id) {
     case 'burden': p.pieces.push(mkPiece(p)); p.npieces = p.pieces.length; p.sticks = Math.max(2, p.sticks - 1); break;
     case 'sgame':
       for (const q of g.players) { while (q.pieces.length > 2) removeOnePiece(q); q.npieces = q.pieces.length; }
-      if (p.pieces[0]) p.pieces[0].pos = 1;
-      if (p.pieces[1]) p.pieces[1].pos = 2;
+      if (p.pieces[0]) p.pieces[0].pos = has(p, 'tianma') ? mirNode(1) : 1;
+      if (p.pieces[1]) p.pieces[1].pos = has(p, 'tianma') ? mirNode(2) : 2;
       break;
-    case 'piggyback': p.pieces.filter((x) => !x.done).forEach((x) => { x.pos = 1; x.route = 'main'; }); break;
+    case 'piggyback': p.pieces.filter((x) => !x.done).forEach((x) => { x.pos = has(p, 'tianma') ? mirNode(1) : 1; x.route = 'main'; }); break;
     case 'garlic': p.st.garlic = shuffle(Array.from({ length: 28 }, (_, i) => i + 1)).slice(0, 3); p.st.garlicGot = []; p.st.garlicSeen = []; break;
     case 'nofriend': p.st.friendHits = []; break;
     case 'poop': { const node = 1 + rnd(28); g.poops.push({ node, owner: p.idx }); log(g, `💩 ${p.name}이(가) 어딘가에 똥을 쌌습니다`); break; }
@@ -602,20 +607,36 @@ function stepBack(piece, n) {
   }
   return { finished: false, nodes, route };
 }
-function moveFor(group, steps) {
-  const mv = steps < 0 ? stepBack(group[0], -steps) : stepFrom(group[0], steps);
+function moveFor(group, steps, mir) {
+  const x = group[0];
+  const v = mir ? { pos: mirNode(x.pos), route: x.route } : x;
+  let mv = steps < 0 ? stepBack(v, -steps) : stepFrom(v, steps);
   if (!mv) return null;
-  if (mv.finished && group.some((x) => x.type === 'queen')) return null;
+  if (mir) mv = Object.assign({}, mv, { nodes: mv.nodes.map(mirNode) });
+  if (mv.finished && group.some((y) => y.type === 'queen')) return null;
   return mv;
 }
-const pathOf = (x) => stepFrom(x, 60).nodes;
+// 일직선 경로: 지금 가는 방향의 직선 위에서 벽(그 직선의 끝)까지의 칸들. 출발/골인점(0)과 모서리 너머로는 가지 않음
+function straightPath(x, mir) {
+  const v = mir ? { pos: mirNode(x.pos), route: x.route } : x;
+  const first = stepFrom(v, 1);
+  if (first.finished || !first.nodes.length) return [];
+  const a = v.pos, b = first.nodes[0];
+  for (const line of LINES) {
+    const i = line.indexOf(a), j = line.indexOf(b);
+    if (i < 0 || j < 0 || j !== i + 1) continue;
+    const out = [];
+    for (let k = j; k < line.length; k++) { if (line[k] === 0) break; out.push(line[k]); }
+    return mir ? out.map(mirNode) : out;
+  }
+  return [];
+}
 function effSteps(p, res) {
   let s = STEPS[res];
   if (s > 0) {
     if (p.st.lastDance) s *= 2;
     if (p.pieces.some((x) => x.type === 'vanguard' && !x.done && x.pos > 0)) s += 1;
   }
-  if (has(p, 'tianma')) s = -s;
   return s;
 }
 function usable(g, p, res) {
@@ -624,7 +645,7 @@ function usable(g, p, res) {
     if (x.done || x.type === 'pawn') return false;
     const grp = groupOf(p, x);
     if (grp.some((y) => isFrozen(g, y))) return false;
-    return !!moveFor(grp, s);
+    return !!moveFor(grp, s, has(p, 'tianma'));
   });
 }
 
@@ -632,7 +653,7 @@ function usable(g, p, res) {
 function applyMove(g, p, group, steps, label, opts) {
   opts = opts || {};
   const tn = g.tn;
-  const mv = opts.mv || moveFor(group, steps);
+  const mv = opts.mv || moveFor(group, steps, has(p, 'tianma'));
   if (!mv) throw E('움직일 수 없습니다');
   let nodes = mv.nodes; let stopped = false;
   for (let i = 0; i < nodes.length; i++) {
@@ -687,10 +708,10 @@ function partyTrigger(g, p, group, np) {
   if (t.kind === 'kill') { log(g, `💀 ${p.name}의 말이 함정을 밟았습니다!`); augKill(g, p, group, owner); }
   else if (t.kind === 'back') {
     log(g, `⏪ ${p.name}의 말이 함정을 밟아 3칸 뒤로 밀려납니다`);
-    const mv = moveFor(group, -3); if (mv) applyMove(g, p, group, -3, '함정', { mv, noTrigger: true });
+    const mv = moveFor(group, -3, has(p, 'tianma')); if (mv) applyMove(g, p, group, -3, '함정', { mv, noTrigger: true });
   } else {
     log(g, `🎁 ${p.name}의 말이 보상을 찾았습니다! 3칸 전진`);
-    const mv = moveFor(group, 3); if (mv) applyMove(g, p, group, 3, '보상', { mv, noTrigger: true });
+    const mv = moveFor(group, 3, has(p, 'tianma')); if (mv) applyMove(g, p, group, 3, '보상', { mv, noTrigger: true });
   }
 }
 function actMove(g, p, ri, pid) {
@@ -705,7 +726,7 @@ function actMove(g, p, ri, pid) {
   const group = groupOf(p, piece);
   if (group.some((x) => isFrozen(g, x))) throw E('멈춰 있는 말입니다');
   const steps = effSteps(p, res);
-  const mv = moveFor(group, steps);
+  const mv = moveFor(group, steps, has(p, 'tianma'));
   if (!mv) throw E(group.some((x) => x.type === 'queen') ? '중전마마는 완주할 수 없습니다' : '그 말은 그렇게 움직일 수 없습니다');
   tn.queue.splice(ri, 1);
   applyMove(g, p, group, steps, res, { mv, backdo: res === '백도' });
@@ -713,22 +734,47 @@ function actMove(g, p, ri, pid) {
 }
 
 // ---------- 던지기 ----------
-function rollPlain(n) {
-  let f = 0, marked = false;
-  for (let i = 0; i < n; i++) if (Math.random() < 0.5) { f++; if (i === 0) marked = true; }
-  if (f === 0) return '모';
-  if (f === n) return '윷';
-  if (f === 1) return marked ? '백도' : '도';
-  if (n >= 4 && f === n - 1) return '걸';   // 윷이 3개 이하면 걸이 없음 (앞면 2개 = 개)
-  return '개';
+function rollFaces(n) {
+  const faces = []; let f = 0, marked = false;
+  for (let i = 0; i < n; i++) { const up = Math.random() < 0.5; faces.push(up); if (up) { f++; if (i === 0) marked = true; } }
+  let r;
+  if (f === 0) r = '모';
+  else if (f === n) r = '윷';
+  else if (f === 1) r = marked ? '백도' : '도';
+  else if (n >= 4 && f === n - 1) r = '걸';   // 윷이 3개 이하면 걸이 없음 (앞면 2개 = 개)
+  else r = '개';
+  return { r, faces };
+}
+const rollPlain = (n) => rollFaces(n).r;
+// 정해진 결과(강제/모아니면도 등)에 맞는 윷 모양
+function facesFor(res, n) {
+  const up = new Array(n).fill(false);
+  const set = (k, skipFirst) => {
+    const idx = []; for (let i = skipFirst ? 1 : 0; i < n; i++) idx.push(i);
+    idx.sort(() => Math.random() - 0.5); idx.slice(0, k).forEach((i) => { up[i] = true; });
+  };
+  switch (res) {
+    case '윷': up.fill(true); break;
+    case '탈락': up.fill(true); break;
+    case '도': set(1, true); break;
+    case '백도': up[0] = true; break;
+    case '개': set(2, false); break;
+    case '걸': set(Math.max(2, n - 1), false); break;
+    default: break; // 모
+  }
+  return up;
 }
 function roll(p) {
-  if (has(p, 'modo')) return Math.random() < 0.4 ? '모' : '도';
+  if (has(p, 'modo')) { const r = Math.random() < 0.4 ? '모' : '도'; return { r, faces: facesFor(r, p.sticks) }; }
   if (has(p, 'excess')) {
-    let f = 0; for (let i = 0; i < 6; i++) if (Math.random() < 0.5) f++;
-    return { 0: '모', 1: '도', 2: '개', 3: '걸', 4: '걸', 5: '윷', 6: '탈락' }[f];
+    const faces = []; let f = 0; for (let i = 0; i < 6; i++) { const u = Math.random() < 0.5; faces.push(u); if (u) f++; }
+    return { r: { 0: '모', 1: '도', 2: '개', 3: '걸', 4: '걸', 5: '윷', 6: '탈락' }[f], faces };
   }
-  return rollPlain(p.sticks);
+  return rollFaces(p.sticks);
+}
+function announceThrow(g, p, items, label) {
+  g.throwSeq = (g.throwSeq || 0) + 1;
+  g.lastThrow = { seq: g.throwSeq, by: p.idx, items, label: label || '' };
 }
 function movePawns(g, p) {
   const done = new Set();
@@ -736,7 +782,7 @@ function movePawns(g, p) {
     if (x.done || x.type !== 'pawn' || done.has(x.id) || !p.alive) continue;
     const grp = groupOf(p, x); grp.forEach((y) => done.add(y.id));
     if (grp.some((y) => isFrozen(g, y))) continue;
-    const mv = moveFor(grp, 1);
+    const mv = moveFor(grp, 1, has(p, 'tianma'));
     if (mv) applyMove(g, p, grp, 1, '폰 전진', { mv });
   }
 }
@@ -758,12 +804,14 @@ function actThrow(g, p, o) {
   tn.throws--; tn.thrown = true;
   if (has(p, 'queen')) p.st.queenThrows++;
   const count = has(p, 'twin') ? 2 : 1;
-  const out = [];
+  const out = [], shown = [];
   for (let i = 0; i < count; i++) {
-    let r = forced || roll(p);
-    if (has(p, 'twin') && r === '모') { r = '도'; log(g, `${p.name}: 이도류! 모가 나왔지만 도로 바뀝니다`); }
-    out.push(r);
+    let r, faces;
+    if (forced) { r = forced; faces = facesFor(r, p.sticks); } else { const o2 = roll(p); r = o2.r; faces = o2.faces; }
+    if (has(p, 'twin') && r === '모') { r = '도'; faces = facesFor('도', p.sticks); log(g, `${p.name}: 이도류! 모가 나왔지만 도로 바뀝니다`); }
+    out.push(r); shown.push({ res: r, faces });
   }
+  announceThrow(g, p, shown);
   for (const r of out) {
     if (!p.alive) break;
     if (r === '탈락') { log(g, `${p.name}: 윷이 전부 앞면! 탈락`); eliminate(g, p); break; }
@@ -807,9 +855,9 @@ function actAbility(g, p, a, o) {
   switch (a) {
     case 'timetravel': {
       once('timetravel'); const x = boardPiece();
-      const r = ROUTES[x.route]; const i = r.indexOf(x.pos);
+      const mir = has(p, 'tianma'); const r = ROUTES[x.route]; const i = r.indexOf(mir ? mirNode(x.pos) : x.pos);
       const target = o.target != null ? o.target : o.node;
-      const allowed = [0, ...r.slice(0, i)];
+      const allowed = [0, ...r.slice(0, i).map((n) => (mir ? mirNode(n) : n))];
       if (!allowed.includes(target)) throw E('그 칸으로는 되돌아갈 수 없습니다');
       if (target === 0) sendHome(x); else x.pos = target;
       p.used.timetravel = true; log(g, `${p.name}: 시간 여행! 말이 ${target === 0 ? '대기칸' : target + '번 칸'}으로`);
@@ -852,7 +900,8 @@ function actAbility(g, p, a, o) {
       if (grp.length < 2) throw E('말이 2개 이상인 말뭉치를 고르세요');
       unfrozen(grp);
       const occ = occupiedSet(g); let cnt = 0;
-      for (const nd of pathOf(grp[0])) {
+      const line = straightPath(grp[0], has(p, 'tianma'));
+      for (const nd of line) {
         if (occ.has(nd)) break;
         cnt++;
         if (g.poops.some((q) => q.node === nd && q.owner !== p.idx)) break;
@@ -860,7 +909,7 @@ function actAbility(g, p, a, o) {
       if (cnt === 0) throw E('앞이 막혀 있습니다');
       p.used.truck = true; tn.throws = 0;
       log(g, `${p.name}: 🚚 8톤 트럭 출동!`);
-      applyMove(g, p, grp, cnt, '8톤 트럭');
+      applyMove(g, p, grp, cnt, '8톤 트럭', { mv: { finished: false, nodes: line.slice(0, cnt), route: grp[0].route } });
       break;
     }
     case 'combo': {
@@ -897,7 +946,7 @@ function actAbility(g, p, a, o) {
       if (tn.goblin) throw E('이번 차례에 이미 도깨비를 움직였습니다');
       const grp = groupOf(p, x); unfrozen(grp);
       const steps = o.dir === -1 ? -1 : 1;
-      const mv = moveFor(grp, steps);
+      const mv = moveFor(grp, steps, has(p, 'tianma'));
       if (!mv) throw E('그쪽으로는 움직일 수 없습니다');
       tn.goblin = true;
       applyMove(g, p, grp, steps, steps > 0 ? '도깨비 도' : '도깨비 백도', { mv });
@@ -908,13 +957,13 @@ function actAbility(g, p, a, o) {
       if (x.type !== 'cannon') throw E('포를 선택하세요');
       if (tn.cannon) throw E('이번 차례에 이미 포를 움직였습니다');
       const grp = groupOf(p, x); unfrozen(grp);
-      const path = pathOf(grp[0]); const t = path.indexOf(Number(o.node));
-      if (t < 0) throw E('갈 수 없는 칸입니다');
+      const path = straightPath(grp[0], has(p, 'tianma')); const t = path.indexOf(Number(o.node));
+      if (t < 0) throw E('갈 수 없는 칸입니다 (포는 가는 방향의 직선, 벽까지만 갈 수 있습니다)');
       const occ = occupiedSet(g);
       const screens = path.slice(0, t).filter((n) => occ.has(n)).length;
       if (screens !== 1) throw E('말이 있는 칸을 정확히 하나만 넘어야 합니다');
       tn.cannon = true;
-      applyMove(g, p, grp, t + 1, '포');
+      applyMove(g, p, grp, t + 1, '포', { mv: { finished: false, nodes: path.slice(0, t + 1), route: grp[0].route } });
       break;
     }
     case 'domain': {
@@ -928,7 +977,8 @@ function actAbility(g, p, a, o) {
     case 'aim': {
       once('aim'); const t = otherTarget(g, p, o.target);
       p.used.aim = true;
-      const r = rollPlain(4);
+      const ar = rollFaces(4); const r = ar.r;
+      announceThrow(g, p, [{ res: r, faces: ar.faces }], '조준');
       if (['걸', '윷', '모'].includes(r)) { t.st.skip += 2; log(g, `${p.name}: 윷을 던져 ${t.name}을(를) 맞췄다! (${r}) ${t.name}은(는) 두 차례 쉽니다`); }
       else log(g, `${p.name}: 윷을 던졌지만 ${t.name}을(를) 빗나갔습니다 (${r})`);
       break;
@@ -971,7 +1021,7 @@ function startTurn(g, idx, second) {
     for (const o of g.players) { if (!isActive(o)) continue; const st = o.pieces.filter((x) => !x.done && x.pos === node); if (st.length) augKill(g, o, st, p); }
   }
   p.st.snipers = [];
-  const z = p.pieces.filter((x) => x.type === 'zealot' && !x.done).length;
+  const z = p.pieces.filter((x) => x.type === 'zealot' && !x.done && x.pos > 0).length;
   if (has(p, 'summon') && z) { p.st.ritual += z; log(g, `${p.name}: 의식 코인 +${z} (${p.st.ritual}/12)`); }
   log(g, `▶ ${g.round}라운드 - ${p.name}의 차례${second ? ' (두 번째)' : ''}`);
   checkWins(g);
@@ -1135,7 +1185,7 @@ function finalize(g) {
 const MAX_ROUND = 40;
 function progressOf(p) {
   let s = p.finished * 100;
-  for (const x of p.pieces) if (!x.done && x.pos > 0) s += ROUTES[x.route].indexOf(x.pos) + 1 + (x.route === 'main' ? 0 : 0);
+  for (const x of p.pieces) if (!x.done && x.pos > 0) s += ROUTES[x.route].indexOf(vpos(p, x)) + 1;
   return s;
 }
 function timeUp(g) {
@@ -1201,7 +1251,7 @@ function viewFor(g, me) {
     })),
     tn: g.tn && g.phase === 'turn' ? { queue: g.tn.queue, throws: g.tn.throws, thrown: g.tn.thrown, goblin: !!g.tn.goblin, cannon: !!g.tn.cannon } : null,
     pick: pk ? { kind: pk.kind, picker: pk.order[pk.pos], left: pk.left, sub: pubSub(pk.sub), banned: pk.banned, options: g.players[pk.order[pk.pos]] === me ? pk.options : null } : null,
-    log: g.log.slice(-40), logN: g.logN || 0,
+    log: g.log.slice(-40), logN: g.logN || 0, lastThrow: g.lastThrow || null,
   };
 }
 

@@ -104,4 +104,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => console.log(`증강 윷놀이 서버 실행 중: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.5 서버 실행 중: http://localhost:${PORT}`));
