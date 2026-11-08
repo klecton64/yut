@@ -11,6 +11,7 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
 
 const server = http.createServer((req, res) => {
   let f = req.url.split('?')[0];
+  if (f === '/api/meta') { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' }); return res.end(JSON.stringify({ augments: G.AUGMENTS, packs: G.PACKS, rules: G.RULES })); }
   if (f === '/') f = '/index.html';
   const full = path.normalize(path.join(PUB, f));
   if (!full.startsWith(PUB)) { res.writeHead(403); return res.end(); }
@@ -42,7 +43,7 @@ function attach(room, p, ws) {
   if (old && old !== ws) { old.ctx = null; try { old.close(); } catch (e) { /* */ } }
   room.conns.set(p, ws); p.connected = true;
   ws.ctx = { room, p };
-  send(ws, { t: 'joined', code: room.g.code, token: p.token, meta: { augments: G.AUGMENTS, routes: G.ROUTES, lines: G.LINES } });
+  send(ws, { t: 'joined', code: room.g.code, token: p.token, meta: { augments: G.AUGMENTS, packs: G.PACKS, rules: G.RULES, routes: G.ROUTES, lines: G.LINES } });
 }
 
 wss.on('connection', (ws) => {
@@ -76,6 +77,7 @@ wss.on('connection', (ws) => {
           return;
         }
         case 'chaos': if (p.idx !== 0 || g.phase !== 'lobby') throw new Error('방장만 로비에서 설정할 수 있습니다'); g.chaos = !!m.v; break;
+        case 'packs': if (p.idx !== 0) throw new Error('방장만 로비에서 설정할 수 있습니다'); G.setPacks(g, m.ids); break;
         case 'ranking': if (p.idx !== 0 || g.phase !== 'lobby') throw new Error('방장만 로비에서 설정할 수 있습니다'); g.ranking = !!m.v; break;
         case 'guess': G.actGuess(g, p, m.value); break;
         case 'vote': G.actVote(g, p, m.value); break;
@@ -84,6 +86,7 @@ wss.on('connection', (ws) => {
         case 'sub': G.actSub(g, p, m.value); break;
         case 'throw': G.actThrow(g, p, { choose: m.choose, coin: !!m.coin }); break;
         case 'move': G.actMove(g, p, m.ri, m.pid); break;
+        case 'interrupt': G.actInterrupt(g, p, m); break;
         case 'ability': G.actAbility(g, p, m.a, m); break;
         case 'rematch': if (g.phase !== 'ended') throw new Error('게임이 끝나지 않았습니다'); G.resetGame(g); break;
         default: return;
@@ -104,4 +107,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => console.log(`증강 윷놀이 v1.7 서버 실행 중: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.10 서버 실행 중: http://localhost:${PORT}`));

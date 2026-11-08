@@ -388,4 +388,160 @@ t('차례는 정해진 순서대로 돌고, 한 바퀴마다 라운드 증가', 
   assert.strictEqual(g.round, 3);
 });
 
+
+t('알까기: 적을 맞히면 밀려나 가까운 칸에 서고, 못 맞히면 내 말은 사망', () => {
+  const XYn = (n) => { const C = [[90, 90], [90, 10], [10, 10], [10, 90]]; const s = Math.floor(n / 5), k = n % 5; return [C[s][0] + (C[(s + 1) % 4][0] - C[s][0]) * k / 5, C[s][1] + (C[(s + 1) % 4][1] - C[s][1]) * k / 5]; };
+  void XYn;
+  const mk = () => { const g = setup(2, [['flick'], []]); g.order = [0, 1]; g.cur = 0; g.tn = { queue: [], throws: 1, counts: {}, thrown: false, second: false }; return g; };
+  // 맞힘: 1번 칸(90,74)의 내 말을 위(-90°)로 쏨 → 2번 칸(90,58)의 적을 침
+  let g = mk(); let me = g.players[0], foe = g.players[1];
+  me.pieces[0].pos = 1; foe.pieces[0].pos = 2;
+  G.actAbility(g, me, 'flick', { pid: me.pieces[0].id, ang: -Math.PI / 2, pow: 0.5 });
+  assert(g.lastFlick && g.lastFlick.hit, '명중 기록');
+  assert(g.lastFlick.frames.length > 3 && g.lastFlick.end.length === 2);
+  assert(me.used.flick === true);
+  const occ = {}; [me, foe].forEach((q) => q.pieces.forEach((x) => { if (!x.done && x.pos > 0) (occ[x.pos] = occ[x.pos] || new Set()).add(q.idx); }));
+  Object.values(occ).forEach((s2) => assert(s2.size === 1, '한 칸에 두 주인'));
+  // 빗나감: 반대 방향으로 쏨 → 아무도 못 맞힘 → 내 말 사망
+  g = mk(); me = g.players[0]; foe = g.players[1];
+  me.pieces[0].pos = 1; foe.pieces[0].pos = 2;
+  G.actAbility(g, me, 'flick', { pid: me.pieces[0].id, ang: Math.PI / 2, pow: 0.5 });
+  assert(!g.lastFlick.hit); assert.strictEqual(me.pieces[0].pos, 0); assert.strictEqual(foe.pieces[0].pos, 2);
+  assert.strictEqual(g.lastFlick.end[0], null);
+});
+t('알까기: 세게 쏴서 적을 판 밖으로 날리면 적 사망', () => {
+  const g = setup(2, [['flick'], []]); g.order = [0, 1]; g.cur = 0; g.tn = { queue: [], throws: 1, counts: {}, thrown: false, second: false };
+  const me = g.players[0], foe = g.players[1];
+  me.pieces[0].pos = 3; foe.pieces[0].pos = 4;   // (90,42) → (90,26), 위쪽으로 세게
+  G.actAbility(g, me, 'flick', { pid: me.pieces[0].id, ang: -Math.PI / 2, pow: 1 });
+  const fe = g.lastFlick.end;
+  assert(g.lastFlick.hit);
+  assert(fe[1] === null ? foe.pieces[0].pos === 0 : foe.pieces[0].pos > 0, '적 결과가 end와 일치');
+});
+t('증강팩: 선택한 팩의 증강만 선택지에 나오고, 최소 1개 필요', () => {
+  const g = G.createGame('X'); G.addPlayer(g, 'a', 'a'); G.addPlayer(g, 'b', 'b');
+  assert.deepStrictEqual(g.packs, ['base']);
+  assert.throws(() => G.setPacks(g, []), /하나 이상/); assert.throws(() => G.setPacks(g, ['nope']), /하나 이상/);
+  G.setPacks(g, ['base']);
+  G.AUGMENTS.push({ id: 'zz_test', name: '테스트', cat: 'gen', desc: '', pack: 'test' });
+  G.PACKS.push({ id: 'test', name: '테스트팩', desc: '' });
+  try {
+    for (let k = 0; k < 30; k++) { G.startGame(g); g.players.forEach((q) => assert(!g.pick.opts[q.idx].some((o) => o.id === 'zz_test'), '미선택 팩 증강 등장')); G.resetGame(g); }
+    G.setPacks(g, ['test']);
+    G.startGame(g); assert(g.players.every((q) => g.pick.opts[q.idx].every((o) => o.id === 'zz_test')), '선택한 팩 증강만');
+  } finally { G.AUGMENTS.pop(); G.PACKS.pop(); }
+});
+
+// ---------- 림버스 컴퍼니 팩 ----------
+const mv = (g, p, res, k) => { g.tn = { queue: [res], throws: 0, counts: {}, thrown: true, second: false }; g.cur = p.idx; G.actMove(g, p, 0, p.pieces[k].id); };
+t('림버스: 루치오 - 혼자 공격한 말이 죽고, 2개 겹친 공격은 원래대로', () => {
+  let g = setup(2, [[], ['lucio']]); let a = g.players[0], b = g.players[1];
+  put(a, 0, 1); put(b, 0, 2); b.pieces[0].type = 'lucio';
+  mv(g, a, '도', 0);
+  assert.strictEqual(a.pieces[0].pos, 0, '공격자 사망'); assert.strictEqual(b.pieces[0].pos, 2);
+  g = setup(2, [[], ['lucio']]); a = g.players[0]; b = g.players[1];
+  put(a, 0, 1); put(a, 1, 1); put(b, 0, 2); b.pieces[0].type = 'lucio';
+  mv(g, a, '도', 0);
+  assert.strictEqual(b.pieces[0].pos, 0, '2개 겹침이면 루치오 사망');
+});
+t('림버스: 발렌치나 - 예지안 확률 회피 시 공격한 말이 죽고 스택 -1', () => {
+  const g = setup(2, [[], ['valen']]); const a = g.players[0], b = g.players[1];
+  put(a, 0, 1); put(b, 0, 2); b.pieces[0].type = 'valen'; b.pieces[0].yeji = 10;
+  const r = Math.random; Math.random = () => 0;
+  try { mv(g, a, '도', 0); } finally { Math.random = r; }
+  assert.strictEqual(a.pieces[0].pos, 0, '공격자 사망'); assert.strictEqual(b.pieces[0].pos, 2); assert.strictEqual(b.pieces[0].yeji, 9);
+});
+t('림버스: T사 - 잡는 대신 징수 상태, 징수당한 말은 1칸만 가고 윷 결과가 보관함에 쌓임', () => {
+  const g = setup(2, [['tsa'], []]); const a = g.players[0], b = g.players[1];
+  put(a, 0, 1); put(b, 0, 2);
+  mv(g, a, '도', 0);
+  assert.strictEqual(b.pieces[0].pos, 2); assert.strictEqual(b.pieces[0].tax, 0);
+  assert.strictEqual(g.cur, 1, '추가 던지기 없이 차례 종료');
+  g.cur = 1; mv(g, b, '걸', 0);
+  assert.strictEqual(b.pieces[0].pos, 3, '1칸만 이동'); assert(g.cur === 0 && g.tn.queue.includes('걸'), '징수한 윷이 내 차례 사용 가능');
+});
+t('림버스: 소속 중지 - 잡히면 반응 대기, 이동으로 되받아 잡으면 상대의 추가 던지기 박탈', () => {
+  const g = setup(2, [[], ['jungji']]); const a = g.players[0], b = g.players[1];
+  put(a, 0, 1); put(b, 0, 2); put(b, 1, 4);
+  mv(g, a, '도', 0);
+  assert.strictEqual(g.interrupts.length, 1); assert.strictEqual(b.pieces[0].pos, 0);
+  assert.throws(() => G.actThrow(g, a, {}), /기다리는 중/);
+  G.actInterrupt(g, b, { pid: b.pieces[1].id });
+  assert.strictEqual(g.interrupts.length, 0);
+});
+t('림버스: 소속 중지 - 사용 안 함으로 넘기면 진행', () => {
+  const g = setup(2, [[], ['jungji']]); const a = g.players[0], b = g.players[1];
+  put(a, 0, 1); put(b, 0, 2); put(b, 1, 8);
+  mv(g, a, '도', 0);
+  assert.strictEqual(g.interrupts.length, 1);
+  G.actInterrupt(g, b, { skip: true });
+  assert.strictEqual(g.interrupts.length, 0);
+});
+t('림버스: 라만차랜드 - 피가 없는 랜드 밖 혈귀는 쇠약(1칸, 잡기 불가)', () => {
+  const g = setup(2, [['lamancha'], []]); const a = g.players[0], b = g.players[1];
+  a.st.lim.land = [1, 2, 3, 4, 5]; a.st.lim.side = 'R'; a.st.lim.blood = 0;
+  put(a, 0, 12); g.cur = 1; g.tn = { queue: [], throws: 0, counts: {}, thrown: true, second: false };
+  G._internal.endTurn(g);
+  assert.strictEqual(g.cur, 0); assert(a.pieces[0].weak, '쇠약해야 함');
+  put(b, 0, 13);
+  mv(g, a, '걸', 0);
+  assert.strictEqual(a.pieces[0].pos, 13, '1칸만 이동'); assert.strictEqual(b.pieces[0].pos, 13, '잡지 못함');
+});
+t('림버스: 라만차랜드 - 랜드 안에서 죽으면 피주머니, 밟은 말은 함께 사망', () => {
+  const g = setup(2, [['lamancha'], []]); const a = g.players[0], b = g.players[1];
+  a.st.lim.land = [1, 2, 3, 4, 5]; a.st.lim.side = 'R'; a.st.lim.blood = 5;
+  put(b, 0, 4); put(a, 0, 2);
+  mv(g, a, '도', 0);                      // 랜드 안 이동 +1: 2 → 4, b 사망 → 4번 칸에 피주머니
+  assert.strictEqual(g.bags.length, 1); assert.strictEqual(g.bags[0].node, 4);
+  put(b, 1, 3); b.pieces[0].pos = 0;
+  g.cur = 1; mv(g, b, '도', 1);            // b가 4번 칸(피주머니)으로 → 둘 다 사망
+  assert.strictEqual(b.pieces[1].pos, 0); assert.strictEqual(g.bags.length, 0); assert(a.st.lim.blood >= 6, '피주머니가 죽어 피 +1');
+});
+t('림버스: K사 - 앰플로 무덤의 말 부활 (근처에 내 말 필요)', () => {
+  const g = setup(2, [['ksa'], []]); const a = g.players[0];
+  a.st.lim.amp = 3; a.st.lim.graves = [{ id: a.pieces[1].id, node: 7 }]; put(a, 0, 15);
+  assert.throws(() => G.actAbility(g, a, 'ksa', { node: 7 }), /앞뒤 칸/);
+  put(a, 0, 8);
+  G.actAbility(g, a, 'ksa', { node: 7 });
+  assert.strictEqual(a.pieces[1].pos, 7); assert.strictEqual(a.st.lim.amp, 2);
+});
+t('림버스: 와일드헌트 - 관으로 가장 먼저 죽은 말을 부활, 3차례 뒤 다시 죽음', () => {
+  const g = setup(2, [['hunt'], []]); const a = g.players[0];
+  a.st.lim.coffin = 1; a.st.lim.graves = [{ id: a.pieces[1].id, node: 9 }, { id: a.pieces[2].id, node: 11 }];
+  G.actAbility(g, a, 'hunt', {});
+  assert.strictEqual(a.pieces[1].pos, 9); assert.strictEqual(a.pieces[2].pos, 0); assert.strictEqual(a.st.lim.coffin, 0);
+  assert.strictEqual(a.st.lim.timers.length, 1);
+});
+t('림버스: 군주 - 흑수의 주인 2에서 능력: 군주 앞뒤에 대기 중 흑수 배치 + 차례 소모', () => {
+  const g = setup(2, [['lord'], []]); const a = g.players[0];
+  a.pieces[0].type = 'lord'; a.pieces.slice(1).forEach((x) => { x.hs = true; }); put(a, 0, 8);
+  a.st.lim.lordMark = 2;
+  G.actAbility(g, a, 'lord', {});
+  const poss = a.pieces.filter((x) => x.hs && x.pos > 0).map((x) => x.pos).sort((x, y) => x - y);
+  assert.deepStrictEqual(poss, [7, 9]); assert.strictEqual(a.st.lim.lordMark, 0);
+});
+t('림버스: 약지 - 생체재료 4로 예술(이동 +2) → 다시 4로 폐장(면 속박)', () => {
+  const g = setup(2, [['yakji'], []]); const a = g.players[0], b = g.players[1];
+  a.st.lim.bio = 4; G.actAbility(g, a, 'yakji', {});
+  assert(a.st.lim.art); assert.strictEqual(a.st.lim.bio, 0);
+  g.phase = 'turn'; g.cur = 0; g.tn = { queue: [], throws: 1, counts: {}, thrown: false, second: false };
+  put(b, 0, 3); a.st.lim.bio = 4;
+  G.actAbility(g, a, 'yakji', { side: 'R' });
+  assert(b.pieces[0].frozen > g.round, '속박됨');
+});
+t('림버스: 검지 - 지령 3개 완수 시 승리 (정중앙 지령)', () => {
+  const g = setup(2, [['geomji'], []]); const a = g.players[0];
+  a.st.lim.qdone = 2; a.st.lim.q = { id: 3, prog: 0, sum: {}, last: null, hist: '', target: null };
+  put(a, 0, 21, 'A'); mv(g, a, '도', 0);
+  assert.strictEqual(g.phase, 'ended'); assert.strictEqual(g.winner, 0);
+});
+t('림버스: 대호수의 규칙 - 규칙(말 안 움직이기)을 어기면 어긴 사람의 말이 죽고 규칙이 공개됨', () => {
+  const g = setup(2, [['lake'], []]); const a = g.players[0], b = g.players[1];
+  a.st.lim.lake = { rule: 3 }; put(b, 0, 6); g.cur = 1; g.tn = { queue: [], throws: 0, counts: {}, thrown: true, second: false };
+  G._internal.endTurn(g);
+  assert.strictEqual(b.pieces[0].pos, 0, '말 사망'); assert.strictEqual(b.st.lim.knows.length, 1);
+  const v = G.viewFor(g, a).players[0].st.lim, w = G.viewFor(g, b).players[0].st.lim;
+  assert.strictEqual(v.lake, 3); assert(w.lake === undefined, '남에게는 비공개');
+});
+
 console.log(pass + '개 통과');

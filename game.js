@@ -47,7 +47,12 @@ for (const line of LINES) for (let i = 0; i + 1 < line.length; i++) {
   (NEI[a] = NEI[a] || new Set()).add(b); (NEI[b] = NEI[b] || new Set()).add(a);
 }
 
-const A = (id, name, cat, desc, flags) => Object.assign({ id, name, cat, desc }, flags || {});
+// 증강팩: 새 팩은 PACKS에 추가하고, 증강을 만들 때 flags에 { pack: '팩id' }를 넣으면 됩니다. (기본값 'base')
+const PACKS = [
+  { id: 'base', name: '기본팩', desc: '지금까지의 모든 증강' },
+  { id: 'limbus', name: '림버스 컴퍼니 팩', desc: '라만차랜드 · K사 · 대호수의 규칙 · 변환 · 소속 증강' },
+];
+const A = (id, name, cat, desc, flags) => Object.assign({ id, name, cat, desc, pack: 'base' }, flags || {});
 const AUGMENTS = [
   // ---- 범용 ----
   A('cat', '고양이', 'gen', '아무 능력이 없습니다. 왜 있냐고요? 귀엽잖아요.'),
@@ -88,7 +93,7 @@ const AUGMENTS = [
   A('cannon', '변환: 포', 'gen', '1회용, 일반말을 포로 바꿉니다. 매 차례 한 번, 포는 말이 있는 칸 하나를 넘어 일직선으로 벽(그 직선의 끝)까지 원하는 만큼 이동할 수 있습니다.'),
   A('pawn', '변환: 폰', 'gen', '1회, 일반말을 폰으로 바꿉니다. 폰은 조작할 수 없지만 투척마다 도만큼 전진합니다.'),
   A('fog', '안개', 'gen', '1회, 두 차례 동안 윷판에 안개가 생깁니다. 안개 속에서 자신 이외의 플레이어는 자신 말 근처만 확인할 수 있습니다.'),
-  A('flick', '알까기', 'gen', '1회, 차례를 사용해 알까기를 합니다. (내 말과 노릴 적 말 선택 → 50% 명중해 적 말뭉치 사망 / 35% 빗나감 / 15% 내 말이 떨어짐)'),
+  A('flick', '알까기', 'gen', '1회, 차례를 사용해 진짜 알까기를 합니다. 내 말을 뒤로 쭉 당겼다 놓아 튕기세요. 적 말을 맞혀 밀어내야 하며, 못 맞히면 내 말은 사망합니다. 다 멈춘 뒤 말이 한 칸 거리 안의 칸 근처에 있으면 그 칸에 서고, 없으면 사망(밀려난 말 포함)'),
   A('mistake', '언제부터 착각한 거지?', 'gen', '한 플레이어의 능력 하나를 지정해 3 라운드 동안 "고양이"로 바꿉니다. 이미 사용 완료한 증강은 바꿀 수 없습니다.', { inter: true }),
   A('aim', '윷을 잘 던져봐', 'gen', '1회, 윷을 던져서 플레이어를 맞춥니다. (걸 이상이 나오면 명중) 해당 플레이어는 차례를 두 번 건너뜁니다.'),
   A('tianma', '천마군림보 - 달걸음', 'gen', '자신의 모든 말이 반대 방향으로 이동합니다. 출발도 반대편(왼쪽 길)에서 하고 지름길도 거울처럼 뒤집힙니다. (백도는 원래 방향으로 한 칸)'),
@@ -127,7 +132,24 @@ const AUGMENTS = [
   // ---- 내부용 (선택창에 나오지 않음) ----
   A('cat_dis', '고양이', 'hidden', '착각으로 변한 고양이. 아무 능력이 없습니다.'),
 ];
+
+const L = (id, name, cat, desc) => A(id, name, cat, desc, { pack: 'limbus' });
+const LIMBUS = [
+  L('lamancha', '라만차랜드', 'gen', '판의 한 면을 골라 라만차랜드로 만듭니다. 내 모든 말은 혈귀: 매 차례 랜드 안에 혈귀가 있으면 피 +1, 랜드 안 혈귀는 이동 +1. 랜드 안에서 죽은 말(누구든)의 자리에 피주머니가 생기고, 혈귀가 아닌 말이 피주머니 칸에 오면 둘 다 죽습니다(피주머니가 죽으면 피 +1). 랜드 밖 혈귀는 매 차례 피를 1씩 소모하며, 피가 모자라 못 받은 혈귀(랜드에서 먼 말부터 지급)는 쇠약해져 그 차례 한 칸만 가고 적을 잡지 못합니다.'),
+  L('ksa', 'K사', 'gen', '앰플 3개를 얻습니다. 내 말이 죽으면 그 칸에 무덤이 생기고, 무덤 칸이나 그 앞뒤 칸에 내 말이 있으면 앰플 1개를 써서 그 무덤의 말을 부활시킵니다(차례 소모 없음).'),
+  L('lake', '대호수의 규칙', 'gen', '다섯 가지 규칙 중 하나를 몰래 정합니다. 누구든 규칙을 어기면 그 즉시 어긴 사람의 판 위 말 하나(무작위)가 죽고, 어긴 사람에게만 규칙이 공개됩니다. 규칙: ①한 차례에 윷 4번 이상 던지기 ②한 차례에 적 말 2개 이상 잡기 ③한 차례에 한 말이 누적 9칸 이동 ④말을 한 번도 움직이지 않고 차례 마치기 ⑤한 차례에 같은 말을 같은 윷으로 두 번 움직이기'),
+  L('lucio', '변환 루치오', 'gen', '말 하나가 루치오가 됩니다. 루치오(혼자 있을 때)가 말 하나에게 공격당하면 오히려 공격한 말이 죽습니다. (공격하는 쪽이 말 2개 이상 겹쳐 있으면 원래대로)'),
+  L('valen', '변환 발렌치나', 'gen', '말 하나가 발렌치나가 되어 예지안 10을 가집니다. 어떤 방식으로든 공격받으면 예지안×10% 확률로 회피(무적)하고 예지안 -1, 말의 공격이었다면 공격한 말이 죽습니다.'),
+  L('lord', '변환 군주', 'gen', '말 하나가 군주, 나머지 말은 흑수가 됩니다. 군주가 적을 잡을 때마다 흑수의 주인 +1(최대 2). 2가 되면 능력 사용 가능: 이번 차례를 쓰고 군주의 앞칸·뒤칸에 대기 중인 흑수를 배치합니다(그 칸의 적은 공격받습니다).'),
+  L('hunt', '변환 와일드헌트', 'gen', '말 하나가 와일드헌트가 됩니다. 이 말이 적을 잡을 때마다 관 +1. 내 말이 죽은 뒤 내 차례에 능력: 관 1개당 가장 먼저 죽은 말을 죽은 자리에 부활시킵니다. 부활한 말은 3차례 뒤 다시 죽습니다.'),
+  L('jungji', '소속 중지', 'gen', '내 말이 잡히면 즉시 발동: 판 위의 내 말뭉치 하나를 죽은 자리 쪽으로 2칸 보낼 수 있습니다. 나를 잡은 상대 말이 있는 칸에 닿으면 그 말을 잡고, 상대는 그 잡기로 얻은 추가 던지기를 잃습니다. 나를 죽인 상대가 아닌 말에는 아무 영향이 없습니다.'),
+  L('tsa', '소속 T사', 'gen', '내 말이 적을 잡으면 적은 죽는 대신 시간 징수 상태가 됩니다(추가 던지기 없음). 징수당한 말을 움직이려 하면 사용한 윷 결과가 내 보관함에 쌓이고(내 차례에 사용), 그 말은 1칸만 움직입니다.'),
+  L('yakji', '소속 약지', 'start', '내 말이 적을 잡으면 생체재료 +1. 4가 되면 능력 \'예술!\'(이번 차례를 쓰고 예술작품 완성 → 내 모든 말의 이동 +2). 완성 뒤 다시 4가 되면 \'폐장\': 이번 차례를 쓰고 한 면을 골라 그 면의 모든 말을 2라운드 동안 속박합니다.'),
+  L('geomji', '소속 검지', 'start', '나에게만 보이는 랜덤 지령이 주어지며, 3개를 완수하면 승리합니다.'),
+];
+AUGMENTS.push(...LIMBUS);
 const BY_ID = Object.fromEntries(AUGMENTS.map((a) => [a.id, a]));
+const inPacks = (g, a) => (g.packs || ['base']).includes(a.pack || 'base');
 const CONVERT = { vanguard: 'vanguard', goblin: 'goblin', cannon: 'cannon', pawn: 'pawn', marathon: 'marathon', kim: 'kim' };
 
 // ---------- 유틸 ----------
@@ -145,7 +167,7 @@ function newStats() {
   return {
     dogs: 0, gul: 0, kills: 0, seen: [], coins: 0, ritual: 0, ejiri: 0, backdoCaps: 0, friendHits: [],
     garlic: [], garlicGot: [], garlicSeen: [], bank: [], snipers: [], nextChoose: false, lastDance: false, poison: false, deliver: [],
-    skip: 0, bound: [], leechTo: null, plan: null, queenLives: 0, queenThrows: 0, kimLeft: 0, domain: null, domainWon: false, dis: [],
+    lim: {}, skip: 0, bound: [], leechTo: null, plan: null, queenLives: 0, queenThrows: 0, kimLeft: 0, domain: null, domainWon: false, dis: [],
   };
 }
 function newPlayer(idx, name, token) {
@@ -164,7 +186,7 @@ function removeOnePiece(p) {
 }
 const stacksOf = (p) => { const m = {}; for (const x of p.pieces) if (!x.done && x.pos > 0) (m[x.pos] = m[x.pos] || []).push(x); return m; };
 const groupOf = (p, x) => (x.pos === 0 ? [x] : p.pieces.filter((y) => !y.done && y.pos === x.pos));
-function sendHome(x) { x.pos = 0; x.route = 'main'; x.shield = false; x.frozen = 0; }
+function sendHome(x) { x.pos = 0; x.route = 'main'; x.shield = false; x.frozen = 0; x.tax = null; x.weak = false; }
 function setRoute(x, node, prefer) {
   if (node < 20) x.route = 'main';
   else if (node >= 25) x.route = 'B';
@@ -177,8 +199,8 @@ const occupiedSet = (g) => { const s = new Set(); for (const q of g.players) for
 // ---------- 방/게임 ----------
 function createGame(code) {
   return {
-    code, players: [], chaos: false, ranking: false, phase: 'lobby', round: 0, cur: 0, tn: null, pick: null, log: [], winner: null, reason: '',
-    poops: [], ganTaek: false, ranks: [], elim: [], fixed: {}, party: [], duels: [], echo: false, fog: null, hpOn: false, final: null, coWinners: [], planWin: null,
+    code, players: [], chaos: false, ranking: false, packs: ['base'], phase: 'lobby', round: 0, cur: 0, tn: null, pick: null, log: [], winner: null, reason: '',
+    poops: [], bags: [], interrupts: [], ganTaek: false, ranks: [], elim: [], fixed: {}, party: [], duels: [], echo: false, fog: null, hpOn: false, final: null, coWinners: [], planWin: null,
   };
 }
 function addPlayer(g, name, token) {
@@ -195,11 +217,17 @@ function removePlayer(g, p) {
 function resetState(g) {
   g.round = 0; g.cur = 0; g.order = null; g.tn = null; g.pick = null; g.winner = null; g.reason = '';
   g.poops = []; g.ganTaek = false; g.log = []; g.ranks = []; g.elim = []; g.fixed = {}; g.party = []; g.duels = [];
-  g.echo = false; g.fog = null; g.hpOn = false; g.lastThrow = null; g.final = null; g.coWinners = []; g.planWin = null;
+  g.echo = false; g.fog = null; g.hpOn = false; g.lastThrow = null; g.lastFlick = null; g.bags = []; g.interrupts = []; g.final = null; g.coWinners = []; g.planWin = null;
 }
 function resetGame(g) {
   g.phase = 'lobby'; resetState(g);
   g.players = g.players.map((p) => { const q = newPlayer(p.idx, p.name, p.token); q.connected = p.connected; return q; });
+}
+function setPacks(g, ids) {
+  if (g.phase !== 'lobby') throw E('로비에서만 설정할 수 있습니다');
+  const list = [...new Set((ids || []).map(String))].filter((id) => PACKS.some((k) => k.id === id));
+  if (!list.length) throw E('증강팩을 하나 이상 선택해야 합니다');
+  g.packs = list;
 }
 function startGame(g) {
   if (g.players.length < 2) throw E('2명 이상이 필요합니다');
@@ -250,7 +278,7 @@ const ordList = (g) => (g.order || g.players.map((p) => p.idx)).map((i) => g.pla
 function rollOptions(g, p, exclude) {
   const pk = g.pick;
   const mine = pk.chosen[p.idx] || [];
-  const ok = (a) => (a.cat === 'gen' || a.cat === pk.kind) && (!a.rankOnly || g.ranking) && !has(p, a.id) && !mine.includes(a.id);
+  const ok = (a) => inPacks(g, a) && (a.cat === 'gen' || a.cat === pk.kind) && (!a.rankOnly || g.ranking) && !has(p, a.id) && !mine.includes(a.id);
   const pool = AUGMENTS.filter((a) => ok(a) && !(exclude || []).includes(a.id));
   const forced = p.st.deliver.filter((id) => BY_ID[id] && ok(BY_ID[id])).slice(0, 3);
   let ids = [...forced];
@@ -343,7 +371,7 @@ function actSub(g, p, value) {
       break;
     }
     case 'augment': {
-      if (!BY_ID[value] || BY_ID[value].cat === 'hidden') throw E('존재하지 않는 증강입니다');
+      if (!BY_ID[value] || BY_ID[value].cat === 'hidden' || !inPacks(g, BY_ID[value])) throw E('존재하지 않는 증강입니다');
       if (sub.aug === 'detective') { pk.banned.push({ id: value, by: p.idx }); log(g, `${p.name}: 명탐정! '${BY_ID[value].name}' 무효화`); }
       if (sub.aug === 'delivery') { p.st.deliver = [value]; log(g, `${p.name}: 배달! 다음 선택창에 '${BY_ID[value].name}' 등장 예약`); }
       break;
@@ -356,8 +384,15 @@ function actSub(g, p, value) {
       break;
     }
     case 'fold': {
-      if (!['R', 'L', 'T', 'B'].includes(value)) throw E('접는 방향을 고르세요');
-      foldBoard(g, p, value);
+      if (!['R', 'L', 'T', 'B'].includes(value)) throw E(sub.aug === 'lamancha' ? '라만차랜드로 만들 면을 고르세요' : '접는 방향을 고르세요');
+      if (sub.aug === 'lamancha') { lim(p).side = value; lim(p).land = landNodes(value); log(g, `🎪 ${p.name}: ${SIDE_NAME[value]} 면이 라만차랜드가 되었습니다!`); }
+      else foldBoard(g, p, value);
+      break;
+    }
+    case 'rule': {
+      const r = Number(value);
+      if (!Number.isInteger(r) || r < 0 || r >= RULES.length) throw E('규칙을 고르세요');
+      lim(p).lake = { rule: r }; log(g, `🌊 ${p.name}: 대호수의 규칙을 정했습니다 (비밀)`);
       break;
     }
     case 'spin': {
@@ -467,6 +502,19 @@ function acquire(g, p, id) {
       p.st.queenLives = 0; p.st.queenThrows = 0;
       break;
     }
+    case 'lucio': convertPiece(p, 'lucio'); break;
+    case 'valen': { const c = convertPiece(p, 'valen'); if (c) c.yeji = 10; break; }
+    case 'lord': {
+      const c = convertPiece(p, 'lord');
+      p.pieces.forEach((x) => { if (x !== c && !x.done) x.hs = true; });
+      p.st.lim.lordMark = 0; break;
+    }
+    case 'hunt': convertPiece(p, 'hunt'); p.st.lim.coffin = 0; break;
+    case 'ksa': p.st.lim.amp = (p.st.lim.amp || 0) + 3; break;
+    case 'yakji': p.st.lim.bio = 0; p.st.lim.art = false; break;
+    case 'geomji': p.st.lim.qdone = 0; newQuest(g, p); break;
+    case 'lamancha': p.st.lim.blood = 0; return { type: 'fold', aug: 'lamancha' };
+    case 'lake': return { type: 'rule', aug: 'lake' };
     case 'summon': p.pieces.filter((x) => !x.done && x.type === 'normal').forEach((x) => { x.type = 'zealot'; }); break;
     case 'redbutton':
       for (const q of g.players) { if (!isActive(q)) continue; const st = stacksOf(q); for (const n of DIAG_NODES) if (st[n]) augKill(g, q, st[n], p); }
@@ -483,7 +531,7 @@ function acquire(g, p, id) {
     }
     case 'comeback': {
       const ex = ['comeback', 'objection', 'detective', 'delivery'];
-      const pool = shuffle(AUGMENTS.filter((a) => a.cat === 'gen' && !a.inter && !ex.includes(a.id) && !has(p, a.id))).slice(0, 3);
+      const pool = shuffle(AUGMENTS.filter((a) => inPacks(g, a) && a.cat === 'gen' && !a.inter && !ex.includes(a.id) && !has(p, a.id))).slice(0, 3);
       for (const a of pool) { p.augs.push(a.id); log(g, `${p.name} 획득 → ${a.name}`); acquire(g, p, a.id); }
       break;
     }
@@ -580,6 +628,10 @@ function onDeaths(g, owner, n) {
 }
 // stack: 같은 칸 owner의 말들. 죽인 말 수 반환
 function killStack(g, owner, stack, killer) {
+  if (killer && killer !== owner) {
+    const v = stack.find((x) => x.type === 'valen' && x.yeji > 0);
+    if (v && Math.random() < v.yeji * 0.1) { v.yeji--; EVADED = true; log(g, `🔮 ${owner.name}의 발렌치나가 공격을 예지해 회피했습니다! (예지안 ${v.yeji})`); return 0; }
+  }
   if (stack.some((x) => x.shield)) {
     stack.forEach((x) => { x.shield = false; });
     log(g, `🛡 ${owner.name}의 말뭉치가 보호막으로 죽음을 막았습니다`);
@@ -587,7 +639,9 @@ function killStack(g, owner, stack, killer) {
   }
   const victims = has(owner, 'friendshield') ? [stack[stack.length - 1]] : stack;
   const queenDied = victims.some((x) => x.type === 'queen');
+  const deathNode = victims[0].pos;
   victims.forEach(sendHome);
+  limOnDeath(g, owner, victims, deathNode);
   onDeaths(g, owner, victims.length);
   log(g, `☠ ${owner.name}의 말 ${victims.length}개 사망${killer && killer !== owner ? ` (by ${killer.name})` : ''}`);
   if (killer && killer !== owner) {
@@ -687,12 +741,11 @@ function effSteps(p, res) {
   return s;
 }
 function usable(g, p, res) {
-  const s = effSteps(p, res);
   return p.pieces.some((x) => {
     if (x.done || x.type === 'pawn') return false;
     const grp = groupOf(p, x);
     if (grp.some((y) => isFrozen(g, y))) return false;
-    return !!moveFor(grp, s, has(p, 'tianma'));
+    return !!moveFor(grp, groupSteps(g, p, res, grp), has(p, 'tianma'));
   });
 }
 
@@ -732,19 +785,24 @@ function applyMove(g, p, group, steps, label, opts) {
     const own = p.pieces.filter((x) => !x.done && x.pos === np && !group.includes(x));
     if (own.length && killStack(g, p, own, null) > 0) { tn.throws += 1; log(g, `${p.name}: 카니발리즘! 추가 던지기 1회`); }
   }
-  let killed = 0, bonus = 0;
-  for (const o of g.players) {
-    if (o === p || !isActive(o)) continue;
-    const stack = o.pieces.filter((x) => !x.done && x.pos === np);
-    if (!stack.length) continue;
-    if (has(p, 'peace') || has(o, 'peace')) continue;
-    const k = killStack(g, o, stack, p);
-    if (k > 0) { killed += k; if (has(p, 'treason') && o.finished > p.finished) bonus++; }
+  tn.moves = (tn.moves || 0) + 1;
+  const bi = has(p, 'lamancha') ? -1 : g.bags.findIndex((b2) => b2.node === np);
+  if (bi >= 0) {
+    const bag = g.bags.splice(bi, 1)[0]; const Lm = g.players[bag.owner];
+    if (Lm && Lm.alive) { lim(Lm).blood = (lim(Lm).blood || 0) + 1; }
+    log(g, `🩸 ${p.name}의 말이 피주머니를 건드려 함께 터졌습니다!`);
+    NOBAG = true; killStack(g, p, group, null); NOBAG = false;
+    return;
   }
+  const cr = captureAt(g, p, group, np, opts.cap);
+  LASTCAP = cr;
+  const killed = cr.killed, bonus = cr.bonus;
+  settleInterrupts(g, killed > 0 ? 1 + bonus : 0);
   if (killed > 0) {
     tn.throws += 1 + bonus;
     log(g, `${p.name}: 잡았다! 추가 던지기 ${1 + bonus}회`);
     if (opts.backdo) p.st.backdoCaps++;
+    limOnCapture(g, p, group, cr);
   }
   if (!opts.noTrigger && p.alive && group.every((x) => x.pos === np)) partyTrigger(g, p, group, np);
 }
@@ -772,11 +830,15 @@ function actMove(g, p, ri, pid) {
   if (piece.type === 'pawn') throw E('폰은 직접 움직일 수 없습니다');
   const group = groupOf(p, piece);
   if (group.some((x) => isFrozen(g, x))) throw E('멈춰 있는 말입니다');
-  const steps = effSteps(p, res);
+  const steps = groupSteps(g, p, res, group);
   const mv = moveFor(group, steps, has(p, 'tianma'));
   if (!mv) throw E(group.some((x) => x.type === 'queen') ? '중전마마는 완주할 수 없습니다' : '그 말은 그렇게 움직일 수 없습니다');
   tn.queue.splice(ri, 1);
+  const taxed = group.find((x) => x.tax != null && x.tax !== p.idx);
+  if (taxed) { const Cc = g.players[taxed.tax]; if (Cc && isActive(Cc)) { Cc.st.bank.push(res); log(g, `⏳ ${p.name}의 말이 시간 징수를 당해 '${res}'이(가) ${Cc.name}의 보관함으로 갑니다 (말은 1칸만 이동)`); } }
+  LASTCAP = null;
   applyMove(g, p, group, steps, res, { mv, backdo: res === '백도' });
+  if (g.phase === 'turn' && p.alive) limAfterMove(g, p, group, res, steps, piece, LASTCAP);
   afterAction(g);
 }
 
@@ -871,6 +933,8 @@ function actThrow(g, p, o) {
     log(g, `${p.name}: ${r}${r === '윷' || r === '모' ? ' (한 번 더!)' : ''}`);
     if (p.st.poison && r === '모') { log(g, `${p.name}: 독이 든 성배... 모가 나와 탈락!`); eliminate(g, p); break; }
   }
+  tn.throwN = (tn.throwN || 0) + 1;
+  if (tn.throwN >= 4 && p.alive) lakeCheck(g, p, 0);
   if (p.alive && p.pieces.some((x) => x.type === 'pawn')) movePawns(g, p);
   afterAction(g);
 }
@@ -891,6 +955,7 @@ function badukTargets(g, p) {
 }
 function actAbility(g, p, a, o) {
   o = o || {};
+  if (a === 'jungji') return actInterrupt(g, p, o);
   assertTurn(g, p);
   const tn = g.tn;
   const need = (id) => { if (!has(p, id)) throw E('가지고 있지 않은 증강입니다'); };
@@ -976,15 +1041,77 @@ function actAbility(g, p, a, o) {
       break;
     }
     case 'flick': {
-      once('flick'); beforeThrow(); const x = boardPiece();
-      let tp = null, tq = null;
-      for (const q of g.players) { if (q === p || !isActive(q)) continue; const y = q.pieces.find((z) => z.id === o.tpid && !z.done && z.pos > 0); if (y) { tp = y; tq = q; } }
-      if (!tp) throw E('노릴 적 말을 선택하세요');
+      once('flick'); beforeThrow(); const x = boardPiece(); unfrozen(groupOf(p, x));
+      const ang = Number(o.ang), pow = Number(o.pow);
+      if (!Number.isFinite(ang) || !Number.isFinite(pow)) throw E('방향과 세기를 정하세요');
       p.used.flick = true; tn.throws = 0;
-      const r = Math.random();
-      if (r < 0.5) { log(g, `${p.name}: 🪨 알까기 명중!`); augKill(g, tq, tq.pieces.filter((z) => !z.done && z.pos === tp.pos), p); }
-      else if (r < 0.85) log(g, `${p.name}: 🪨 알까기... 빗나갔습니다`);
-      else { log(g, `${p.name}: 🪨 알까기... 자기 말이 판 밖으로 떨어졌습니다!`); killStack(g, p, groupOf(p, x), null); }
+      runFlick(g, p, x, ang, Math.max(0.05, Math.min(1, pow)));
+      break;
+    }
+    case 'lord': {
+      need('lord'); beforeThrow();
+      if ((lim(p).lordMark || 0) < 2) throw E('흑수의 주인이 2가 되어야 합니다');
+      const c = p.pieces.find((x) => x.type === 'lord' && !x.done && x.pos > 0);
+      if (!c) throw E('군주가 판 위에 없어야 하지 않습니다 — 군주를 판 위에 올리세요');
+      unfrozen(groupOf(p, c));
+      const mir = has(p, 'tianma');
+      const dest = [moveFor([c], 1, mir), moveFor([c], -1, mir)].filter((m) => m && !m.home && !m.finished).map((m) => m.nodes[m.nodes.length - 1]);
+      const dogs = p.pieces.filter((x) => x.hs && !x.done && x.pos === 0);
+      if (!dogs.length) throw E('대기 중인 흑수가 없습니다');
+      if (!dest.length) throw E('흑수를 배치할 칸이 없습니다');
+      lim(p).lordMark = 0; tn.throws = 0;
+      log(g, `🐺 ${p.name}: 군주의 능력! 흑수를 배치합니다 (이번 차례 사용)`);
+      dest.slice(0, dogs.length).forEach((node, i) => {
+        const x = dogs[i]; x.pos = node; setRoute(x, mir ? mirNode(node) : node);
+        log(g, `🐺 흑수가 ${node}번 칸에 나타났습니다`);
+        const cr = captureAt(g, p, [x], node, {});
+        settleInterrupts(g, 0);
+        if (cr.killed) limOnCapture(g, p, [x], cr);
+      });
+      break;
+    }
+    case 'hunt': {
+      need('hunt'); const l = lim(p);
+      l.graves = (l.graves || []).filter((gv) => p.pieces.some((x) => x.id === gv.id && !x.done && x.pos === 0));
+      if (!(l.coffin > 0)) throw E('관이 없습니다');
+      if (!l.graves.length) throw E('부활시킬 말이 없습니다');
+      const n = Math.min(l.coffin, l.graves.length); const mir = has(p, 'tianma');
+      l.timers = l.timers || [];
+      for (let i = 0; i < n; i++) {
+        const gv = l.graves.shift(); const x = p.pieces.find((y) => y.id === gv.id);
+        x.pos = gv.node; setRoute(x, mir ? mirNode(gv.node) : gv.node); l.coffin--; l.timers.push({ id: x.id, left: 3 });
+        log(g, `⚰ ${p.name}: 와일드헌트의 관! 죽었던 말이 ${gv.node}번 칸에서 부활했습니다 (3차례 뒤 다시 죽음)`);
+        const cr = captureAt(g, p, groupOf(p, x), gv.node, {}); settleInterrupts(g, 0); if (cr.killed) limOnCapture(g, p, [x], cr);
+      }
+      break;
+    }
+    case 'ksa': {
+      need('ksa'); const l = lim(p);
+      if (!(l.amp > 0)) throw E('앰플이 없습니다');
+      const node = Number(o.node != null ? o.node : o.target);
+      const gv = (l.graves || []).find((q2) => q2.node === node && p.pieces.some((x) => x.id === q2.id && !x.done && x.pos === 0));
+      if (!gv) throw E('그 칸에는 내 무덤이 없습니다');
+      const near = [node, ...(NEI[node] ? [...NEI[node]] : [])];
+      if (!p.pieces.some((x) => !x.done && x.pos > 0 && near.includes(x.pos))) throw E('무덤 칸이나 그 앞뒤 칸에 내 말이 있어야 합니다');
+      const x = p.pieces.find((y) => y.id === gv.id); const mir = has(p, 'tianma');
+      l.amp--; l.graves = l.graves.filter((q2) => q2 !== gv);
+      x.pos = node; setRoute(x, mir ? mirNode(node) : node);
+      log(g, `💉 ${p.name}(K사): 앰플을 써서 ${node}번 칸의 무덤에서 말을 부활시켰습니다 (남은 앰플 ${l.amp})`);
+      const cr = captureAt(g, p, groupOf(p, x), node, {}); settleInterrupts(g, 0); if (cr.killed) limOnCapture(g, p, [x], cr);
+      break;
+    }
+    case 'yakji': {
+      need('yakji'); beforeThrow(); const l = lim(p);
+      if ((l.bio || 0) < 4) throw E('생체재료가 4개 모여야 합니다');
+      if (!l.art) {
+        l.art = true; l.bio = 0; tn.throws = 0;
+        log(g, `🎨 ${p.name}: 예술! 예술작품을 완성했습니다. 모든 말의 이동 +2 (이번 차례 사용)`);
+      } else {
+        if (!['R', 'L', 'T', 'B'].includes(o.side)) throw E('속박할 면을 고르세요');
+        l.bio = 0; tn.throws = 0; const nodes = landNodes(o.side); let c = 0;
+        for (const q of g.players) for (const x of q.pieces) if (!x.done && nodes.includes(x.pos)) { x.frozen = g.round + 2; c++; }
+        log(g, `🎪 ${p.name}: 폐장! ${SIDE_NAME[o.side]} 면의 말 ${c}개가 2라운드 동안 속박됩니다 (이번 차례 사용)`);
+      }
       break;
     }
     case 'goblin': {
@@ -1049,6 +1176,7 @@ function actAbility(g, p, a, o) {
 // ---------- 턴 진행 ----------
 function assertTurn(g, p) {
   if (g.phase !== 'turn') throw E('지금은 할 수 없습니다');
+  if (g.interrupts && g.interrupts.length) throw E('상대의 중지 능력 선택을 기다리는 중입니다');
   if (g.cur !== p.idx) throw E('내 차례가 아닙니다');
   if (!isActive(p)) throw E('탈락했습니다');
 }
@@ -1061,6 +1189,7 @@ function startTurn(g, idx, second) {
   if (p.st.skip > 0) {
     p.st.skip--; g.tn.queue = []; g.tn.throws = 0;
     log(g, `⏭ ${p.name}: 차례를 건너뜁니다`);
+    g.tn.skipped = true;
     endTurn(g); return;
   }
   for (const node of p.st.snipers) {
@@ -1068,6 +1197,7 @@ function startTurn(g, idx, second) {
     for (const o of g.players) { if (!isActive(o)) continue; const st = o.pieces.filter((x) => !x.done && x.pos === node); if (st.length) augKill(g, o, st, p); }
   }
   p.st.snipers = [];
+  limStartTurn(g, p);
   const z = p.pieces.filter((x) => x.type === 'zealot' && !x.done && x.pos > 0).length;
   if (has(p, 'summon') && z) { p.st.ritual += z; log(g, `${p.name}: 의식 코인 +${z} (${p.st.ritual}/12)`); }
   log(g, `▶ ${g.round}라운드 - ${p.name}의 차례${second ? ' (두 번째)' : ''}`);
@@ -1082,9 +1212,11 @@ function normalizeTurn(g) {
   g.tn.queue = g.tn.queue.filter((r) => usable(g, p, r));
   if (!g.tn.queue.length) endTurn(g);
 }
-function afterAction(g) { checkWins(g); if (g.phase === 'turn') normalizeTurn(g); }
+function afterAction(g) { checkWins(g); if (g.phase === 'turn' && !g.interrupts.length) normalizeTurn(g); }
 function endTurn(g) {
   const p = g.players[g.cur];
+  if (g.tn && !g.tn.skipped && isActive(p) && !(g.tn.moves > 0)) lakeCheck(g, p, 3);
+  p.pieces.forEach((x) => { x.weak = false; });
   if (isActive(p) && p.st.lastDance) { log(g, `${p.name}: 라스트 댄스가 끝났습니다. 탈락`); eliminate(g, p); }
   p.st.poison = false; p.st.lastDance = false;
   if (isActive(p)) {
@@ -1118,6 +1250,7 @@ function endTurn(g) {
 }
 function eliminate(g, p) {
   if (!p.alive) return;
+  g.interrupts = (g.interrupts || []).filter((i) => i.owner !== p.idx);
   p.alive = false; p.pieces = []; p.out = false;
   g.elim.push(p.idx);
   g.duels = g.duels.filter((d) => d.t !== p.idx && d.ch !== p.idx);
@@ -1130,7 +1263,9 @@ function forfeit(g, p) {
   log(g, `🚪 ${p.name}이(가) 방을 나갔습니다`);
   const wasCur = g.phase === 'turn' && g.cur === p.idx;
   const pk = g.pick; const wasPicker = g.phase === 'pick' && pk && pk.stage === 'resolve' && picker(g) === p;
+  const hadInt = g.interrupts.length;
   eliminate(g, p);
+  if (hadInt && !g.interrupts.length && g.phase === 'turn' && !wasCur) afterAction(g);
   if (pk && pk.sub) {
     const s = pk.sub;
     if (s.pending) s.pending = s.pending.filter((i) => i !== p.idx);
@@ -1261,6 +1396,21 @@ function pubSt(q, mine) {
     plan: mine ? s.plan : !!s.plan,
   };
 }
+function pubLim(g, q, mine) {
+  const l = q.st.lim, o = {};
+  if (has(q, 'lamancha')) { o.blood = l.blood || 0; o.side = l.side || null; }
+  if (has(q, 'ksa')) o.amp = l.amp || 0;
+  if (has(q, 'hunt')) { o.coffin = l.coffin || 0; o.timers = (l.timers || []).length; }
+  if (has(q, 'ksa') || has(q, 'hunt')) o.graves = (l.graves || []).filter((gv) => q.pieces.some((x) => x.id === gv.id && !x.done && x.pos === 0)).map((gv) => gv.node);
+  if (has(q, 'lord')) o.lordMark = l.lordMark || 0;
+  if (has(q, 'yakji')) { o.bio = l.bio || 0; o.art = !!l.art; }
+  if (has(q, 'geomji')) { o.qdone = l.qdone || 0; if (mine && l.q) o.quest = { text: QUESTS[l.q.id], progress: questProgress(g, q) }; }
+  if (mine) {
+    if (has(q, 'lake') && l.lake) o.lake = l.lake.rule;
+    o.knows = (l.knows || []).map((k) => ({ by: k.by, rule: k.rule, text: RULES[k.rule] }));
+  }
+  return o;
+}
 function visibleNodes(viewer) {
   const seen = new Set(); let frontier = [];
   viewer.pieces.forEach((x) => { if (!x.done && x.pos > 0) { seen.add(x.pos); frontier.push(x.pos); } });
@@ -1278,13 +1428,325 @@ function pubSub(sub) {
   if (s.answered) { s.answered = Object.keys(s.answered).map(Number); }
   return s;
 }
+
+
+// ========== 림버스 컴퍼니 팩 ==========
+const lim = (p) => p.st.lim;
+const SIDE_TEST = { R: (x) => x > 89.9, L: (x) => x < 10.1, T: (x, y) => y < 10.1, B: (x, y) => y > 89.9 };
+const SIDE_NAME = { R: '오른쪽', L: '왼쪽', T: '위쪽', B: '아래쪽' };
+const landNodes = (side) => { const r = []; for (let n = 1; n <= 19; n++) { const [x, y] = XY(n); if (SIDE_TEST[side](x, y)) r.push(n); } return r; };
+const RULES = ['한 차례에 윷을 4번 이상 던지기', '한 차례에 적 말 2개 이상 잡기', '한 차례에 한 말이 누적 9칸 이동하기', '말을 한 번도 움직이지 않고 차례 마치기', '한 차례에 같은 말을 같은 윷으로 두 번 움직이기'];
+const QUESTS = [
+  '한 말을 연속하여 3번 움직이기 (죽거나 다른 말을 움직이면 처음부터)',
+  '한 말을 누적 10칸 움직이기',
+  '지정된 상대의 말 잡기',
+  '보드 정중앙에 위치하기',
+  '개를 이용하여 상대 말 잡기',
+  '내 말이 3번 사망하기',
+  '대각선 이동이 가능한 칸(모서리·중앙)에 도달하기',
+  '도 → 개 → 걸을 연속 사용하기 (도가 여러 번 이어져도 됨)',
+  '내 말 3개를 한 칸에 겹치기',
+  '백도·윷·모 중 아무거나 2번 사용하기',
+];
+let EVADED = false, NOBAG = false, LASTCAP = null;
+function newQuest(g, p) {
+  const l = lim(p); l.used = l.used || [];
+  const foes = activeList(g).filter((q) => q !== p);
+  let pool = QUESTS.map((_, i) => i).filter((i) => !l.used.includes(i) && (i !== 2 || foes.length));
+  if (!pool.length) pool = QUESTS.map((_, i) => i).filter((i) => i !== 2 || foes.length);
+  const id = sample(pool); l.used.push(id);
+  l.q = { id, prog: 0, sum: {}, last: null, hist: '', target: id === 2 ? sample(foes).idx : null };
+}
+function questEvent(g, p, ev) {
+  const l = lim(p), q = l.q;
+  if (!q || !has(p, 'geomji') || g.phase === 'ended' || !p.alive) return;
+  let ok = false;
+  if (ev.t === 'death') {
+    if (q.id === 5) { q.prog += ev.n; ok = q.prog >= 3; }
+    if (q.id === 0 && ev.ids.includes(q.last)) { q.prog = 0; q.last = null; }
+    if (q.id === 1) ev.ids.forEach((i) => { delete q.sum[i]; });
+  } else if (ev.t === 'move') {
+    const n = Math.abs(ev.steps);
+    switch (q.id) {
+      case 0: q.prog = q.last === ev.pid ? q.prog + 1 : 1; q.last = ev.pid; ok = q.prog >= 3; break;
+      case 1: ev.ids.forEach((i) => { q.sum[i] = (q.sum[i] || 0) + n; if (q.sum[i] >= 10) ok = true; }); break;
+      case 2: ok = ev.cap.owners.includes(q.target); break;
+      case 3: ok = p.pieces.some((x) => !x.done && x.pos === 22); break;
+      case 4: ok = ev.res === '개' && ev.cap.killed > 0; break;
+      case 6: ok = [5, 10, 22].includes(ev.pos); break;
+      case 7: q.hist = (q.hist + ev.res).slice(-20); ok = /도+개걸$/.test(q.hist); break;
+      case 8: ok = Object.values(stacksOf(p)).some((st) => st.length >= 3); break;
+      case 9: if (['백도', '윷', '모'].includes(ev.res)) q.prog++; ok = q.prog >= 2; break;
+      default: break;
+    }
+  }
+  if (!ok) return;
+  l.qdone++; log(g, `🔎 ${p.name}: 지령을 완수했습니다! (${l.qdone}/3)`);
+  if (l.qdone >= 3) declareWin(g, p, '소속 검지 - 지령 3개 완수'); else newQuest(g, p);
+}
+function questProgress(g, p) {
+  const l = lim(p), q = l.q; if (!q) return '';
+  switch (q.id) {
+    case 0: return `연속 ${q.prog}/3`;
+    case 1: return `최대 ${Math.max(0, ...Object.values(q.sum))}/10칸`;
+    case 2: return `대상: ${g.players[q.target] ? g.players[q.target].name : '?'}`;
+    case 5: return `${q.prog}/3`;
+    case 7: return `기록: ${q.hist || '-'}`;
+    case 9: return `${q.prog}/2`;
+    default: return '';
+  }
+}
+function lakeCheck(g, v, rule) {
+  if (!isActive(v)) return;
+  const tn = g.tn; if (!tn) return;
+  tn.lakeHit = tn.lakeHit || {};
+  for (const Lk of g.players) {
+    if (!isActive(Lk) || !has(Lk, 'lake') || !lim(Lk).lake || lim(Lk).lake.rule !== rule) continue;
+    const key = Lk.idx + ':' + rule; if (tn.lakeHit[key]) continue; tn.lakeHit[key] = true;
+    log(g, `🌊 ${v.name}이(가) 대호수의 규칙을 어겼습니다!`);
+    const kn = (lim(v).knows = lim(v).knows || []);
+    if (!kn.some((k) => k.by === Lk.idx)) kn.push({ by: Lk.idx, rule });
+    const st = stacksOf(v); const ks = Object.keys(st);
+    if (ks.length) killStack(g, v, st[sample(ks)], null); else log(g, '…하지만 판 위에 말이 없어 아무 일도 없었습니다');
+    if (!isActive(v)) return;
+  }
+}
+function limOnDeath(g, owner, victims, node) {
+  if (node > 0) {
+    if (has(owner, 'ksa') || has(owner, 'hunt')) {
+      const gr = (lim(owner).graves = lim(owner).graves || []);
+      victims.forEach((x) => gr.push({ id: x.id, node }));
+      if (gr.length > 12) gr.splice(0, gr.length - 12);
+    }
+    if (!NOBAG) {
+      for (const Lm of g.players) {
+        if (isActive(Lm) && has(Lm, 'lamancha') && lim(Lm).land && lim(Lm).land.includes(node)) { g.bags.push({ node, owner: Lm.idx }); log(g, `🩸 라만차랜드의 ${node}번 칸에 피주머니가 생겼습니다`); }
+      }
+    }
+  }
+  if (has(owner, 'geomji')) questEvent(g, owner, { t: 'death', ids: victims.map((x) => x.id), n: victims.length });
+}
+function bfsPath(from, to) {
+  if (from === to) return [from];
+  const prev = { [from]: null }; const q = [from];
+  while (q.length) {
+    const n = q.shift();
+    for (const m of (NEI[n] ? [...NEI[n]] : [])) {
+      if (m === 0 || prev[m] !== undefined) continue;
+      prev[m] = n;
+      if (m === to) { const path = []; let c = m; while (c != null) { path.push(c); c = prev[c]; } return path.reverse(); }
+      q.push(m);
+    }
+  }
+  return null;
+}
+function queueJungji(g, o, killer, node) {
+  if (!o.pieces.some((x) => !x.done && x.pos > 0)) return;
+  g.interrupts.push({ owner: o.idx, killer: killer.idx, node, fresh: true, granted: 0 });
+}
+function settleInterrupts(g, granted) { g.interrupts.forEach((it) => { if (it.fresh) { it.granted = granted; it.fresh = false; } }); }
+// 말이 적을 잡은 칸 처리 (applyMove / 흑수 배치 / 중지 / 부활 공용)
+function captureAt(g, p, group, np, opts) {
+  opts = opts || {};
+  const res = { killed: 0, bonus: 0, owners: [] };
+  if (group.some((x) => x.weak)) return res; // 쇠약한 혈귀는 적을 잡을 수 없음
+  for (const o of g.players) {
+    if (o === p || !isActive(o)) continue;
+    if (opts.only != null && o.idx !== opts.only) continue;
+    const stack = o.pieces.filter((x) => !x.done && x.pos === np);
+    if (!stack.length) continue;
+    if (has(p, 'peace') || has(o, 'peace')) continue;
+    if (stack.length === 1 && stack[0].type === 'lucio' && group.length === 1) {
+      log(g, `🗡 ${o.name}의 루치오가 공격을 되받아쳤습니다!`);
+      killStack(g, p, group, o);
+      return res;
+    }
+    if (has(p, 'tsa')) {
+      stack.forEach((x) => { if (x.tax == null) x.tax = p.idx; });
+      log(g, `⏳ ${p.name}(T사): ${o.name}의 말이 시간 징수 상태가 되었습니다`);
+      continue;
+    }
+    EVADED = false;
+    const k = killStack(g, o, stack, p);
+    if (EVADED) { EVADED = false; log(g, `🔮 공격한 ${p.name}의 말이 예지에 걸려 죽습니다`); killStack(g, p, group, o); return res; }
+    if (k > 0) {
+      res.killed += k; res.owners.push(o.idx);
+      if (has(p, 'treason') && o.finished > p.finished) res.bonus++;
+      if (has(o, 'jungji') && !opts.noReact) queueJungji(g, o, p, np);
+    }
+  }
+  return res;
+}
+function limOnCapture(g, p, group, cr) {
+  if (!cr.killed) return;
+  const l = lim(p);
+  if (has(p, 'lord') && group.some((x) => x.type === 'lord')) { l.lordMark = Math.min(2, (l.lordMark || 0) + 1); log(g, `👑 ${p.name}: 군주가 적을 잡아 흑수의 주인 ${l.lordMark}/2`); }
+  if (has(p, 'hunt') && group.some((x) => x.type === 'hunt')) { l.coffin = (l.coffin || 0) + 1; log(g, `⚰ ${p.name}: 와일드헌트가 적을 잡아 관 ${l.coffin}`); }
+  if (has(p, 'yakji')) { l.bio = Math.min(4, (l.bio || 0) + 1); log(g, `🧬 ${p.name}: 생체재료 ${l.bio}/4`); }
+  if (g.tn && g.cur === p.idx) { g.tn.cap = (g.tn.cap || 0) + cr.killed; if (g.tn.cap >= 2) lakeCheck(g, p, 1); }
+}
+function groupSteps(g, p, res, group) {
+  let s = effSteps(p, res);
+  if (s > 0) {
+    if (has(p, 'yakji') && lim(p).art) s += 2;
+    if (has(p, 'lamancha') && lim(p).land && group.some((x) => lim(p).land.includes(x.pos))) s += 1;
+  }
+  if (group.some((x) => x.tax != null || x.weak)) s = Math.sign(s) * 1;
+  return s;
+}
+function limAfterMove(g, p, group, res, steps, piece, cr) {
+  const tn = g.tn;
+  if (tn) {
+    tn.pm = tn.pm || {}; tn.pr = tn.pr || {};
+    for (const x of group) {
+      tn.pm[x.id] = (tn.pm[x.id] || 0) + Math.abs(steps);
+      if (tn.pm[x.id] >= 9) lakeCheck(g, p, 2);
+      const key = x.id + '|' + res;
+      if (tn.pr[key]) lakeCheck(g, p, 4); tn.pr[key] = true;
+    }
+  }
+  if (has(p, 'geomji') && p.alive) questEvent(g, p, { t: 'move', res, pid: piece.id, ids: group.map((x) => x.id), steps, pos: piece.pos, cap: cr || { killed: 0, owners: [] } });
+}
+function limStartTurn(g, p) {
+  const l = lim(p);
+  if (has(p, 'lamancha') && l.land) {
+    const onBoard = p.pieces.filter((x) => !x.done && x.pos > 0);
+    const inside = onBoard.filter((x) => l.land.includes(x.pos)), outside = onBoard.filter((x) => !l.land.includes(x.pos));
+    if (inside.length) { l.blood = (l.blood || 0) + 1; log(g, `🩸 ${p.name}: 라만차랜드 안의 혈귀로 피 +1 (${l.blood})`); }
+    const dist = (x) => { const [px, py] = XY(x.pos); return Math.min(...l.land.map((n) => { const [lx, ly] = XY(n); return Math.hypot(px - lx, py - ly); })); };
+    outside.sort((a, b) => dist(b) - dist(a));
+    outside.forEach((x) => { if ((l.blood || 0) > 0) { l.blood--; x.weak = false; } else x.weak = true; });
+    if (outside.some((x) => x.weak)) log(g, `🩸 ${p.name}: 피가 모자라 일부 혈귀가 쇠약해졌습니다 (이번 차례 한 칸만 이동, 잡기 불가)`);
+  }
+  if (l.timers && l.timers.length) {
+    l.timers.forEach((t) => { t.left--; });
+    for (const t of l.timers.filter((tt) => tt.left <= 0)) {
+      const x = p.pieces.find((y) => y.id === t.id);
+      if (x && !x.done && x.pos > 0) { sendHome(x); log(g, `☠ ${p.name}: 부활했던 말이 다시 죽었습니다`); }
+    }
+    l.timers = l.timers.filter((t) => t.left > 0);
+  }
+}
+function actInterrupt(g, p, o) {
+  const it = g.interrupts[0];
+  if (!it || it.owner !== p.idx) throw E('지금 사용할 수 있는 중지 능력이 없습니다');
+  if (o.skip) { g.interrupts.shift(); log(g, `${p.name}: 중지 능력을 사용하지 않았습니다`); }
+  else {
+    const x = p.pieces.find((y) => y.id === o.pid);
+    if (!x || x.done || x.pos <= 0) throw E('판 위의 내 말을 선택하세요');
+    const grp = groupOf(p, x);
+    if (grp.some((y) => isFrozen(g, y))) throw E('멈춰 있는 말뭉치입니다');
+    const path = bfsPath(x.pos, it.node);
+    if (!path || path.length < 2) throw E('죽은 자리 쪽으로 움직일 수 없습니다');
+    const to = path[Math.min(2, path.length - 1)];
+    g.interrupts.shift();
+    grp.forEach((y) => { y.pos = to; setRoute(y, has(p, 'tianma') ? mirNode(to) : to); });
+    log(g, `🫳 ${p.name}(소속 중지): 말뭉치가 죽은 자리 쪽으로 ${path.length > 2 ? 2 : 1}칸 이동 → ${to}번 칸`);
+    const cr = captureAt(g, p, grp, to, { only: it.killer, noReact: true });
+    if (cr.killed > 0) {
+      const t = g.tn; if (t) t.throws = Math.max(0, t.throws - it.granted);
+      log(g, `${g.players[it.killer].name}은(는) 이 잡기로 얻은 추가 던지기를 잃습니다`);
+      limOnCapture(g, p, grp, cr);
+    }
+  }
+  checkWins(g);
+  if (!g.interrupts.length) afterAction(g);
+}
+
+// ---------- 알까기 물리 ----------
+const FLICK = { R: 3.6, FRIC: 0.965, E: 0.92, SNAP: 16, MAXSTEP: 330 };
+function simFlick(bodies, sh, ang, pow) {
+  const D = FLICK.R * 2; const v0 = 0.4 + 2.2 * pow;
+  sh.vx = Math.cos(ang) * v0; sh.vy = Math.sin(ang) * v0; sh.moved = true;
+  const snap = () => bodies.flatMap((b) => [Math.round(b.x * 10) / 10, Math.round(b.y * 10) / 10]);
+  const frames = [snap()], ev = []; let hitEnemy = false;
+  for (let step = 1; step <= FLICK.MAXSTEP; step++) {
+    let moving = false;
+    for (const b of bodies) {
+      if (b.vx || b.vy) {
+        b.x += b.vx; b.y += b.vy; b.vx *= FLICK.FRIC; b.vy *= FLICK.FRIC;
+        if (Math.hypot(b.vx, b.vy) < 0.04) { b.vx = 0; b.vy = 0; }
+        moving = true;
+      }
+    }
+    for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) {
+      const a = bodies[i], c = bodies[j]; const dx = a.x - c.x, dy = a.y - c.y; const d = Math.hypot(dx, dy);
+      if (d >= D || d < 1e-6) continue;
+      const nx = dx / d, ny = dy / d, ov = (D - d) / 2;
+      a.x += nx * ov; a.y += ny * ov; c.x -= nx * ov; c.y -= ny * ov;
+      const rv = (a.vx - c.vx) * nx + (a.vy - c.vy) * ny;
+      if (rv < 0) {
+        const jj = -(1 + FLICK.E) * rv / 2;
+        a.vx += jj * nx; a.vy += jj * ny; c.vx -= jj * nx; c.vy -= jj * ny;
+        a.moved = true; c.moved = true; moving = true;
+        if (a.owner !== c.owner) hitEnemy = true;
+        ev.push([frames.length, Math.min(1, Math.abs(rv) / 2)]);
+      }
+    }
+    if (step % 2 === 0) frames.push(snap());
+    if (!moving) break;
+  }
+  frames.push(snap());
+  return { frames, ev, hitEnemy };
+}
+function runFlick(g, p, x, ang, pow) {
+  const bodies = []; let sh = null;
+  for (const q of g.players) {
+    if (!isActive(q)) continue;
+    const st = stacksOf(q);
+    for (const n of Object.keys(st)) {
+      const [bx, by] = XY(+n);
+      const b = { id: 'b' + bodies.length, owner: q.idx, node: +n, pieces: st[n], x: bx, y: by, vx: 0, vy: 0, moved: false };
+      bodies.push(b); if (q === p && st[n].includes(x)) sh = b;
+    }
+  }
+  const meta = bodies.map((b) => ({ o: b.owner, n: b.pieces.length, t: (b.pieces.find((y) => y.type !== 'normal') || {}).type || 'normal', node: b.node }));
+  const sim = simFlick(bodies, sh, ang, pow);
+  const enemyMoved = bodies.some((b) => b.owner !== p.idx && b.moved);
+  const hit = sim.hitEnemy && enemyMoved;
+  const end = bodies.map((b) => b.node); // 최종 칸 (null = 추락)
+  const fix = (q, b, node) => { b.pieces.forEach((y) => { y.pos = node; setRoute(y, has(q, 'tianma') ? mirNode(node) : node); }); };
+  if (!hit) {
+    log(g, `${p.name}: 🪨 알까기... 아무도 맞히지 못해 말이 판 밖으로 떨어졌습니다!`);
+    const before = sh.pieces.slice();
+    killStack(g, p, sh.pieces, null);
+    if (!before.some((y) => !y.done && y.pos > 0)) end[bodies.indexOf(sh)] = null;
+  } else {
+    const taken = {};
+    bodies.forEach((b) => { if (!b.moved) taken[b.node] = b.owner; });
+    const order = [sh, ...bodies.filter((b) => b.moved && b !== sh)];
+    const lost = [];
+    for (const b of order) {
+      const cand = [];
+      for (let n = 1; n <= 28; n++) { const [nx, ny] = XY(n); const d = Math.hypot(b.x - nx, b.y - ny); if (d <= FLICK.SNAP) cand.push([d, n]); }
+      cand.sort((u, v) => u[0] - v[0]);
+      const hit2 = cand.find(([, n]) => taken[n] == null || taken[n] === b.owner);
+      const bi = bodies.indexOf(b);
+      if (hit2) { taken[hit2[1]] = b.owner; end[bi] = hit2[1]; fix(g.players[b.owner], b, hit2[1]); } else lost.push(b);
+    }
+    log(g, `${p.name}: 🪨 알까기 명중!`);
+    for (const b of lost) {
+      const q = g.players[b.owner]; const bi = bodies.indexOf(b);
+      log(g, `${q.name}의 말이 판 밖으로 밀려났습니다`);
+      if (q === p) killStack(g, q, b.pieces, null); else augKill(g, q, b.pieces, p);
+      if (b.pieces.some((y) => !y.done && y.pos > 0)) {
+        // 보호막/평화로 살아남음: 원래 자리에 남음 (다른 주인의 말과 겹치면 대기칸으로)
+        const conflict = bodies.some((o2) => o2 !== b && o2.owner !== b.owner && end[bodies.indexOf(o2)] === b.node);
+        if (conflict) { b.pieces.forEach(sendHome); log(g, `${q.name}의 말이 자리를 잃고 대기칸으로 돌아갑니다`); end[bi] = null; }
+      } else end[bi] = null;
+    }
+  }
+  g.flickSeq = (g.flickSeq || 0) + 1;
+  g.lastFlick = { seq: g.flickSeq, by: p.idx, shooter: bodies.indexOf(sh), bodies: meta, frames: sim.frames, ev: sim.ev, end, hit };
+}
+
 function viewFor(g, me) {
   const pk = g.pick;
   const hideColors = !!(pk && pk.sub && pk.sub.type === 'guess');
   const fogOn = !!(g.fog && g.fog.owner !== me.idx && g.phase !== 'ended');
   const vis = fogOn ? visibleNodes(me) : null;
   return {
-    code: g.code, phase: g.phase, chaos: g.chaos, ranking: g.ranking, round: g.round, cur: g.cur, winner: g.winner, reason: g.reason,
+    code: g.code, phase: g.phase, packs: g.packs || ['base'], chaos: g.chaos, ranking: g.ranking, round: g.round, cur: g.cur, winner: g.winner, reason: g.reason,
     me: me.idx, ganTaek: g.ganTaek, poops: g.poops.map((q) => q.node), hpOn: g.hpOn, echo: g.echo,
     fog: g.fog ? { owner: g.fog.owner, left: g.fog.left } : null, final: g.final, ranks: g.ranks, coWinners: g.coWinners, planWin: g.planWin,
     party: g.party.filter((q) => q.owner === me.idx).map((q) => ({ node: q.node, kind: q.kind })),
@@ -1294,20 +1756,22 @@ function viewFor(g, me) {
       augs: q.augs, used: q.used, npieces: q.pieces.length || q.npieces, sticks: q.sticks, finished: q.finished,
       pieces: q.pieces.map((x) => {
         const hidden = vis && q !== me && !x.done && x.pos > 0 && !vis.has(x.pos);
-        return { id: x.id, pos: hidden ? -2 : x.pos, route: x.route, done: x.done, type: x.type, shield: x.shield, frozen: x.frozen > g.round };
+        return { id: x.id, pos: hidden ? -2 : x.pos, route: x.route, done: x.done, type: x.type, shield: x.shield, frozen: x.frozen > g.round, yeji: x.yeji, hs: !!x.hs, tax: x.tax == null ? null : x.tax, weak: !!x.weak };
       }),
-      st: pubSt(q, q === me),
+      st: Object.assign(pubSt(q, q === me), { lim: pubLim(g, q, q === me) }),
     })),
     tn: g.tn && g.phase === 'turn' ? { queue: g.tn.queue, throws: g.tn.throws, thrown: g.tn.thrown, goblin: !!g.tn.goblin, cannon: !!g.tn.cannon } : null,
     pick: pk ? { kind: pk.kind, stage: pk.stage, picker: pk.cur, left: pk.left, done: pk.order.filter((i) => pk.left[i] <= 0 || !isActive(g.players[i])), sub: pubSub(pk.sub), banned: pk.banned.map((b) => b.id), pending: pk.queue.map((q) => q.idx), mine: pk.chosen[me.idx] || [], options: pk.stage === 'choose' ? (pk.opts[me.idx] || null) : null } : null,
     order: g.order || g.players.map((q) => q.idx),
-    log: g.log.slice(-40), logN: g.logN || 0, lastThrow: g.lastThrow || null,
+    bags: g.bags.map((b) => ({ node: b.node, owner: b.owner })),
+    interrupt: g.interrupts[0] ? { owner: g.interrupts[0].owner, killer: g.interrupts[0].killer, node: g.interrupts[0].node } : null,
+    log: g.log.slice(-40), logN: g.logN || 0, lastThrow: g.lastThrow || null, lastFlick: g.lastFlick || null,
   };
 }
 
 module.exports = {
-  AUGMENTS, BY_ID, ROUTES, LINES, STEPS, RES, ROUND_PICKS,
-  createGame, addPlayer, removePlayer, resetGame, startGame,
-  actPick, actSub, actGuess, actVote, forfeit, actThrow, actMove, actAbility, viewFor,
+  AUGMENTS, PACKS, RULES, BY_ID, ROUTES, LINES, STEPS, RES, ROUND_PICKS,
+  createGame, addPlayer, removePlayer, resetGame, startGame, setPacks,
+  actPick, actSub, actGuess, actVote, forfeit, actThrow, actMove, actAbility, actInterrupt, viewFor,
   _internal: { has, usable, stacksOf, picker, isActive, endTurn },
 };

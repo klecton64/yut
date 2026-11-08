@@ -51,6 +51,9 @@ svg{width:100%;height:auto;background:#222736;border-radius:12px;display:block}
 .banner{background:#1d2a3a;border:1px solid #3d5a80;color:#bcd;padding:6px 10px;border-radius:8px;margin-bottom:8px;font-size:13px}
 ol.final{margin:8px 0 0;padding-left:22px}
 
+#fx2{display:none;position:fixed;inset:0;z-index:85;pointer-events:none}.fxtag{position:fixed;top:14px;left:0;right:0;text-align:center;color:#fff;font-size:22px;font-weight:800;text-shadow:0 2px 8px #000}
+body.fxhide g[data-a="piece"]{opacity:0!important}
+body.aiming svg[viewBox="0 0 100 100"]{touch-action:none;cursor:crosshair}
 #fx{display:none;position:fixed;inset:0;z-index:90;pointer-events:none;align-items:center;justify-content:center;background:rgba(5,6,10,.88)}
 .fxbox{text-align:center;perspective:700px}
 .fxname{color:#fff;font-size:16px;margin-bottom:18px;text-shadow:0 1px 4px #000}
@@ -63,21 +66,42 @@ ol.final{margin:8px 0 0;padding-left:22px}
 .ogrid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:340px;margin:0 auto}.ocell{width:100px}.oname{font-size:13px;font-weight:700;text-shadow:0 1px 3px #000}.fxrow.small{height:100px;gap:6px}.fxrow.small .stick{width:13px;height:70px}.ores{font-size:26px;font-weight:800;min-height:34px;opacity:0;transition:opacity .25s;text-shadow:0 2px 6px #000}.ores.show{opacity:1}
 .fxres{font-size:54px;font-weight:800;min-height:64px;opacity:0;transform:scale(.6);transition:all .25s;text-shadow:0 2px 8px #000}
 .fxres.show{opacity:1;transform:scale(1)}
+#log div{}.priv{font-size:12px;margin-top:4px;padding:4px 6px;border-radius:6px;background:rgba(255,183,3,.12);border:1px solid rgba(255,183,3,.35)}
 #mute{position:fixed;right:10px;bottom:10px;z-index:80;width:38px;height:38px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer}
+
+/* 증강팩 화면 · 림버스 팩(지옥 제1원 '림보') 테마 */
+.pk-limbus{position:relative;overflow:hidden;background:radial-gradient(120% 70% at 50% 120%,rgba(255,120,40,.35),transparent 60%),linear-gradient(160deg,#4a0d17 0%,#25060b 60%,#150306 100%)!important;border:2px solid #b3182b!important;box-shadow:inset 0 0 0 1px rgba(232,190,110,.35),0 0 14px rgba(179,24,43,.35)}
+.pk-limbus::before{content:"";position:absolute;right:-26px;top:-26px;width:120px;height:120px;opacity:.2;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='none' stroke='%23ffb37a' stroke-width='3'/><circle cx='50' cy='50' r='39' fill='none' stroke='%23ffb37a' stroke-width='1'/><g stroke='%23ffb37a' stroke-width='3' stroke-linecap='round'><path d='M50 8v8M50 84v8M8 50h8M84 50h8'/></g><g stroke='%23ffb37a' stroke-width='1.6'><path d='M71 14l-4 7M86 29l-7 4M86 71l-7-4M71 86l-4-7M29 86l4-7M14 71l7-4M14 29l7 4M29 14l4 7'/></g><path d='M50 50V22M50 50l18 10' stroke='%23ffb37a' stroke-width='3' stroke-linecap='round'/><circle cx='50' cy='50' r='3.5' fill='%23ffb37a'/></svg>") no-repeat center/contain}
+.pk-limbus::after{content:"✦ 지옥 제1원 · 림보 ✦";position:absolute;left:0;right:0;bottom:0;padding:2px 0;text-align:center;font-size:10px;letter-spacing:2px;color:rgba(255,205,150,.75);background:linear-gradient(90deg,transparent,rgba(179,24,43,.55),transparent);pointer-events:none}
+.opt.pk-limbus{padding-bottom:24px}
+.opt.pk-limbus:hover:not(.lock){border-color:#e8be6e!important}
+.pk-limbus b{font-family:Georgia,'Nanum Myeongjo','Noto Serif KR',serif;color:#ffe3c2;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.pk-limbus .d{color:#f1cfc4!important}
+.pk-limbus .tag{background:rgba(232,190,110,.2);color:#ffd9a0}
+.chip.pk-limbus{padding-bottom:2px;border-width:1px!important}.chip.pk-limbus::before,.chip.pk-limbus::after{display:none}
+.packbox{width:100%;max-width:560px;margin:0 auto;text-align:left}
+.packbtn.pk-limbus{padding-bottom:24px}
+.packbtn{display:block;width:100%;text-align:left;margin-top:8px}
+.packhead{padding:14px;border-radius:12px;margin-bottom:10px}
+.packhead.pk-limbus::after{display:none}
+.augrow{padding:10px 12px;margin-top:6px;border-radius:10px;background:var(--card2);border:1px solid var(--bd)}
+.augrow.pk-limbus{padding-bottom:10px}.augrow.pk-limbus::after{display:none}.augrow.pk-limbus::before{width:70px;height:70px;right:-14px;top:-14px}
+.augrow b{display:block}.augrow .d{font-size:13px;color:#c8cddb;line-height:1.45;margin-top:3px}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toast"></div>
 <div id="fx"></div>
+<div id="fx2"></div>
 <button id="mute" onclick="toggleMute()" title="효과음"></button>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const VERSION = 'v1.7 (동시 증강 선택 · 윷으로 순서 정하기 · 변신 말 장식 · 2026-10-31)';
+const VERSION = 'v1.10 (팩 보기 · 림버스 테마 · 림버스 컴퍼니 팩 · 증강팩 · 알까기 물리 · 동시 증강 선택 · 윷으로 순서 정하기 · 변신 말 장식 · 2026-10-31)';
 const RES = ['백도', '도', '개', '걸', '윷', '모'];
 const COLORS = ['#e5484d', '#3e8ef7', '#30a46c', '#f5c518', '#a855f7', '#f97316'], COLOR_NAMES = ['빨강', '파랑', '초록', '노랑', '보라', '주황'];
-const LET = { vanguard: '선', zealot: '광', marathon: '마', goblin: '깨', cannon: '포', pawn: '폰', kim: '김', queen: '후' };
+const LET = { lord: '군', lucio: '루', valen: '발', hunt: '헌', vanguard: '선', zealot: '광', marathon: '마', goblin: '깨', cannon: '포', pawn: '폰', kim: '김', queen: '후' };
 let ws, meta = null, S = null, ui = { ri: 0, mode: null, abil: null, pid: null };
 let token = localStorage.getItem('yut_token');
 if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('yut_token', token); }
@@ -94,14 +118,14 @@ function connect(first) {
     const m = JSON.parse(ev.data);
     if (m.t === 'joined') { meta = m.meta; localStorage.setItem('yut_room', m.code); }
     else if (m.t === 'state') enqueueState(m.s);
-    else if (m.t === 'left') { fxQ.length = 0; lastSeq = null; S = null; meta = null; resetUI(); localStorage.removeItem('yut_room'); render(); }
+    else if (m.t === 'left') { fxQ.length = 0; lastSeq = null; lastFlickSeq = null; S = null; meta = null; resetUI(); localStorage.removeItem('yut_room'); render(); }
     else if (m.t === 'err') { toast(m.msg); if (!S) { localStorage.removeItem('yut_room'); render(); } }
   };
   ws.onclose = () => { if (S) toast('연결이 끊어졌습니다. 새로고침하면 다시 들어갑니다'); };
 }
 function applyState(ns) { const prevN = S ? S.logN : null; S = ns; notifyNew(prevN); if (S.phase !== 'turn' || S.cur !== S.me) resetUI(); render(); }
 // ---- 윷 던지기 연출: 새 던지기가 담긴 상태는 연출이 끝난 뒤 화면에 반영 (결과 미리 노출 방지) ----
-let lastSeq = null, fxQ = [], fxBusy = false;
+let lastSeq = null, lastFlickSeq = null, fxQ = [], fxBusy = false;
 function enqueueState(ns) {
   fxQ.push(ns);
   if (!fxBusy) drain();
@@ -116,6 +140,12 @@ async function drain() {
       try { await playThrow(t, ns); } catch (e) { /* 연출 실패는 무시 */ }
     } else if (lastSeq === null || seq > lastSeq) lastSeq = seq;
     else if (!t) lastSeq = 0;
+    const f = ns.lastFlick, fs = f ? f.seq : 0;
+    if (f && lastFlickSeq !== null && fs > lastFlickSeq && !document.hidden) {
+      lastFlickSeq = fs;
+      try { await playFlick(f, ns); } catch (e) { document.body.classList.remove('fxhide'); const r2 = $('fx2'); if (r2) { r2.style.display = 'none'; r2.innerHTML = ''; } }
+    } else if (lastFlickSeq === null || fs > lastFlickSeq) lastFlickSeq = fs;
+    else if (!f) lastFlickSeq = 0;
     applyState(ns);
   }
   fxBusy = false;
@@ -148,6 +178,8 @@ function noise(t0, dur, vol, freq) {
 }
 const sfx = {
   whoosh() { noise(0, 0.35, 0.18, 700); },
+  hit(s) { noise(0, 0.06, 0.25 + 0.4 * s, 2600); tone(150 + 80 * s, 0, 0.1, 'triangle', 0.15 + 0.2 * s); },
+  fall() { tone(520, 0, 0.5, 'sine', 0.14, 90); },
   clack(t0) { noise(t0, 0.07, 0.5, 2200); tone(180 + Math.random() * 60, t0, 0.09, 'triangle', 0.25); },
   result(r) {
     const seq = { '도': [[392, 0], [494, 0.12]], '개': [[392, 0], [494, 0.12], [587, 0.24]], '걸': [[392, 0], [494, 0.12], [587, 0.24], [698, 0.36]],
@@ -207,6 +239,82 @@ async function playOrder(t, ns) {
   root.style.display = 'none'; root.innerHTML = '';
 }
 const RES_RANK = { '백도': 0, '도': 1, '개': 2, '걸': 3, '윷': 4, '모': 5, '탈락': -1 };
+
+// ---- 알까기: 당겨서 쏘기 ----
+let aim = null;
+const svgPt = (svg, e) => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const m = svg.getScreenCTM(); return m ? pt.matrixTransform(m.inverse()) : { x: 50, y: 50 }; };
+function aimGeom(e) {
+  const me = S.players[S.me]; const pc = me.pieces.find((x) => x.id === ui.pid); if (!pc) return null;
+  const [px, py] = nodeXY(pc.pos); const pt = svgPt(aim.svg, e);
+  const dx = pt.x - aim.sx, dy = pt.y - aim.sy; const len = Math.hypot(dx, dy);
+  const pow = Math.min(1, len / 32); const ang = Math.atan2(-dy, -dx);
+  return { px, py, pow, ang, len, dx, dy };
+}
+function drawAim(e) {
+  const g = aimGeom(e); if (!g) return;
+  let el = aim.svg.querySelector('#aimg'); if (!el) { el = document.createElementNS('http://www.w3.org/2000/svg', 'g'); el.id = 'aimg'; el.setAttribute('pointer-events', 'none'); aim.svg.appendChild(el); }
+  const L = 6 + 40 * g.pow, ex = g.px + Math.cos(g.ang) * L, ey = g.py + Math.sin(g.ang) * L;
+  const col = g.pow > 0.66 ? '#ff5a4d' : g.pow > 0.33 ? '#ffb703' : '#9be37a';
+  el.innerHTML = `<line x1="${g.px}" y1="${g.py}" x2="${g.px + g.dx}" y2="${g.py + g.dy}" stroke="#aaa" stroke-width="0.6" stroke-dasharray="1.2 1"/>
+    <line x1="${g.px}" y1="${g.py}" x2="${ex}" y2="${ey}" stroke="${col}" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="${ex}" cy="${ey}" r="1.8" fill="${col}"/>
+    <text x="${g.px}" y="${g.py - 7}" font-size="4" text-anchor="middle" fill="#fff">${Math.round(g.pow * 100)}%</text>`;
+}
+document.addEventListener('pointerdown', (e) => {
+  if (!S || ui.mode !== 'aim' || S.cur !== S.me) return;
+  const svg = e.target.closest && e.target.closest('svg'); if (!svg || svg.getAttribute('viewBox') !== '0 0 100 100') return;
+  e.preventDefault(); const pt = svgPt(svg, e); aim = { svg, sx: pt.x, sy: pt.y, id: e.pointerId };
+  try { svg.setPointerCapture(e.pointerId); } catch (err) { /* */ }
+  drawAim(e);
+});
+document.addEventListener('pointermove', (e) => { if (aim && e.pointerId === aim.id) drawAim(e); });
+const endAim = (e, fire) => {
+  if (!aim || e.pointerId !== aim.id) return;
+  const g = fire ? aimGeom(e) : null; const el = aim.svg.querySelector('#aimg'); if (el) el.remove(); aim = null;
+  if (g && g.pow >= 0.08) sendAbil({ pid: ui.pid, ang: g.ang, pow: g.pow });
+  else if (fire) toast('조금 더 길게 당겨 보세요');
+};
+document.addEventListener('pointerup', (e) => endAim(e, true));
+document.addEventListener('pointercancel', (e) => endAim(e, false));
+
+// ---- 알까기 연출 ----
+async function playFlick(f, ns) {
+  const root = $('fx2'); const board = document.querySelector('#app svg[viewBox="0 0 100 100"]'); if (!root || !board) return;
+  const r = board.getBoundingClientRect(); const NS = 'http://www.w3.org/2000/svg';
+  root.innerHTML = ''; root.style.display = 'block';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 100 100');
+  svg.style.cssText = `background:transparent!important;border:0!important;position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`; root.appendChild(svg);
+  document.body.classList.add('fxhide');
+  const who = ns.players[f.by] ? ns.players[f.by].name : '';
+  const tag = document.createElement('div'); tag.className = 'fxtag'; tag.textContent = who + ' 알까기!'; root.appendChild(tag);
+  const els = f.bodies.map((b, i) => {
+    const g = document.createElementNS(NS, 'g'); const col = ns.players[b.o] ? ns.players[b.o].color : '#888';
+    g.innerHTML = `<circle r="3.6" fill="${col}" stroke="${i === f.shooter ? '#fff' : '#111'}" stroke-width="${i === f.shooter ? 0.9 : 0.5}"/>` + (b.n > 1 ? `<text y="1.4" font-size="4" text-anchor="middle" fill="#fff" font-weight="700">${b.n}</text>` : (b.t !== 'normal' && LET[b.t] ? `<text y="1.3" font-size="3.6" text-anchor="middle" fill="#fff" font-weight="700">${LET[b.t]}</text>` : ''));
+    svg.appendChild(g); return g;
+  });
+  const put = (i, x, y, sc) => els[i].setAttribute('transform', `translate(${x} ${y}) scale(${sc == null ? 1 : sc})`);
+  const frame = (k) => { const fr = f.frames[Math.min(k, f.frames.length - 1)]; els.forEach((_, i) => put(i, fr[i * 2], fr[i * 2 + 1])); };
+  frame(0); play(sfx.whoosh); await sleep(350);
+  const evAt = {}; f.ev.forEach(([k, s]) => { (evAt[k] = evAt[k] || []).push(s); });
+  for (let k = 1; k < f.frames.length; k++) {
+    frame(k); (evAt[k] || []).forEach((s) => play(() => sfx.hit(s)));
+    await sleep(26);
+  }
+  await sleep(250);
+  const last = f.frames[f.frames.length - 1]; const steps = 12;
+  for (let t = 1; t <= steps; t++) {
+    const u = t / steps;
+    f.end.forEach((n, i) => {
+      if (n == null) put(i, last[i * 2], last[i * 2 + 1], 1 - u);
+      else { const [nx, ny] = nodeXY(n); put(i, last[i * 2] + (nx - last[i * 2]) * u, last[i * 2 + 1] + (ny - last[i * 2 + 1]) * u); }
+    });
+    await sleep(30);
+  }
+  if (f.end.some((n) => n == null)) play(sfx.fall);
+  tag.textContent = f.hit ? '명중!' : '빗나감... 말이 떨어졌습니다';
+  await sleep(900);
+  document.body.classList.remove('fxhide'); root.style.display = 'none'; root.innerHTML = '';
+}
 async function playThrow(t, ns) {
   if (t.rounds) return playOrder(t, ns);
   const root = $('fx'); if (!root) return;
@@ -276,7 +384,8 @@ function boardSVG() {
     if (ui.abil === 'timetravel') {
       const x = me.pieces.find((y) => y.id === ui.pid);
       if (x) { const mir = me.augs.includes('tianma'); const r = meta.routes[x.route]; r.slice(0, r.indexOf(mir ? mirNode(x.pos) : x.pos)).forEach((n) => hi.add(mir ? mirNode(n) : n)); }
-    } else for (let n = 1; n <= 28; n++) hi.add(n);
+    } else if (ABIL[ui.abil] && ABIL[ui.abil].nodes) ABIL[ui.abil].nodes(me).forEach((n) => hi.add(n));
+    else for (let n = 1; n <= 28; n++) hi.add(n);
   }
   for (let n = 0; n < 29; n++) {
     const [x, y] = nodeXY(n); const big = isBig(n);
@@ -284,6 +393,13 @@ function boardSVG() {
     if (n === 0) s += `<text x="${x}" y="${y + 1.2}" font-size="3" fill="#aab" text-anchor="middle">출발</text>`;
     s += '</g>';
   }
+  S.players.forEach((p) => {
+    const sd = p.st.lim && p.st.lim.side; if (!sd) return;
+    const seg = { R: [95, 5, 95, 95], L: [5, 5, 5, 95], T: [5, 5, 95, 5], B: [5, 95, 95, 95] }[sd];
+    s += `<line x1="${seg[0]}" y1="${seg[1]}" x2="${seg[2]}" y2="${seg[3]}" stroke="${p.color}" stroke-width="2.6" stroke-linecap="round" opacity="0.35" pointer-events="none"/>`;
+  });
+  (S.bags || []).forEach((b) => { const [x, y] = nodeXY(b.node); s += `<text x="${x}" y="${y + 1.6}" font-size="4.6" text-anchor="middle" pointer-events="none">🩸</text>`; });
+  if (S.interrupt) { const [x, y] = nodeXY(S.interrupt.node); s += `<text x="${x}" y="${y - 4.4}" font-size="5" text-anchor="middle" pointer-events="none">✝</text>`; }
   S.poops.forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x}" y="${y + 1.8}" font-size="5" text-anchor="middle" pointer-events="none">💩</text>`; });
   (S.party || []).forEach((q) => { const [x, y] = nodeXY(q.node); s += `<text x="${x - 3}" y="${y + 5}" font-size="4" pointer-events="none">${{ kill: '💀', back: '⏪', fwd: '🎁' }[q.kind]}</text>`; });
   if (Array.isArray(me.st.garlic)) me.st.garlic.filter((n) => !me.st.garlicGot.includes(n)).forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x + 3}" y="${y - 2}" font-size="4" pointer-events="none">🧄</text>`; });
@@ -306,7 +422,7 @@ function boardSVG() {
       s += `<g data-a="piece" data-v="${lead.id}" style="cursor:pointer" opacity="${frozen ? 0.55 : 1}">
         ${decoBack(tt, x, y)}<circle cx="${x}" cy="${y}" r="3.6" fill="${e.p.color}" stroke="${shield ? '#fff' : '#000'}" stroke-width="${shield ? 1 : 0.7}" ${shield ? 'stroke-dasharray="1.2 0.8"' : ''}/>
         ${e.list.length > 1 ? `<text x="${x}" y="${y + 1.3}" font-size="4" font-weight="700" fill="#000" text-anchor="middle">${e.list.length}</text>` : (letter ? `<text x="${x}" y="${y + 1.2}" font-size="3.2" font-weight="700" fill="#000" text-anchor="middle">${letter}</text>` : '')}
-        ${decoFront(tt, x, y)}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
+        ${decoFront(tt, x, y)}${e.list.some((q) => q.hs) ? `<path pointer-events="none" d="M${x - 3} ${y - 2.2} L${x - 3.6} ${y - 5.2} L${x - 1.2} ${y - 3.2} Z M${x + 3} ${y - 2.2} L${x + 3.6} ${y - 5.2} L${x + 1.2} ${y - 3.2} Z" fill="#111" stroke="#fff" stroke-width="0.25"/>` : ''}${e.list.some((q) => q.tax != null) ? `<text x="${x - 5}" y="${y - 2.6}" font-size="3.4" pointer-events="none">⏳</text>` : ''}${e.list.some((q) => q.weak) ? `<text x="${x - 5}" y="${y + 5.4}" font-size="3.4" pointer-events="none">🩸</text>` : ''}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
     });
   });
   if (S.fog) s += '<rect x="0" y="0" width="100" height="100" fill="#99a" opacity="0.07" pointer-events="none"/>';
@@ -315,9 +431,17 @@ function boardSVG() {
 }
 
 // 변신한 말의 특징 장식 (원 주변)
-const ICON = { vanguard: '🚩', zealot: '🔥', marathon: '🏃', goblin: '👹', cannon: '💣', pawn: '♟', kim: '👒', queen: '👑' };
+const ICON = { lord: '🐺', lucio: '🗡', valen: '🎩', hunt: '⚰', vanguard: '🚩', zealot: '🔥', marathon: '🏃', goblin: '👹', cannon: '💣', pawn: '♟', kim: '👒', queen: '👑' };
 function decoBack(t, x, y) {
   switch (t) {
+    case 'lord': // 언월도 (긴 자루 + 휘어진 날)
+      return `<g pointer-events="none"><line x1="${x + 4.4}" y1="${y + 4.2}" x2="${x + 4.4}" y2="${y - 6.2}" stroke="#5a3b22" stroke-width="0.9" stroke-linecap="round"/><path d="M${x + 4.4} ${y - 6.6} Q${x + 8.6} ${y - 6.2} ${x + 7.2} ${y - 1.6} Q${x + 6.2} ${y - 4.4} ${x + 4.4} ${y - 4.2} Z" fill="#cfd6df" stroke="#222" stroke-width="0.35"/></g>`;
+    case 'lucio': // 회색 포니테일 (뒤로 늘어뜨림)
+      return `<g pointer-events="none"><path d="M${x + 1.2} ${y - 3.2} Q${x + 7} ${y - 6.2} ${x + 5.2} ${y + 0.6} Q${x + 5.2} ${y - 2.6} ${x + 2.2} ${y - 2.4} Z" fill="#aeb4bd" stroke="#555" stroke-width="0.35"/></g>`;
+    case 'valen': // 칼 두 자루 (X자)
+      return `<g pointer-events="none"><line x1="${x - 6.2}" y1="${y - 4.6}" x2="${x - 1.6}" y2="${y + 3.8}" stroke="#d9dde3" stroke-width="0.9" stroke-linecap="round"/><line x1="${x + 6.2}" y1="${y - 4.6}" x2="${x + 1.6}" y2="${y + 3.8}" stroke="#d9dde3" stroke-width="0.9" stroke-linecap="round"/><circle cx="${x - 3.6}" cy="${y - 0.4}" r="0.8" fill="#a33"/><circle cx="${x + 3.6}" cy="${y - 0.4}" r="0.8" fill="#a33"/></g>`;
+    case 'hunt': // 관
+      return `<g pointer-events="none"><path d="M${x + 4.4} ${y - 5.4} L${x + 7.2} ${y - 3.8} L${x + 7.2} ${y + 3.6} L${x + 5.8} ${y + 5.2} L${x + 4.4} ${y + 3.6} Z" fill="#6b4423" stroke="#222" stroke-width="0.4"/><line x1="${x + 5.8}" y1="${y - 3.6}" x2="${x + 5.8}" y2="${y + 1}" stroke="#d9c08a" stroke-width="0.4"/><line x1="${x + 4.9}" y1="${y - 1.8}" x2="${x + 6.7}" y2="${y - 1.8}" stroke="#d9c08a" stroke-width="0.4"/></g>`;
     case 'goblin': // 철몽둥이 (오른쪽 뒤)
       return `<g pointer-events="none"><line x1="${x + 2.2}" y1="${y + 3.4}" x2="${x + 5.6}" y2="${y - 3}" stroke="#4a3320" stroke-width="1.1" stroke-linecap="round"/><ellipse cx="${x + 5.8}" cy="${y - 3.6}" rx="1.9" ry="2.3" fill="#8b8f99" stroke="#222" stroke-width="0.4" transform="rotate(25 ${x + 5.8} ${y - 3.6})"/><circle cx="${x + 4.3}" cy="${y - 4.6}" r="0.45" fill="#222"/><circle cx="${x + 7.3}" cy="${y - 3.1}" r="0.45" fill="#222"/><circle cx="${x + 5.8}" cy="${y - 5.5}" r="0.45" fill="#222"/></g>`;
     case 'cannon': // 포신 + 바퀴
@@ -331,6 +455,14 @@ function decoBack(t, x, y) {
 }
 function decoFront(t, x, y) {
   switch (t) {
+    case 'lord': // 붉은 안대
+      return `<g pointer-events="none"><line x1="${x - 3.4}" y1="${y - 2.2}" x2="${x + 3.4}" y2="${y - 0.2}" stroke="#7a0f0f" stroke-width="0.5"/><ellipse cx="${x - 1.2}" cy="${y - 1.3}" rx="1.5" ry="1.15" fill="#e02b2b" stroke="#400" stroke-width="0.3"/></g>`;
+    case 'lucio': // 특이한 칼 (지그재그 날)
+      return `<g pointer-events="none"><path d="M${x - 6.6} ${y + 3.6} L${x - 5} ${y + 1.6} L${x - 5.8} ${y - 0.2} L${x - 4} ${y - 1.4} L${x - 4.6} ${y - 4.6}" fill="none" stroke="#e6e9ee" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round"/><line x1="${x - 7.4}" y1="${y + 4.2}" x2="${x - 5.8}" y2="${y + 3}" stroke="#444" stroke-width="1" stroke-linecap="round"/></g>`;
+    case 'valen': // 붉은 모자
+      return `<g pointer-events="none"><path d="M${x - 3} ${y - 2.6} Q${x - 2.6} ${y - 6.6} ${x + 1} ${y - 6.2} Q${x + 3} ${y - 5.8} ${x + 3} ${y - 2.6} Z" fill="#d12a2a" stroke="#500" stroke-width="0.35"/><rect x="${x - 4.2}" y="${y - 3}" width="8.4" height="1.1" rx="0.5" fill="#a81f1f" stroke="#500" stroke-width="0.3"/></g>`;
+    case 'hunt': // 거친 갈색 머리
+      return `<path pointer-events="none" d="M${x - 3.2} ${y - 1.6} L${x - 3.8} ${y - 4.6} L${x - 2} ${y - 3.2} L${x - 1.6} ${y - 6} L${x - 0.2} ${y - 3.6} L${x + 1.2} ${y - 6.4} L${x + 1.8} ${y - 3.4} L${x + 3.6} ${y - 5} L${x + 3.2} ${y - 1.6} Z" fill="#7b4a22" stroke="#2a1608" stroke-width="0.35" stroke-linejoin="round"/>`;
     case 'goblin': // 뿔 두 개
       return `<g pointer-events="none"><path d="M${x - 2.6} ${y - 2.3} L${x - 3.4} ${y - 6} L${x - 0.9} ${y - 3.3} Z" fill="#fff4cf" stroke="#222" stroke-width="0.35" stroke-linejoin="round"/><path d="M${x + 2.6} ${y - 2.3} L${x + 3.4} ${y - 6} L${x + 0.9} ${y - 3.3} Z" fill="#fff4cf" stroke="#222" stroke-width="0.35" stroke-linejoin="round"/></g>`;
     case 'queen': // 왕관
@@ -356,17 +488,22 @@ const ABIL = {
   lastdance: { k: 'now', confirm: '이번 턴이 끝나면 탈락합니다. 정말 사용할까요?' },
   truck: { k: 'p', pre: true, hint: ['달릴 말뭉치(말 2개 이상)를 클릭하세요 (직선으로 벽까지 달립니다)'] },
   combo: { k: 'p', pre: true, hint: ['합체할 말뭉치(말 3개 이상)를 클릭하세요'] },
-  flick: { k: 'pe', pre: true, hint: ['튕길 내 말을 클릭하세요', '맞힐 적 말을 클릭하세요'] },
+  flick: { k: 'fl', pre: true, hint: ['튕길 내 말을 클릭하세요', '판 위에서 뒤로 쭉 당겼다 놓으세요 (당긴 반대 방향으로 발사 · 길게 당길수록 세게)'] },
   goblin: { k: 'pd', hint: ['도깨비를 클릭하세요', '방향을 고르세요'] },
   cannon: { k: 'pn', hint: ['포를 클릭하세요', '도착할 칸을 클릭하세요 (가는 방향의 직선 위에서, 말이 있는 칸을 정확히 하나 넘어 벽까지)'] },
   domain: { k: 'p', hint: ['움직이지 못하게 할 내 말을 클릭하세요'] },
   aim: { k: 'player', hint: ['맞힐 플레이어를 고르세요'] },
   necro: { k: 'dead', hint: ['부활시킬 플레이어를 고르세요'] },
+  lord: { k: 'now', pre: true, can: (m) => (m.st.lim.lordMark || 0) >= 2, confirm: '이번 차례를 쓰고 군주의 앞칸·뒤칸에 흑수를 배치합니다. 사용할까요?' },
+  hunt: { k: 'now', can: (m) => m.st.lim.coffin > 0 && (m.st.lim.graves || []).length > 0 },
+  ksa: { k: 'n', can: (m) => m.st.lim.amp > 0 && (m.st.lim.graves || []).length > 0, nodes: (m) => m.st.lim.graves || [], hint: ['부활시킬 무덤 칸을 클릭하세요 (무덤 칸이나 그 앞뒤 칸에 내 말이 있어야 합니다)'] },
+  yakji: { k: 'yakji', pre: true, can: (m) => (m.st.lim.bio || 0) >= 4 },
 };
 const REPEAT = { goblin: 'goblin', cannon: 'cannon' }; // 턴마다 쓰는 능력 (tn 플래그)
 
 function abilHint() {
   const d = ABIL[ui.abil]; if (!d) return '';
+  if (ui.mode === 'sel_side') return '속박할 면을 고르세요 (그 면 위의 모든 말이 2라운드 동안 움직이지 못합니다)';
   const step = ui.mode === 'sel_p' || ui.mode === 'sel_player' || ui.mode === 'sel_dead' ? 0 : 1;
   return d.hint[Math.min(step, d.hint.length - 1)];
 }
@@ -394,7 +531,8 @@ function controlsHTML(me) {
       let off = !!me.used[id];
       if (REPEAT[id] && tn[REPEAT[id]]) off = true;
       if (d.pre && tn.thrown) off = true;
-      return `<button data-a="abil" data-v="${id}" ${off ? 'disabled' : ''} title="${esc(A[id].desc)}">⚡ ${esc(A[id].name)}</button>`;
+      if (d.can && !d.can(me)) off = true;
+      return `<button data-a="abil" data-v="${id}" ${off ? 'disabled' : ''} title="${esc(A[id].desc)}">⚡ ${id === 'yakji' ? (me.st.lim.art ? '폐장' : '예술!') : esc(A[id].name)}</button>`;
     }).join('') + '</div>';
   }
   if (ui.mode) {
@@ -402,6 +540,7 @@ function controlsHTML(me) {
     let extra = '';
     if (ui.mode === 'sel_player') extra = others.map((p) => `<button data-a="abil_t" data-v="${p.idx}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('');
     if (ui.mode === 'sel_dead') extra = S.players.filter((p) => !p.alive).map((p) => `<button data-a="abil_t" data-v="${p.idx}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('') || '<span class="mut">탈락한 플레이어가 없습니다</span>';
+    if (ui.mode === 'sel_side') extra = ['R', 'L', 'T', 'B'].map((sd) => `<button data-a="side" data-v="${sd}">${{ R: '오른쪽', L: '왼쪽', T: '위쪽', B: '아래쪽' }[sd]} 면 속박</button>`).join('');
     if (ui.mode === 'sel_d') extra = '<button data-a="dir" data-v="1">도 (앞으로 1칸)</button><button data-a="dir" data-v="-1">백도 (뒤로 1칸)</button>';
     if (ui.abil === 'timetravel' && ui.mode === 'sel_n') extra = '<button data-a="tthome">대기칸으로</button>';
     h += `<div class="hint">${abilHint()} <button data-a="cancel">취소</button> ${extra}</div>`;
@@ -409,6 +548,14 @@ function controlsHTML(me) {
   return h;
 }
 
+function privInfo(p) {
+  if (p.idx !== S.me || !p.st.lim) return '';
+  const lm = p.st.lim; let o = '';
+  if (lm.quest) o += `<div class="priv">🔎 <b>지령</b>: ${esc(lm.quest.text)}${lm.quest.progress ? ` <span class="mut">(${esc(lm.quest.progress)})</span>` : ''}</div>`;
+  if (lm.lake != null && meta.rules) o += `<div class="priv">🌊 <b>내가 정한 규칙</b>: ${esc(meta.rules[lm.lake])}</div>`;
+  if (lm.knows && lm.knows.length) o += lm.knows.map((k) => `<div class="priv">🌊 알게 된 규칙(${esc(S.players[k.by].name)}): ${esc(k.text)}</div>`).join('');
+  return o;
+}
 function playerCards() {
   const A = AUG();
   return S.players.map((p) => {
@@ -424,6 +571,14 @@ function playerCards() {
     if (p.augs.includes('queen')) badges.push(`👑목숨+${p.st.queenLives} · 던짐 ${p.st.queenThrows}/12`);
     if (p.augs.includes('kim') && p.st.kimLeft > 0) badges.push(`🎎${p.st.kimLeft}차례 남음`);
     if (p.st.domain) badges.push(`🌀영역 ${p.st.domain.left}`);
+    const lm = p.st.lim || {};
+    if (p.augs.includes('lamancha')) badges.push(`🩸피 ${lm.blood || 0}`);
+    if (p.augs.includes('ksa')) badges.push(`💉앰플 ${lm.amp || 0}${lm.graves && lm.graves.length ? ' · 🪦' + lm.graves.length : ''}`);
+    if (p.augs.includes('hunt')) badges.push(`⚰관 ${lm.coffin || 0}${lm.timers ? ' · 부활 중 ' + lm.timers : ''}`);
+    if (p.augs.includes('lord')) badges.push(`🐺흑수의 주인 ${lm.lordMark || 0}/2`);
+    if (p.augs.includes('yakji')) badges.push(`🧬${lm.bio || 0}/4${lm.art ? ' · 🎨예술 완성' : ''}`);
+    if (p.augs.includes('tsa') && p.st.bank) badges.push(`⏳보관 윷 ${p.st.bank}`);
+    if (p.augs.includes('geomji')) badges.push(`🔎지령 ${lm.qdone || 0}/3`);
     if (p.hp != null) badges.push(`❤${p.hp}`);
     if (p.st.skip) badges.push(`⏭${p.st.skip}`);
     if (p.st.leechTo != null) badges.push(`🪱${esc(S.players[p.st.leechTo].name)}와 운명공동체`);
@@ -439,8 +594,8 @@ function playerCards() {
       <div class="row"><b><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${p.idx === S.me ? ' (나)' : ''}</b>${S.order ? `<span class="tag">${S.order.indexOf(p.idx) + 1}번째</span>` : ''}
       <span class="mut">완주 ${p.finished}/${p.npieces} · 윷 ${p.sticks}개${p.connected ? '' : ' · 접속 끊김'}${status}</span></div>
       <div class="homebox" style="margin:6px 0"><span class="mut">대기</span>${home.map((x) => `<span class="hp ${p.idx === S.me ? 'me' : ''}" style="background:${p.color}" ${p.idx === S.me ? `data-a="piece" data-v="${x.id}"` : ''}>${LET[x.type] || ''}${ICON[x.type] ? `<b class="dc">${ICON[x.type]}</b>` : ''}</span>`).join('') || '<span class="mut">-</span>'}</div>
-      <div>${p.augs.map((id) => `<span class="chip ${p.used[id] ? 'used' : ''}" title="${esc(A[id].desc)}">${esc(A[id].name)}</span>`).join('') || '<span class="mut">증강 없음</span>'}</div>
-      ${badges.length ? `<div class="mut">${badges.join(' · ')}</div>` : ''}</div>`;
+      <div>${p.augs.map((id) => `<span class="chip ${A[id].pack === 'limbus' ? 'pk-limbus' : ''} ${p.used[id] ? 'used' : ''}" title="${esc(A[id].desc)}">${esc(A[id].name)}</span>`).join('') || '<span class="mut">증강 없음</span>'}</div>
+      ${badges.length ? `<div class="mut">${badges.join(' · ')}</div>` : ''}${privInfo(p)}</div>`;
   }).join('');
 }
 
@@ -471,10 +626,16 @@ function pickModal() {
         others.map((p) => `<button data-a="sub" data-v="${p.idx}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('') + '</div>';
     } else if (sub.type === 'augment') {
       h += `<p>${esc(A[sub.aug].name)}: 증강을 하나 고르세요</p><div class="augl">` +
-        meta.augments.filter((a) => a.cat !== 'hidden').map((a) => `<button data-a="sub" data-v="${a.id}" title="${esc(a.desc)}" style="text-align:left">${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작', mid: '중간', end: '마무리' }[a.cat]}</span></button>`).join('') + '</div>';
+        meta.augments.filter((a) => a.cat !== 'hidden' && (S.packs || ['base']).includes(a.pack)).map((a) => `<button data-a="sub" data-v="${a.id}" title="${esc(a.desc)}" style="text-align:left">${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작', mid: '중간', end: '마무리' }[a.cat]}</span></button>`).join('') + '</div>';
     } else if (sub.type === 'owned') {
       h += `<p>${esc(S.players[sub.target].name)}의 증강 중 고양이로 바꿀 것을 고르세요 (3라운드 동안)</p><div class="augl">` +
         sub.list.map((id) => `<button data-a="sub" data-v="${id}" title="${esc(A[id].desc)}" style="text-align:left">${esc(A[id].name)}</button>`).join('') + '</div>';
+    } else if (sub.type === 'fold' && sub.aug === 'lamancha') {
+      h += `<p>🎪 라만차랜드로 만들 면을 고르세요. (그 면 위의 내 말은 이동 +1, 피를 얻습니다)</p><div class="row">` +
+        ['R', 'L', 'T', 'B'].map((sd) => `<button data-a="sub" data-v="${sd}">${{ R: '→ 오른쪽', L: '← 왼쪽', T: '↑ 위쪽', B: '↓ 아래쪽' }[sd]} 면</button>`).join('') + '</div>';
+    } else if (sub.type === 'rule') {
+      h += `<p>🌊 대호수의 규칙: 어기면 즉시 말 하나가 죽는 규칙을 몰래 고르세요. 다른 사람은 무슨 규칙인지 알 수 없습니다.</p><div class="augl">` +
+        (meta.rules || []).map((r, i) => `<button data-a="sub" data-v="${i}" style="text-align:left">${esc(r)}</button>`).join('') + '</div>';
     } else if (sub.type === 'fold') {
       h += `<p>🧻 게임 접어라: 접는 방향을 고르세요. 접히는 쪽의 말은 반대편 칸으로 옮겨가며, 그 칸에 있던 적을 잡습니다.</p><div class="row">
         <button data-a="sub" data-v="R">→ 오른쪽을 왼쪽으로</button><button data-a="sub" data-v="L">← 왼쪽을 오른쪽으로</button>
@@ -487,7 +648,7 @@ function pickModal() {
     }
   } else if (pk.stage === 'choose') {
     if (pk.mine.length) h += `<div class="mut">이미 고른 증강: ${pk.mine.map((id) => esc(A[id].name)).join(', ')}</div>`;
-    h += '<div class="opts">' + pk.options.map((o) => { const a = A[o.id]; return `<div class="opt ${o.locked ? 'lock' : ''}" ${o.locked ? '' : `data-a="pick" data-v="${o.id}"`}><b>${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작 전용', mid: '중간 전용', end: '마무리 전용' }[a.cat]}</span></b><div class="d">${esc(a.desc)}</div></div>`; }).join('') + '</div>';
+    h += '<div class="opts">' + pk.options.map((o) => { const a = A[o.id]; return `<div class="opt ${a.pack === 'limbus' ? 'pk-limbus' : ''} ${o.locked ? 'lock' : ''}" ${o.locked ? '' : `data-a="pick" data-v="${o.id}"`}><b>${esc(a.name)}<span class="tag">${{ gen: '범용', start: '시작 전용', mid: '중간 전용', end: '마무리 전용' }[a.cat]}</span></b><div class="d">${esc(a.desc)}</div></div>`; }).join('') + '</div>';
   }
   if (pk.stage === 'resolve' && !sub && pk.picker === S.me) h += '<p class="mut">처리 중...</p>';
   if (pk.banned.length) h += `<div class="mut" style="margin-top:10px">🔍 이번 선택에서 무효화됨: ${pk.banned.map((id) => esc(A[id].name)).join(', ')}</div>`;
@@ -495,12 +656,31 @@ function pickModal() {
   return h;
 }
 
+let pre = null, packView = null; // 방에 들어가기 전에도 팩을 볼 수 있도록 /api/meta를 받아 둠
+fetch('/api/meta').then((r) => r.json()).then((m) => { pre = m; if (!S) render(); }).catch(() => { /* 서버 주소가 다르면 무시 */ });
+const CATN = { gen: '범용', start: '시작 전용', mid: '중간 전용', end: '마무리 전용', hidden: '특수' };
+function packListHTML(k, ms) {
+  const augs = ms.augments.filter((a) => (a.pack || 'base') === k.id && a.cat !== 'hidden');
+  const cls = k.id === 'limbus' ? 'pk-limbus' : '';
+  let o = `<div class="packhead card ${cls}"><b style="font-size:19px">📦 ${esc(k.name)}</b><div class="mut" style="margin-top:4px">${esc(k.desc)} · 증강 ${augs.length}개</div></div>`;
+  for (const c of ['gen', 'start', 'mid', 'end']) {
+    const list = augs.filter((a) => a.cat === c); if (!list.length) continue;
+    o += `<div class="mut" style="margin:12px 0 2px">${CATN[c]} (${list.length})</div>` + list.map((a) => `<div class="augrow ${cls}"><b>${esc(a.name)}</b><div class="d">${esc(a.desc)}</div></div>`).join('');
+  }
+  return o;
+}
 function landingHTML() {
+  if (packView && pre) {
+    const k = pre.packs.find((x) => x.id === packView);
+    return `<div class="center"><div class="packbox"><div class="row" style="margin-bottom:10px"><button data-a="packback">← 돌아가기</button></div>${k ? packListHTML(k, pre) : ''}</div></div>`;
+  }
+  const packs = pre ? `<div class="card" style="margin-top:12px"><b>📦 증강팩</b> <span class="mut">눌러서 들어있는 증강을 확인하세요</span>` +
+    pre.packs.map((k) => `<button class="packbtn ${k.id === 'limbus' ? 'pk-limbus' : ''}" data-a="packview" data-v="${k.id}"><b>${esc(k.name)}</b> <span class="mut">· 증강 ${pre.augments.filter((a) => (a.pack || 'base') === k.id && a.cat !== 'hidden').length}개</span><div class="mut" style="font-size:12px">${esc(k.desc)}</div></button>`).join('') + '</div>' : '';
   return `<div class="center"><h1>🎲 증강 윷놀이</h1><p class="mut">최대 6인 · 라운드 1/5/10에 증강 선택</p>
   <div class="card"><div class="mut">이름</div><input type="text" id="nm" maxlength="10" value="${esc(localStorage.getItem('yut_name') || '')}" placeholder="이름">
   <div class="row" style="margin-top:12px"><button class="pri" data-a="create">새 방 만들기</button></div>
   <hr style="border-color:#323848;margin:16px 0"><div class="mut">친구가 알려준 방 코드</div>
-  <div class="row"><input type="text" id="cd" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"><button data-a="join">입장</button></div></div><div class="mut">버전 ${VERSION}</div></div>`;
+  <div class="row"><input type="text" id="cd" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"><button data-a="join">입장</button></div></div>${packs}<div class="mut" style="margin-top:10px">버전 ${VERSION}</div></div>`;
 }
 function lobbyHTML() {
   const host = S.me === 0;
@@ -509,6 +689,8 @@ function lobbyHTML() {
   <div class="card"><label><input type="checkbox" data-a="chaos" ${S.chaos ? 'checked' : ''} ${host ? '' : 'disabled'}> 🌀 혼돈 모드 (증강을 한 번에 2번 고름)</label>
   <div style="height:8px"></div>
   <label><input type="checkbox" data-a="ranking" ${S.ranking ? 'checked' : ''} ${host ? '' : 'disabled'}> 🏅 순위전 (한 명이 이겨도 끝나지 않고 순위를 끝까지 가림 · 계획대로/동메달/취~소 증강 등장)</label></div>
+  <div class="card"><b>📦 증강팩</b> <span class="mut">${host ? '(여러 개 선택 가능)' : '(방장이 선택)'}</span>
+  ${(meta.packs || []).map((k) => `<div style="margin-top:6px"><label><input type="checkbox" data-a="pack" data-v="${k.id}" ${(S.packs || []).includes(k.id) ? 'checked' : ''} ${host ? '' : 'disabled'}> ${esc(k.name)} <span class="mut">· 증강 ${meta.augments.filter((a) => a.pack === k.id && a.cat !== 'hidden').length}개 — ${esc(k.desc)}</span></label></div>`).join('')}</div>
   <div style="margin-bottom:10px"><button data-a="leave">🚪 방 나가기</button></div>
   ${host ? `<button class="pri" data-a="start" ${S.players.length < 2 ? 'disabled' : ''}>게임 시작 (${S.players.length}/6)</button>` : '<div class="mut">방장이 시작하기를 기다리는 중...</div>'}<div class="mut" style="margin-top:14px">버전 ${VERSION}</div></div>`;
 }
@@ -521,6 +703,11 @@ function gameHTML() {
   const banners = [];
   if (S.fog) banners.push(`🌫 안개 (${esc(S.players[S.fog.owner].name)}의 능력) - ${S.fog.owner === S.me ? '나는 전부 보입니다' : '내 말 근처만 보입니다'}`);
   if (S.echo) banners.push('🔁 메아리: 모든 플레이어가 차례를 두 번씩');
+  if (S.interrupt) {
+    const iw = S.players[S.interrupt.owner], ik = S.players[S.interrupt.killer];
+    if (S.interrupt.owner === S.me) h += `<div class="banner" style="border-color:#ffb703">🫳 <b>소속 중지 발동!</b> ${esc(ik.name)}에게 말이 잡혔습니다(✝ 표시). 판 위의 내 말을 클릭하면 죽은 자리 쪽으로 2칸 이동합니다. <button data-a="skipint">사용 안 함</button></div>`;
+    else banners.push(`🫳 ${esc(iw.name)}이(가) 소속 중지 능력을 선택하는 중...`);
+  }
   if (banners.length) h += banners.map((b) => `<div class="banner">${b}</div>`).join('');
   if (S.phase === 'ended') {
     const w = S.players[S.winner];
@@ -539,6 +726,7 @@ function render() {
   if (!S) app.innerHTML = landingHTML();
   else if (S.phase === 'lobby') app.innerHTML = lobbyHTML();
   else app.innerHTML = gameHTML();
+  document.body.classList.toggle('aiming', ui.mode === 'aim');
   if ($('log')) $('log').scrollTop = 1e9;
 }
 
@@ -565,15 +753,21 @@ document.addEventListener('click', (e) => {
   else if (a === 'tthome') sendAbil({ pid: ui.pid, target: 0 });
   else if (a === 'abil_t') sendAbil({ target: +v });
   else if (a === 'dir') sendAbil({ pid: ui.pid, dir: +v });
+  else if (a === 'packview') { const nm = $('nm'), cd = $('cd'); try { if (nm) localStorage.setItem('yut_name', nm.value); } catch (e) { /* */ } packView = v; render(); window.scrollTo(0, 0); }
+  else if (a === 'packback') { packView = null; render(); }
+  else if (a === 'side') sendAbil({ side: v });
+  else if (a === 'skipint') send({ t: 'interrupt', skip: true });
   else if (a === 'abil') {
     const d = ABIL[v];
     if (d.confirm && !confirm(d.confirm)) return;
     if (d.k === 'now') { send({ t: 'ability', a: v }); return; }
+    if (d.k === 'yakji') { if (!me.st.lim.art) { if (confirm('예술! 이번 차례를 쓰고 예술작품을 완성합니다 (내 모든 말 이동 +2). 사용할까요?')) send({ t: 'ability', a: 'yakji' }); return; } ui.abil = 'yakji'; ui.mode = 'sel_side'; render(); return; }
     if (d.needThrow && S.tn.throws <= 0) return toast('던지기 기회가 있을 때만 사용할 수 있습니다');
     ui.abil = v; ui.pid = null;
     ui.mode = d.k === 'n' ? 'sel_n' : d.k === 'player' ? 'sel_player' : d.k === 'dead' ? 'sel_dead' : 'sel_p';
     render();
   } else if (a === 'piece') {
+    if (S && S.interrupt && S.interrupt.owner === S.me) { if (me.pieces.some((x) => x.id === v)) send({ t: 'interrupt', pid: v }); else toast('판 위의 내 말을 클릭하세요'); return; }
     if (!S || S.phase !== 'turn' || S.cur !== S.me) return;
     if (ui.mode === 'sel_e') {
       if (me.pieces.some((x) => x.id === v)) return toast('상대의 말을 클릭하세요');
@@ -583,7 +777,7 @@ document.addEventListener('click', (e) => {
     if (ui.mode === 'sel_p') {
       const k = ABIL[ui.abil].k;
       if (k === 'p') return sendAbil({ pid: v });
-      ui.pid = v; ui.mode = k === 'pn' ? 'sel_n' : k === 'pe' ? 'sel_e' : 'sel_d'; render(); return;
+      ui.pid = v; ui.mode = k === 'pn' ? 'sel_n' : k === 'pe' ? 'sel_e' : k === 'fl' ? 'aim' : 'sel_d'; render(); return;
     }
     if (ui.mode) return;
     send({ t: 'move', ri: ui.ri, pid: v });
@@ -595,6 +789,11 @@ document.addEventListener('change', (e) => {
   const d = e.target.dataset; if (!d) return;
   if (d.a === 'chaos') send({ t: 'chaos', v: e.target.checked });
   if (d.a === 'ranking') send({ t: 'ranking', v: e.target.checked });
+  if (d.a === 'pack') {
+    const ids = [...document.querySelectorAll('input[data-a="pack"]')].filter((x) => x.checked).map((x) => x.dataset.v);
+    if (!ids.length) { toast('증강팩을 하나 이상 선택해야 합니다'); e.target.checked = true; return; }
+    send({ t: 'packs', ids });
+  }
 });
 connect(true);
 render();

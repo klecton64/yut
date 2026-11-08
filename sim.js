@@ -29,9 +29,10 @@ function pickPhase(g) {
   if (sub) {
     switch (sub.type) {
       case 'player': return G.actSub(g, p, sample(g.players.filter((q) => q.alive && !q.out && q !== p)).idx);
-      case 'augment': return G.actSub(g, p, sample(G.AUGMENTS.filter((a) => a.cat !== 'hidden')).id);
+      case 'augment': return G.actSub(g, p, sample(G.AUGMENTS.filter((a) => a.cat !== 'hidden' && g.packs.includes(a.pack))).id);
       case 'owned': return G.actSub(g, p, sample(sub.list));
       case 'fold': return G.actSub(g, p, sample(['R', 'L', 'T', 'B']));
+      case 'rule': return G.actSub(g, p, Math.floor(Math.random() * G.RULES.length));
       case 'spin': return G.actSub(g, p, sample(sub.respun ? ['keep'] : ['keep', 'respin']));
       case 'rank': return G.actSub(g, p, sample(g.players.filter((q) => !sub.picks.includes(q.idx))).idx);
       default: throw new Error('알 수 없는 sub ' + sub.type);
@@ -42,6 +43,12 @@ function pickPhase(g) {
 
 function stepBot(g) {
   if (g.phase === 'pick') return pickPhase(g);
+  if (g.interrupts && g.interrupts.length) {
+    const it = g.interrupts[0]; const q = g.players[it.owner];
+    const mine = q.pieces.filter((x) => !x.done && x.pos > 0);
+    if (Math.random() < 0.6 && mine.length) { try { return G.actInterrupt(g, q, { pid: sample(mine).id }); } catch (e) { /* 건너뜀 */ } }
+    return G.actInterrupt(g, q, { skip: true });
+  }
   const p = g.players[g.cur];
   const tn = g.tn;
   // 가끔 능력 사용
@@ -54,13 +61,15 @@ function stepBot(g) {
     board.forEach((x) => {
       tries.push(['shield', { pid: x.id }], ['sacrifice', { pid: x.id }], ['timetravel', { pid: x.id, target: 0 }],
         ['truck', { pid: x.id }], ['combo', { pid: x.id }], ['domain', { pid: x.id }]);
-      foes.forEach((q) => q.pieces.filter((y) => !y.done && y.pos > 0).forEach((y) => tries.push(['flick', { pid: x.id, tpid: y.id }])));
+      foes.forEach((q) => q.pieces.filter((y) => !y.done && y.pos > 0).forEach((y) => tries.push(['flick', { pid: x.id, ang: Math.random() * 6.28, pow: Math.random() }])));
     });
     mine.forEach((x) => {
       tries.push(['goblin', { pid: x.id, dir: Math.random() < 0.5 ? 1 : -1 }]);
       for (let k = 0; k < 3; k++) tries.push(['cannon', { pid: x.id, node: 1 + Math.floor(Math.random() * 28) }]);
     });
     tries.push(['sniper', { node: 1 + Math.floor(Math.random() * 28) }]);
+    tries.push(['lord', {}], ['hunt', {}], ['yakji', { side: sample(['R', 'L', 'T', 'B']) }]);
+    (p.st.lim.graves || []).forEach((gv) => tries.push(['ksa', { node: gv.node }]));
     tries.push(['baduk', {}], ['handfast', {}], ['chalice', {}], ['lastdance', {}], ['fog', {}]);
     foes.forEach((q) => tries.push(['aim', { target: q.idx }]));
     dead.forEach((q) => tries.push(['necro', { target: q.idx }]));
@@ -89,6 +98,7 @@ for (let i = 0; i < N; i++) {
   for (let k = 0; k < n; k++) G.addPlayer(g, 'P' + k, 't' + k);
   g.chaos = i % 2 === 0;
   g.ranking = i % 4 >= 2;
+  g.packs = i % 3 === 0 ? ['base'] : i % 3 === 1 ? ['limbus'] : ['base', 'limbus'];
   G.startGame(g);
   let steps = 0;
   try {
