@@ -32,6 +32,7 @@ function pickPhase(g) {
       case 'augment': return G.actSub(g, p, sample(G.AUGMENTS.filter((a) => a.cat !== 'hidden' && g.packs.includes(a.pack))).id);
       case 'owned': return G.actSub(g, p, sample(sub.list));
       case 'fold': return G.actSub(g, p, sample(['R', 'L', 'T', 'B']));
+      case 'stock': return G.actSub(g, p, sample(['W', 'L', 'T', 'H']));
       case 'rule': return G.actSub(g, p, Math.floor(Math.random() * G.RULES.length));
       case 'spin': return G.actSub(g, p, sample(sub.respun ? ['keep'] : ['keep', 'respin']));
       case 'rank': return G.actSub(g, p, sample(g.players.filter((q) => !sub.picks.includes(q.idx))).idx);
@@ -70,11 +71,16 @@ function stepBot(g) {
     tries.push(['sniper', { node: 1 + Math.floor(Math.random() * 28) }]);
     tries.push(['lord', {}], ['hunt', {}], ['yakji', { side: sample(['R', 'L', 'T', 'B']) }]);
     (p.st.lim.graves || []).forEach((gv) => tries.push(['ksa', { node: gv.node }]));
+    mine.forEach((x) => {
+      tries.push(['ego', { pid: x.id }], ['weapon', { pid: x.id, dir: sample(['f', 'b']), node: 1 + Math.floor(Math.random() * 28) }], ['light', { pid: x.id }],
+        ['trait', { pid: x.id, mode: 'dash' }]);
+      foes.forEach((q) => q.pieces.filter((y) => !y.done && y.pos > 0).forEach((y) => { tries.push(['harpoon', { tpid: y.id }], ['trait', { pid: x.id, mode: 'drag', tpid: y.id }]); }));
+    });
     tries.push(['baduk', {}], ['handfast', {}], ['chalice', {}], ['lastdance', {}], ['fog', {}]);
     foes.forEach((q) => tries.push(['aim', { target: q.idx }]));
     dead.forEach((q) => tries.push(['necro', { target: q.idx }]));
     const [a, o] = sample(tries);
-    if (p.augs.includes(a)) { try { G.actAbility(g, p, a, o); return; } catch (e) { /* 무시 */ } }
+    if (p.augs.includes(a) || ['ego', 'weapon', 'trait'].includes(a)) { try { G.actAbility(g, p, a, o); return; } catch (e) { /* 무시 */ } }
   }
   if (tn.throws > 0) {
     const o = {};
@@ -83,8 +89,8 @@ function stepBot(g) {
     return G.actThrow(g, p, o);
   }
   const cands = [];
-  tn.queue.forEach((r, ri) => p.pieces.forEach((x) => { if (!x.done) cands.push([ri, x.id]); }));
-  const ok = tryAll(([ri, pid]) => G.actMove(g, p, ri, pid), cands);
+  tn.queue.forEach((r, ri) => p.pieces.forEach((x) => { if (!x.done) { cands.push([ri, x.id, {}]); cands.push([ri, x.id, { back: true }]); cands.push([ri, x.id, { dist: 1 + Math.floor(Math.random() * 5) }]); } }));
+  const ok = tryAll(([ri, pid, o]) => G.actMove(g, p, ri, pid, o), cands);
   if (!ok) throw new Error('유효한 이동이 없는데 턴이 안 넘어감: queue=' + tn.queue + ' phase=' + g.phase + ' augs=' + p.augs);
 }
 

@@ -544,4 +544,198 @@ t('림버스: 대호수의 규칙 - 규칙(말 안 움직이기)을 어기면 �
   assert.strictEqual(v.lake, 3); assert(w.lake === undefined, '남에게는 비공개');
 });
 
+// ---------- 림버스 2차 ----------
+const I = G._internal;
+t('에이해브: 업힌 말 수만큼 이동 +1', () => {
+  const g = setup(2, [['ahab'], []]);
+  const p = g.players[0]; p.pieces[0].type = 'ahab'; put(p, 0, 3); put(p, 1, 3); put(p, 2, 3);
+  assert.strictEqual(I.groupSteps(g, p, '도', I.groupOf(p, p.pieces[0])), 3);
+});
+t('에이해브: 공격당하면 업힌 말 하나를 희생하고 생존, 3스택이면 가스하푼 개화', () => {
+  const g = setup(2, [['ahab'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'ahab'; a.pieces[0].sac = 2;
+  put(a, 0, 7); put(a, 1, 7); put(b, 0, 6);
+  g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1;
+  G.actMove(g, b, 0, '1_0');
+  assert.strictEqual(a.pieces[0].pos, 7); assert.strictEqual(a.pieces[1].pos, 0); assert(a.pieces[0].bloom);
+});
+t('에이해브: 가스하푼 상태에서 공격하면 공격한 말이 죽음', () => {
+  const g = setup(2, [['ahab'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'ahab'; a.pieces[0].bloom = true;
+  put(a, 0, 7); put(b, 0, 6);
+  g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1;
+  G.actMove(g, b, 0, '1_0');
+  assert.strictEqual(a.pieces[0].pos, 7); assert.strictEqual(b.pieces[0].pos, 0);
+});
+t('고래: 라운드 시작에 이동하고 그 칸 말을 죽임 / 다른 플레이어가 공격하면 잠수', () => {
+  const g = setup(2, [['ahab'], []]);
+  g.whales = [{ id: 1, node: 8, kind: 'ahab', imm: null }];
+  put(g.players[1], 0, 8);
+  g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1; put(g.players[1], 0, 7); put(g.players[1], 1, 20);
+  G.actMove(g, g.players[1], 0, '1_0');             // 7→8 고래 공격
+  assert(g.whales[0].node !== 8 || g.whales.length === 1);
+  assert.strictEqual(g.players[1].pieces[0].pos, 8); // 공격자는 안 죽음
+});
+t('에이해브가 고래를 잡으면 개화', () => {
+  const g = setup(2, [['ahab'], []]);
+  const a = g.players[0]; a.pieces[0].type = 'ahab'; put(a, 0, 7);
+  g.whales = [{ id: 1, node: 8, kind: 'ahab', imm: null }];
+  g.tn.throws = 0; g.tn.queue = ['도'];
+  G.actMove(g, a, 0, '0_0');
+  assert(a.pieces[0].bloom); assert.strictEqual(g.whales.length, 0);
+});
+t('싱클레어: 알 상태는 1칸만, 공격당하지 않고 부화하면 이동 +1', () => {
+  const g = setup(2, [['sinclair'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'sinclair'; a.pieces[0].egg = 2; a.pieces[0].form = 'egg'; a.pieces[0].mark = 0;
+  put(a, 0, 6);
+  assert.strictEqual(I.groupSteps(g, a, '걸', [a.pieces[0]]), 1);
+  put(b, 0, 5); g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1; G.actMove(g, b, 0, '1_0');
+  assert.strictEqual(a.pieces[0].pos, 6);
+  a.pieces[0].egg = 0; a.pieces[0].form = 'sin';
+  assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 2);
+});
+t('싱클레어: 표지 3개면 어느 싱클레어, 던진 결과 이내 자유 이동', () => {
+  const g = setup(2, [['sinclair'], []]);
+  const a = g.players[0]; const x = a.pieces[0]; x.type = 'sinclair'; x.egg = 0; x.form = 'any'; x.mark = 3; put(a, 0, 1);
+  g.tn.throws = 0; g.tn.queue = ['걸'];
+  G.actMove(g, a, 0, '0_0', { dist: 2 });
+  assert.strictEqual(x.pos, 3);  // 걸(3)+1=4 이내에서 2칸 선택 → 1+2=3
+}) ;
+t('뒤틀림: 죽을 때 뒤틀림/개화/사망 중 하나, 뒤틀림이면 공격자를 공격', () => {
+  let sawDistort = 0, sawEgo = 0, sawDeath = 0;
+  for (let i = 0; i < 300; i++) {
+    const g = setup(2, [['distort'], []]);
+    const a = g.players[0], b = g.players[1]; put(a, 0, 7); put(b, 0, 6);
+    g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1; G.actMove(g, b, 0, '1_0');
+    const x = a.pieces[0];
+    if (x.type === 'distort') { sawDistort++; assert.strictEqual(b.pieces[0].pos, 0); }
+    else if (x.type === 'ego') { sawEgo++; assert(x.ego); }
+    else { sawDeath++; assert.strictEqual(x.pos, 0); }
+  }
+  assert(sawDistort > 80 && sawEgo > 5 && sawDeath > 60, `${sawDistort}/${sawEgo}/${sawDeath}`);
+});
+t('EGO 가시 돋친 입맞춤: 앞뒤 직선에 출혈, 출혈은 이동 -1', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0], b = g.players[1]; I.bloomEgo(g, a, a.pieces[0], 'bleed'); put(a, 0, 7); put(b, 0, 9); put(b, 1, 20);
+  G.actAbility(g, a, 'ego', { pid: '0_0' });
+  assert.strictEqual(b.pieces[0].bleed, 2); assert(!b.pieces[1].bleed);
+  assert.strictEqual(I.groupSteps(g, b, '개', [b.pieces[0]]), 1);
+});
+t('EGO 무한한 궤적: 같은 말을 연속 이동할수록 이동 증가', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0]; I.bloomEgo(g, a, a.pieces[0], 'breath'); put(a, 0, 1); a.pieces[0].chain = 2;
+  assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 3);
+});
+t('EGO 무너지는 종루: 균열은 3번까지, 지나가는 적 말이 멈춤', () => {
+  const g = setup(2, [[], []]);
+  const a = g.players[0], b = g.players[1]; I.bloomEgo(g, a, a.pieces[0], 'tower'); put(a, 0, 3); put(b, 0, 1);
+  G.actAbility(g, a, 'ego', { pid: '0_0' });
+  assert.strictEqual(G.viewFor(g, a).cracks[0], 3);
+  g.cur = 1; g.tn = { queue: ['걸'], throws: 0, counts: {}, thrown: true };
+  G.actMove(g, b, 0, '1_0');
+  assert.strictEqual(b.pieces[0].pos, 3);
+});
+t('EGO 필연적인 균열: 공격한 적의 앞뒤 칸도 공격', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0], b = g.players[1]; I.bloomEgo(g, a, a.pieces[0], 'rupture'); put(a, 0, 7);
+  put(b, 0, 8); put(b, 1, 9);
+  g.tn.throws = 0; g.tn.queue = ['도'];
+  G.actMove(g, a, 0, '0_0');
+  assert.strictEqual(b.pieces[0].pos, 0); assert.strictEqual(b.pieces[1].pos, 0);
+});
+t('EGO 가라앉은 독백: 차례 시작마다 앞뒤 적에게 침잠 -1', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0], b = g.players[1]; I.bloomEgo(g, a, a.pieces[0], 'sink'); put(a, 0, 7); put(b, 0, 8);
+  I.limStartTurn(g, a);
+  assert(b.pieces[0].sink); assert.strictEqual(I.groupSteps(g, b, '개', [b.pieces[0]]), 1);
+});
+t('EGO 폭풍의 전야: 충전을 쓰면 다음 이동 증가', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0]; I.bloomEgo(g, a, a.pieces[0], 'charge'); put(a, 0, 1); a.pieces[0].charge = 3;
+  G.actAbility(g, a, 'ego', { pid: '0_0' });
+  assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 4);
+});
+t('EGO 꺼지지 않는 장례식: 적 말이 있는 칸을 지나가면 화상, 차례 시작에 후퇴', () => {
+  const g = setup(2, [['distort'], []]);
+  const a = g.players[0], b = g.players[1]; I.bloomEgo(g, a, a.pieces[0], 'burn'); put(a, 0, 6); put(b, 0, 7);
+  g.tn.throws = 0; g.tn.queue = ['개'];
+  G.actMove(g, a, 0, '0_0');
+  assert.strictEqual(b.pieces[0].burn, 1);   // 상대 차례가 시작되며 이미 1 줄고 1칸 후퇴
+  assert.strictEqual(b.pieces[0].pos, 6);
+});
+t('해결사: 적을 잡으면 급수 상승, 변환된 말은 2급, 5급이면 이동+1과 뒤로 이동', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'fixer'; a.pieces[0].lv = 0; a.pieces[0].ex = 0;
+  put(a, 0, 6); put(b, 0, 7); b.pieces[0].type = 'goblin';
+  g.tn.throws = 0; g.tn.queue = ['도'];
+  G.actMove(g, a, 0, '0_0');
+  assert.strictEqual(a.pieces[0].lv, 2);
+  a.pieces[0].lv = 4; assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 2);
+  g.tn = { queue: ['걸'], throws: 0, counts: {}, thrown: true }; a.pieces[0].pos = 10; a.pieces[0].route = 'main';
+  G.actMove(g, a, 0, '0_0', { back: true });
+  assert.strictEqual(a.pieces[0].pos, 9);
+});
+t('해결사: 1급 이후 3스택이면 특색, 죽어도 유지', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0]; a.pieces[0].type = 'fixer'; a.pieces[0].lv = 8; a.pieces[0].ex = 2; put(a, 0, 6);
+  I.fixerGain(g, a, a.pieces[0], 1);
+  assert(['red', 'yellow', 'indigo'].includes(a.pieces[0].trait));
+});
+t('붉은시선: 앞에 있는 적의 이동 -2, 모/윷 금지', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'fixer'; put(a, 0, 3); put(b, 0, 8);
+  I.becomeTrait(g, a, a.pieces[0], 'red');
+  assert.strictEqual(I.groupSteps(g, b, '걸', [b.pieces[0]]), 1);
+  assert.strictEqual(I.groupSteps(g, b, '도', [b.pieces[0]]), 0);
+  assert.strictEqual(g.pool, 0);
+});
+t('노란작살: 돌진은 지나간 칸의 적을 모두 죽이고, 쿨타임 2', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'fixer'; put(a, 0, 6); put(b, 0, 7); put(b, 1, 8);
+  I.becomeTrait(g, a, a.pieces[0], 'yellow');
+  G.actAbility(g, a, 'trait', { pid: '0_0', mode: 'dash' });
+  assert.strictEqual(b.pieces[0].pos, 0); assert.strictEqual(b.pieces[1].pos, 0); assert.strictEqual(a.pieces[0].pos, 9);
+  assert.throws(() => G.actAbility(g, a, 'trait', { pid: '0_0', mode: 'dash' }), /차례 뒤/);
+});
+t('쪽빛노인: 대호수의 규칙 획득, 연못, 고래 4마리(주인 면역)', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0]; a.pieces[0].type = 'fixer';
+  I.becomeTrait(g, a, a.pieces[0], 'indigo');
+  assert(g.pond); assert.strictEqual(g.whales.length, 4); assert(a.augs.includes('lake')); assert(g.whales.every((w) => w.imm === 0));
+});
+t('검은침묵: 무기 능력으로 범위 안의 적을 처치 (추가 던지기 없음)', () => {
+  const g = setup(2, [['fixer'], []]);
+  const a = g.players[0], b = g.players[1]; a.pieces[0].type = 'fixer'; put(a, 0, 6); put(b, 0, 8);
+  I.becomeTrait(g, a, a.pieces[0], 'black'); a.pieces[0].weapon = '대검';
+  const th = g.tn.throws;
+  G.actAbility(g, a, 'weapon', { pid: '0_0' });
+  assert.strictEqual(b.pieces[0].pos, 0); assert.strictEqual(g.tn.throws, th);
+});
+t('주식: 값에 따라 이동 증감, 0 이하 이동은 불가', () => {
+  const g = setup(2, [['stock'], []]);
+  const a = g.players[0]; a.st.lim.stock = { name: 'W', v: 12 }; put(a, 0, 1);
+  assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 4);
+  a.st.lim.stock.v = 3; assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 0); assert.strictEqual(I.groupSteps(g, a, '개', [a.pieces[0]]), 1);
+  a.st.lim.stock.v = 0; assert.strictEqual(I.groupSteps(g, a, '윷', [a.pieces[0]]), 1);
+});
+t('초록빛: 말을 바치면 주변 말이 끌려오고 조종 불가, 3차례 뒤 소멸', () => {
+  const g = setup(2, [['light'], []]);
+  const a = g.players[0], b = g.players[1]; put(a, 0, 7); put(a, 1, 6); put(b, 0, 8);
+  G.actAbility(g, a, 'light', { pid: '0_0' });
+  assert.strictEqual(a.pieces[0].pos, 0); assert.strictEqual(a.pieces[1].pos, 7); assert.strictEqual(b.pieces[0].pos, 7);
+  assert(b.pieces[0].lit);
+  for (let i = 0; i < 3; i++) I.lightTick(g, a);
+  assert.strictEqual(g.lights.length, 0); assert(!b.pieces[0].lit);
+});
+t('마티아스: 모든 플레이어의 말 +1, 이동 +1', () => {
+  const g = setup(2, [[], []]);
+  g.phase = 'pick'; g.pick = { kind: 'start', order: [0, 1], stage: 'choose', cur: 0, left: { 0: 1, 1: 0 }, chosen: { 0: [], 1: [] }, opts: { 0: [{ id: 'matthias', locked: false }], 1: [] }, queue: [], banned: [], options: [], sub: null };
+  g.players.forEach((p) => { p.augs = []; });
+  G.actPick(g, g.players[0], 'matthias');
+  assert.deepStrictEqual(g.players.map((p) => p.pieces.length), [5, 5]);
+  assert(g.matthias);
+  put(g.players[0], 0, 1);
+  assert.strictEqual(I.groupSteps(g, g.players[0], '도', [g.players[0].pieces[0]]), 2);
+});
+
 console.log(pass + '개 통과');

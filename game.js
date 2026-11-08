@@ -145,6 +145,13 @@ const LIMBUS = [
   L('jungji', '소속 중지', 'gen', '내 말이 잡히면 즉시 발동: 판 위의 내 말뭉치 하나를 죽은 자리 쪽으로 2칸 보낼 수 있습니다. 나를 잡은 상대 말이 있는 칸에 닿으면 그 말을 잡고, 상대는 그 잡기로 얻은 추가 던지기를 잃습니다. 나를 죽인 상대가 아닌 말에는 아무 영향이 없습니다.'),
   L('tsa', '소속 T사', 'gen', '내 말이 적을 잡으면 적은 죽는 대신 시간 징수 상태가 됩니다(추가 던지기 없음). 징수당한 말을 움직이려 하면 사용한 윷 결과가 내 보관함에 쌓이고(내 차례에 사용), 그 말은 1칸만 움직입니다.'),
   L('yakji', '소속 약지', 'start', '내 말이 적을 잡으면 생체재료 +1. 4가 되면 능력 \'예술!\'(이번 차례를 쓰고 예술작품 완성 → 내 모든 말의 이동 +2). 완성 뒤 다시 4가 되면 \'폐장\': 이번 차례를 쓰고 한 면을 골라 그 면의 모든 말을 2라운드 동안 속박합니다.'),
+  L('ahab', '변환 에이해브', 'gen', '말 하나가 에이해브가 됩니다. 업힌 말 하나당 이동 +1. 판에 고래가 나타나 라운드 시작마다 앞뒤 2칸 안으로 헤엄치며 그 칸의 말을 죽입니다. 다른 플레이어가 고래를 공격하면 고래는 잠수해 다른 칸에 나타납니다(그 칸의 말도 죽음). 에이해브가 공격당하면 업힌 말 하나를 희생하고 살아남습니다(희생 스택). 희생 3스택이거나 에이해브가 고래를 잡으면 <개화 E.G.O 가스하푼>: 공격해 온 말이 오히려 죽고, 능력으로 판 위의 말에 작살을 던져 박으면 그 말은 2번 이동할 때까지 이동 -1.'),
+  L('sinclair', '변환 싱클레어', 'gen', '말 하나가 알 3스택으로 시작하는 싱클레어가 됩니다. 알 상태에서는 1칸만 갈 수 있고, 공격당하지도 적을 잡지도 못하며, 내 차례마다(판 위에 있을 때) 알이 1 줄어듭니다. 부화하면 이동 +1, 적을 잡을 때마다 표지 +1. 표지 3이면 <어느 싱클레어>: 던진 결과 이내에서 원하는 칸수만큼 움직일 수 있습니다.'),
+  L('distort', '뒤틀림, 아니면..', 'gen', '내 말이 죽을 때마다 50% 뒤틀림 / 10% E.G.O 개화 / 40% 사망. 뒤틀림은 죽은 자리에서 살아남아 자신을 공격한 말을 공격하고, 이후 라운드 시작마다 앞뒤 1칸 안으로 무작위 이동합니다. E.G.O 개화는 일곱 가지 중 하나(가시 돋친 입맞춤 · 무한한 궤적 · 무너지는 종루 · 필연적인 균열 · 가라앉은 독백 · 폭풍의 전야 · 꺼지지 않는 장례식)입니다.'),
+  L('stock', '절호의 찬스자나요!', 'gen', 'W사·L사·T사·H사 중 주식 하나를 고릅니다. 주식은 5에서 시작해 내 차례마다 -3~+3 변동. 0 이하면 던진 이동 -3, 5 미만 -1, 5 이상 +1, 10 이상 +3. 이동이 0 이하가 되면 움직일 수 없습니다(뒤로 가지 않음).'),
+  L('light', '너무 아름다운 빛이에요', 'mid', '내 판 위의 말 하나를 희생해 그 자리에 영롱한 초록빛을 3차례 동안 둡니다. 빛의 앞뒤 1칸 안의 모든 말은 빛을 향해 1칸 끌려오며(서로 공격하지 않음) 빛이 있는 동안 조종할 수 없습니다. 빛은 공격받지 않습니다.'),
+  L('fixer', '변환 해결사', 'start', '말 하나가 9급 해결사가 됩니다. 적을 잡으면 1급씩, 변환된 말이나 뒤틀림을 잡으면 2급씩 오르고 죽으면 1급 내려갑니다. 5급이 되면 이동 +1, 뒤로 이동 가능(던진 결과 -2칸). 1급 이후 3스택을 더 쌓으면 <특색>(붉은시선 · 노란작살 · 쪽빛노인 중 하나)이 되며 죽어도 유지됩니다. 증강을 고를 때 4% 확률로 <검은침묵>.'),
+  L('matthias', '저 마티아스가 여러분 가정에 평화를 빕니다', 'start', '모든 플레이어의 말이 1개씩 늘어나고, 모든 말의 이동이 1칸 늘어납니다.'),
   L('geomji', '소속 검지', 'start', '나에게만 보이는 랜덤 지령이 주어지며, 3개를 완수하면 승리합니다.'),
 ];
 AUGMENTS.push(...LIMBUS);
@@ -159,7 +166,7 @@ const sample = (arr) => arr[rnd(arr.length)];
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const has = (p, id) => p.augs.includes(id);
 const log = (g, m) => { g.logN = (g.logN || 0) + 1; g.log.push(m); if (g.log.length > 120) g.log.shift(); };
-const isFrozen = (g, x) => x.frozen > g.round;
+const isFrozen = (g, x) => x.frozen > g.round || !!x.lit;
 const isActive = (p) => p.alive && !p.out;
 const activeList = (g) => g.players.filter(isActive);
 
@@ -186,7 +193,7 @@ function removeOnePiece(p) {
 }
 const stacksOf = (p) => { const m = {}; for (const x of p.pieces) if (!x.done && x.pos > 0) (m[x.pos] = m[x.pos] || []).push(x); return m; };
 const groupOf = (p, x) => (x.pos === 0 ? [x] : p.pieces.filter((y) => !y.done && y.pos === x.pos));
-function sendHome(x) { x.pos = 0; x.route = 'main'; x.shield = false; x.frozen = 0; x.tax = null; x.weak = false; }
+function sendHome(x) { x.pos = 0; x.route = 'main'; x.shield = false; x.frozen = 0; x.tax = null; x.weak = false; x.bleed = 0; x.sink = false; x.burn = 0; x.harp = 0; x.lit = null; x.chain = 0; x.charge = 0; }
 function setRoute(x, node, prefer) {
   if (node < 20) x.route = 'main';
   else if (node >= 25) x.route = 'B';
@@ -200,7 +207,7 @@ const occupiedSet = (g) => { const s = new Set(); for (const q of g.players) for
 function createGame(code) {
   return {
     code, players: [], chaos: false, ranking: false, packs: ['base'], phase: 'lobby', round: 0, cur: 0, tn: null, pick: null, log: [], winner: null, reason: '',
-    poops: [], bags: [], interrupts: [], ganTaek: false, ranks: [], elim: [], fixed: {}, party: [], duels: [], echo: false, fog: null, hpOn: false, final: null, coWinners: [], planWin: null,
+    poops: [], bags: [], interrupts: [], whales: [], lights: [], fx: [], fxSeq: 0, wid: 0, lid: 0, pond: false, pool: null, matthias: false, ganTaek: false, ranks: [], elim: [], fixed: {}, party: [], duels: [], echo: false, fog: null, hpOn: false, final: null, coWinners: [], planWin: null,
   };
 }
 function addPlayer(g, name, token) {
@@ -217,6 +224,7 @@ function removePlayer(g, p) {
 function resetState(g) {
   g.round = 0; g.cur = 0; g.order = null; g.tn = null; g.pick = null; g.winner = null; g.reason = '';
   g.poops = []; g.ganTaek = false; g.log = []; g.ranks = []; g.elim = []; g.fixed = {}; g.party = []; g.duels = [];
+  g.whales = []; g.lights = []; g.fx = []; g.pond = false; g.pool = null; g.matthias = false;
   g.echo = false; g.fog = null; g.hpOn = false; g.lastThrow = null; g.lastFlick = null; g.bags = []; g.interrupts = []; g.final = null; g.coWinners = []; g.planWin = null;
 }
 function resetGame(g) {
@@ -403,6 +411,12 @@ function actSub(g, p, value) {
       log(g, `${p.name}: 돌려돌려 돌림판! 판이 ${sub.k * 90}° 돌아갑니다`);
       break;
     }
+    case 'stock': {
+      if (!['W', 'L', 'T', 'H'].includes(value)) throw E('주식을 고르세요');
+      lim(p).stock = { name: value, v: 5 }; fxe(g, 'stock', { by: p.idx });
+      log(g, `📈 ${p.name}: ${value}사 주식을 샀습니다 (5)`);
+      break;
+    }
     case 'rank': {
       const v = Number(value);
       if (!(v >= 0 && v < g.players.length) || sub.picks.includes(v)) throw E('이미 고른 플레이어입니다');
@@ -503,6 +517,20 @@ function acquire(g, p, id) {
       break;
     }
     case 'lucio': convertPiece(p, 'lucio'); break;
+    case 'ahab': { const c = convertPiece(p, 'ahab'); if (c) { c.sac = 0; c.bloom = false; } spawnWhale(g, 'ahab', null); break; }
+    case 'sinclair': { const c = convertPiece(p, 'sinclair'); if (c) { c.egg = 3; c.mark = 0; c.form = 'egg'; } break; }
+    case 'fixer': {
+      const c = convertPiece(p, 'fixer');
+      if (c) { c.lv = 0; c.ex = 0; if (Math.random() < 0.04) becomeTrait(g, p, c, 'black'); }
+      break;
+    }
+    case 'stock': return { type: 'stock', aug: 'stock' };
+    case 'matthias':
+      g.matthias = true;
+      for (const q of g.players) if (isActive(q)) { q.pieces.push(mkPiece(q)); q.npieces = q.pieces.length; }
+      fxe(g, 'matthias', { by: p.idx });
+      log(g, `🕊 ${p.name}: 저 마티아스가 여러분 가정에 평화를 빕니다! 모든 플레이어의 말 +1, 이동 +1`);
+      break;
     case 'valen': { const c = convertPiece(p, 'valen'); if (c) c.yeji = 10; break; }
     case 'lord': {
       const c = convertPiece(p, 'lord');
@@ -573,6 +601,8 @@ function mapNodeLists(g, f) {
   const mp = (n) => { const m = f(n); return m === 0 ? null : m; };
   g.poops = g.poops.map((q) => ({ ...q, node: mp(q.node) })).filter((q) => q.node);
   g.party = g.party.map((q) => ({ ...q, node: mp(q.node) })).filter((q) => q.node);
+  (g.whales || []).forEach((w) => { const m = f(w.node); w.node = m === 0 ? 1 + rnd(28) : m; });
+  (g.lights || []).forEach((w) => { const m = f(w.node); w.node = m === 0 ? 1 : m; });
   for (const q of g.players) {
     q.st.garlic = q.st.garlic.map(mp).filter(Boolean);
     q.st.garlicGot = q.st.garlicGot.map(mp).filter(Boolean);
@@ -628,6 +658,7 @@ function onDeaths(g, owner, n) {
 }
 // stack: 같은 칸 owner의 말들. 죽인 말 수 반환
 function killStack(g, owner, stack, killer) {
+  if (killer && killer !== owner && stack.some((x) => x.type === 'sinclair' && x.egg > 0)) return 0; // 알 상태는 공격당하지 않음
   if (killer && killer !== owner) {
     const v = stack.find((x) => x.type === 'valen' && x.yeji > 0);
     if (v && Math.random() < v.yeji * 0.1) { v.yeji--; EVADED = true; log(g, `🔮 ${owner.name}의 발렌치나가 공격을 예지해 회피했습니다! (예지안 ${v.yeji})`); return 0; }
@@ -637,10 +668,18 @@ function killStack(g, owner, stack, killer) {
     log(g, `🛡 ${owner.name}의 말뭉치가 보호막으로 죽음을 막았습니다`);
     return 0;
   }
-  const victims = has(owner, 'friendshield') ? [stack[stack.length - 1]] : stack;
+  let victims = has(owner, 'friendshield') ? [stack[stack.length - 1]] : stack;
+  const ahab = stack.find((x) => x.type === 'ahab' && !x.bloom);
+  if (ahab && stack.length > 1) {
+    const sac = stack.filter((x) => x !== ahab).pop(); victims = [sac]; ahab.sac = (ahab.sac || 0) + 1;
+    log(g, `🐋 ${owner.name}의 에이해브가 업힌 말을 희생해 살아남았습니다 (희생 ${ahab.sac}/3)`); fxe(g, 'sacrifice', { node: ahab.pos });
+    if (ahab.sac >= 3) bloomAhab(g, owner, ahab);
+  }
+  victims = distortSurvive(g, owner, victims, killer);
+  if (!victims.length) return 0;
   const queenDied = victims.some((x) => x.type === 'queen');
   const deathNode = victims[0].pos;
-  victims.forEach(sendHome);
+  victims.forEach((x) => { if (x.type === 'fixer') fixerLose(x); sendHome(x); });
   limOnDeath(g, owner, victims, deathNode);
   onDeaths(g, owner, victims.length);
   log(g, `☠ ${owner.name}의 말 ${victims.length}개 사망${killer && killer !== owner ? ` (by ${killer.name})` : ''}`);
@@ -740,12 +779,16 @@ function effSteps(p, res) {
   }
   return s;
 }
+function backSteps(group, res) { return group.some((y) => y.type === 'fixer' && (y.lv || 0) >= 4) ? STEPS[res] - 2 : 0; }
 function usable(g, p, res) {
   return p.pieces.some((x) => {
     if (x.done || x.type === 'pawn') return false;
     const grp = groupOf(p, x);
     if (grp.some((y) => isFrozen(g, y))) return false;
-    return !!moveFor(grp, groupSteps(g, p, res, grp), has(p, 'tianma'));
+    const s = groupSteps(g, p, res, grp);
+    if (s !== 0 && moveFor(grp, s, has(p, 'tianma'))) return true;
+    const b = backSteps(grp, res);
+    return b >= 1 && !!moveFor(grp, -b, has(p, 'tianma'));
   });
 }
 
@@ -758,7 +801,15 @@ function applyMove(g, p, group, steps, label, opts) {
   let nodes = mv.nodes; let stopped = false;
   for (let i = 0; i < nodes.length; i++) {
     const pi = g.poops.findIndex((q) => q.node === nodes[i] && q.owner !== p.idx);
-    if (pi >= 0) { g.poops.splice(pi, 1); nodes = nodes.slice(0, i + 1); stopped = true; log(g, `💩 ${p.name}의 말이 똥을 밟고 멈췄습니다!`); break; }
+    if (pi >= 0) { const pp = g.poops.splice(pi, 1)[0]; nodes = nodes.slice(0, i + 1); stopped = true; log(g, pp.kind === 'crack' ? `🔔 ${p.name}의 말이 진동하는 균열에 걸려 멈췄습니다!` : `💩 ${p.name}의 말이 똥을 밟고 멈췄습니다!`); break; }
+  }
+  // 꺼지지 않는 장례식: 적 말이 있는 칸을 지나가면 그 말이 화상 2
+  if (group.some((x) => x.type === 'ego' && x.ego === 'burn')) {
+    for (const nd of nodes.slice(0, -1)) for (const q of g.players) {
+      if (q === p || !isActive(q)) continue;
+      const st = q.pieces.filter((x) => !x.done && x.pos === nd);
+      if (st.length) { st.forEach((x) => { x.burn = 2; }); fxe(g, 'burn', { node: nd }); log(g, `🔥 ${q.name}의 말이 화상을 입었습니다 (2)`); }
+    }
   }
   // 웅녀: 마늘 칸에 정확히 멈춰야 획득, 지나가기만 하면 위치가 드러남
   const landing = ((mv.home || mv.finished) && !stopped) ? null : nodes[nodes.length - 1];
@@ -819,7 +870,8 @@ function partyTrigger(g, p, group, np) {
     const mv = moveFor(group, 3, has(p, 'tianma')); if (mv) applyMove(g, p, group, 3, '보상', { mv, noTrigger: true });
   }
 }
-function actMove(g, p, ri, pid) {
+function actMove(g, p, ri, pid, opt) {
+  opt = opt || {};
   assertTurn(g, p);
   const tn = g.tn;
   if (tn.throws > 0) throw E('먼저 윷을 던지세요');
@@ -830,14 +882,27 @@ function actMove(g, p, ri, pid) {
   if (piece.type === 'pawn') throw E('폰은 직접 움직일 수 없습니다');
   const group = groupOf(p, piece);
   if (group.some((x) => isFrozen(g, x))) throw E('멈춰 있는 말입니다');
-  const steps = groupSteps(g, p, res, group);
+  let steps = groupSteps(g, p, res, group);
+  if (opt.back) {
+    const b = backSteps(group, res);
+    if (b < 1) throw E('이 윷 결과로는 뒤로 갈 수 없습니다 (5급 이상 해결사는 던진 결과 -2칸)');
+    steps = -b;
+  } else if (steps === 0) throw E('이동 칸이 0 이하라 움직일 수 없습니다');
+  else if (opt.dist != null && steps > 1 && group.some((x) => x.type === 'sinclair' && x.form === 'any')) {
+    const d = Math.floor(Number(opt.dist));
+    if (Number.isFinite(d)) steps = Math.max(1, Math.min(steps, d));
+  }
   const mv = moveFor(group, steps, has(p, 'tianma'));
   if (!mv) throw E(group.some((x) => x.type === 'queen') ? '중전마마는 완주할 수 없습니다' : '그 말은 그렇게 움직일 수 없습니다');
   tn.queue.splice(ri, 1);
   const taxed = group.find((x) => x.tax != null && x.tax !== p.idx);
   if (taxed) { const Cc = g.players[taxed.tax]; if (Cc && isActive(Cc)) { Cc.st.bank.push(res); log(g, `⏳ ${p.name}의 말이 시간 징수를 당해 '${res}'이(가) ${Cc.name}의 보관함으로 갑니다 (말은 1칸만 이동)`); } }
   LASTCAP = null;
+  const hadCharge = lim(p).chargeUse > 0;
   applyMove(g, p, group, steps, res, { mv, backdo: res === '백도' });
+  group.forEach((x) => { x.sink = false; if (x.harp > 0) x.harp--; });
+  if (hadCharge) lim(p).chargeUse = 0;
+  p.pieces.forEach((x) => { if (x.type === 'ego' && x.ego === 'breath') x.chain = group.includes(x) ? (x.chain || 0) + 1 : 0; });
   if (g.phase === 'turn' && p.alive) limAfterMove(g, p, group, res, steps, piece, LASTCAP);
   afterAction(g);
 }
@@ -916,7 +981,11 @@ function actThrow(g, p, o) {
   const out = [], shown = [];
   for (let i = 0; i < count; i++) {
     let r, faces;
-    if (forced) { r = forced; faces = facesFor(r, p.sticks); } else { const o2 = roll(p); r = o2.r; faces = o2.faces; }
+    if (forced) { r = forced; faces = facesFor(r, p.sticks); } else {
+      let o2 = roll(p), guard = 0;
+      while (g.pool != null && g.pool !== p.idx && (o2.r === '윷' || o2.r === '모') && guard++ < 40) o2 = roll(p); // 피 웅덩이: 윷·모 금지
+      r = o2.r; faces = o2.faces;
+    }
     if (has(p, 'twin') && r === '모') { r = '도'; faces = facesFor('도', p.sticks); log(g, `${p.name}: 이도류! 모가 나왔지만 도로 바뀝니다`); }
     out.push(r); shown.push({ res: r, faces });
   }
@@ -1168,6 +1237,85 @@ function actAbility(g, p, a, o) {
       log(g, `${p.name}: 💀 네크로맨서! ${t.name}이(가) 부활했습니다`);
       break;
     }
+    case 'harpoon': {
+      need('ahab');
+      const ab = p.pieces.find((x) => x.type === 'ahab' && x.bloom && !x.done);
+      if (!ab) throw E('개화한 에이해브(가스하푼)가 필요합니다');
+      if (tn.harp) throw E('이번 차례에 이미 작살을 던졌습니다');
+      const f = findPiece(g, o.tpid);
+      if (!f || f.q === p || f.x.done || f.x.pos <= 0) throw E('판 위의 다른 플레이어 말을 고르세요');
+      groupOf(f.q, f.x).forEach((x) => { x.harp = 2; });
+      tn.harp = true; fxe(g, 'harpoon', { node: f.x.pos, by: p.idx });
+      log(g, `🔱 ${p.name}: 작살을 던졌습니다! ${f.q.name}의 말은 2번 이동할 때까지 이동 -1`);
+      break;
+    }
+    case 'ego': {
+      const x = myPiece(); if (x.type !== 'ego') throw E('E.G.O가 개화한 말을 고르세요');
+      tn.egoUsed = tn.egoUsed || {};
+      if (tn.egoUsed[x.id]) throw E('이번 차례에 이미 사용했습니다');
+      if (x.ego === 'bleed') {
+        if (x.pos <= 0) throw E('판 위의 말이어야 합니다');
+        const nodes = [...rayNodes(p, x, 1), ...rayNodes(p, x, -1)]; let c = 0;
+        for (const n of nodes) for (const { q, st } of enemyStacksAt(g, p, n)) { st.forEach((y) => { y.bleed = 2; }); c += st.length; }
+        fxe(g, 'slash', { by: p.idx, from: x.pos, nodes });
+        log(g, `🌹 ${p.name}: 가시 돋친 입맞춤! 앞뒤로 참격을 날려 ${c}개의 말에 출혈 2`);
+      } else if (x.ego === 'tower') {
+        if (x.pos <= 0) throw E('판 위의 말이어야 합니다');
+        if ((x.uses || 0) >= 3) throw E('균열은 총 3번까지 만들 수 있습니다');
+        x.uses = (x.uses || 0) + 1;
+        g.poops.push({ node: x.pos, owner: p.idx, kind: 'crack' });
+        fxe(g, 'crack', { by: p.idx, node: x.pos });
+        log(g, `🔔 ${p.name}: 무너지는 종루! ${x.pos}번 칸에 진동하는 균열 (${x.uses}/3)`);
+      } else if (x.ego === 'charge') {
+        if (!(x.charge > 0)) throw E('충전 스택이 없습니다');
+        lim(p).chargeUse = x.charge; fxe(g, 'charge', { by: p.idx, n: x.charge });
+        log(g, `⚡ ${p.name}: 폭풍의 전야! 다음 이동 +${x.charge}`); x.charge = 0;
+      } else throw E('이 E.G.O는 자동으로 발동합니다');
+      tn.egoUsed[x.id] = true;
+      break;
+    }
+    case 'trait': {
+      const x = myPiece(); if (x.type !== 'fixer' || x.trait !== 'yellow') throw E('노란작살 특색의 말을 고르세요');
+      if (x.pos <= 0) throw E('판 위의 말이어야 합니다');
+      if (x.cd > 0) throw E(`노란작살은 ${x.cd}차례 뒤에 다시 쓸 수 있습니다`);
+      const grp = groupOf(p, x); unfrozen(grp);
+      if (o.mode === 'dash') {
+        const mv = moveFor(grp, 3, has(p, 'tianma'));
+        if (!mv || !mv.nodes.length) throw E('앞으로 돌진할 수 없습니다');
+        fxe(g, 'dash', { by: p.idx, from: x.pos, nodes: mv.nodes });
+        const c = hitNodes(g, p, mv.nodes);
+        log(g, `🔱 ${p.name}: 노란작살 돌진! 지나간 자리의 적 말 ${c}개 처치 (추가 던지기 없음)`);
+        if (p.alive) applyMove(g, p, grp, 3, '노란작살 돌진', { mv, cap: { only: -1 }, noWhale: true });
+      } else if (o.mode === 'drag') {
+        const f = findPiece(g, o.tpid);
+        if (!f || f.q === p || f.x.done || f.x.pos <= 0) throw E('판 위의 다른 플레이어 말을 고르세요');
+        const tg = groupOf(f.q, f.x); const mv = moveFor(tg, -3, has(f.q, 'tianma'));
+        if (!mv) throw E('끌어올 수 없습니다');
+        fxe(g, 'drag', { by: p.idx, from: x.pos, node: f.x.pos });
+        log(g, `🔱 ${p.name}: 작살을 던져 ${f.q.name}의 말을 3칸 뒤로 끌고 갑니다`);
+        applyMove(g, f.q, tg, -3, '작살에 끌려감', { mv, cap: { only: -1 }, noTrigger: true, noWhale: true });
+      } else throw E('돌진 또는 작살 던지기를 고르세요');
+      x.cd = 2;
+      break;
+    }
+    case 'weapon': {
+      const x = myPiece(); if (x.type !== 'fixer' || x.trait !== 'black') throw E('검은침묵의 말을 고르세요');
+      if (x.pos <= 0) throw E('판 위의 말이어야 합니다');
+      if (tn.weaponUsed) throw E('이번 차례에 이미 무기를 썼습니다');
+      unfrozen(groupOf(p, x));
+      weaponAttack(g, p, x, o); tn.weaponUsed = true;
+      break;
+    }
+    case 'light': {
+      need('light');
+      const x = boardPiece();
+      if (g.lights.some((l) => l.owner === p.idx)) throw E('이미 초록빛이 있습니다');
+      const node = x.pos; sendHome(x); onDeaths(g, p, 1);
+      const L = { id: ++g.lid, node, owner: p.idx, left: 3 }; g.lights.push(L);
+      log(g, `💚 ${p.name}: 말 하나를 바쳐 ${node}번 칸에 영롱한 초록빛을 피웠습니다 (3차례)`);
+      pullLight(g, L);
+      break;
+    }
     default: throw E('알 수 없는 능력입니다');
   }
   afterAction(g);
@@ -1242,7 +1390,8 @@ function endTurn(g) {
   for (let k = 1; k <= n; k++) { const pj = (ci + k) % n; const j = ord[pj]; if (isActive(g.players[j])) { nxt = j; wrap = pj <= ci; break; } }
   if (nxt < 0) { checkWins(g); return; }
   if (wrap) {
-    g.round++; expireDisguises(g);
+    g.round++; expireDisguises(g); roundStart(g);
+    if (g.phase === 'ended') return;
     if (g.round > MAX_ROUND) { timeUp(g); return; }
     if (ROUND_PICKS[g.round]) { startPick(g); return; }
   }
@@ -1403,6 +1552,8 @@ function pubLim(g, q, mine) {
   if (has(q, 'hunt')) { o.coffin = l.coffin || 0; o.timers = (l.timers || []).length; }
   if (has(q, 'ksa') || has(q, 'hunt')) o.graves = (l.graves || []).filter((gv) => q.pieces.some((x) => x.id === gv.id && !x.done && x.pos === 0)).map((gv) => gv.node);
   if (has(q, 'lord')) o.lordMark = l.lordMark || 0;
+  if (has(q, 'stock') && l.stock) o.stock = l.stock;
+  o.chargeUse = l.chargeUse || 0;
   if (has(q, 'yakji')) { o.bio = l.bio || 0; o.art = !!l.art; }
   if (has(q, 'geomji')) { o.qdone = l.qdone || 0; if (mine && l.q) o.quest = { text: QUESTS[l.q.id], progress: questProgress(g, q) }; }
   if (mine) {
@@ -1448,7 +1599,7 @@ const QUESTS = [
   '내 말 3개를 한 칸에 겹치기',
   '백도·윷·모 중 아무거나 2번 사용하기',
 ];
-let EVADED = false, NOBAG = false, LASTCAP = null;
+let EVADED = false, NOBAG = false, LASTCAP = null, ATKGRP = null;
 function newQuest(g, p) {
   const l = lim(p); l.used = l.used || [];
   const foes = activeList(g).filter((q) => q !== p);
@@ -1496,6 +1647,246 @@ function questProgress(g, p) {
     default: return '';
   }
 }
+
+// ========== 림버스 2차: 에이해브 · 싱클레어 · 뒤틀림/E.G.O · 해결사 · 주식 · 빛 · 마티아스 ==========
+function fxe(g, kind, d) {
+  g.fxSeq = (g.fxSeq || 0) + 1; g.fx = g.fx || [];
+  g.fx.push(Object.assign({ seq: g.fxSeq, kind }, d || {}));
+  if (g.fx.length > 30) g.fx.shift();
+}
+const EGO_KEYS = ['bleed', 'breath', 'tower', 'rupture', 'sink', 'charge', 'burn'];
+const EGO_NAME = { bleed: '가시 돋친 입맞춤', breath: '무한한 궤적', tower: '무너지는 종루', rupture: '필연적인 균열', sink: '가라앉은 독백', charge: '폭풍의 전야', burn: '꺼지지 않는 장례식' };
+const TRAIT_NAME = { red: '붉은시선', yellow: '노란작살', indigo: '쪽빛노인', black: '검은침묵' };
+const WEAPONS = ['대검', '랜스&건틀릿', '산탄총&리볼버', '단검', '쌍검', '태도', '도끼&메이스', '망치'];
+const SOZOK = ['jungji', 'tsa', 'yakji', 'geomji'];
+const findPiece = (g, pid) => { for (const q of g.players) { const x = q.pieces.find((y) => y.id === pid); if (x) return { q, x }; } return null; };
+
+// 고래
+function spawnWhale(g, kind, imm) {
+  const node = 1 + rnd(28);
+  g.whales.push({ id: ++g.wid, node, kind, imm });
+  fxe(g, 'whale', { node, act: 'spawn' });
+  log(g, `🐋 고래가 ${kind === 'indigo' ? '연못 ' : ''}어딘가에 나타났습니다`);
+}
+function whaleKill(g, w) {
+  for (const o of g.players) {
+    if (!isActive(o) || o.idx === w.imm) continue;
+    const st = o.pieces.filter((x) => !x.done && x.pos === w.node && !(x.type === 'sinclair' && x.egg > 0));
+    if (!st.length) continue;
+    log(g, `🐋 고래가 ${w.node}번 칸의 ${o.name}의 말을 덮쳤습니다!`);
+    fxe(g, 'whalehit', { node: w.node });
+    killStack(g, o, st, null);
+  }
+}
+function nodesWithin(n, d) {
+  const seen = new Set([n]); let fr = [n];
+  for (let i = 0; i < d; i++) { const nx = []; fr.forEach((a) => (NEI[a] ? [...NEI[a]] : []).forEach((b) => { if (b !== 0 && !seen.has(b)) { seen.add(b); nx.push(b); } })); fr = nx; }
+  seen.delete(n); return [...seen];
+}
+function whaleHit(g, p, group, np) {
+  for (const w of g.whales.slice()) {
+    if (w.node !== np || w.imm === p.idx) continue;
+    const ab = group.find((x) => x.type === 'ahab');
+    if (w.kind === 'ahab' && has(p, 'ahab') && ab) {
+      g.whales.splice(g.whales.indexOf(w), 1);
+      log(g, `🐋 ${p.name}의 에이해브가 고래를 잡았습니다!`); fxe(g, 'whalecatch', { node: np });
+      if (!ab.bloom) bloomAhab(g, p, ab);
+    } else {
+      let n; do { n = 1 + rnd(28); } while (n === w.node);
+      log(g, `🐋 고래가 공격을 받고 잠수했다가 ${n}번 칸에 다시 나타났습니다`);
+      w.node = n; fxe(g, 'whale', { node: n, act: 'dive' });
+      whaleKill(g, w);
+    }
+  }
+}
+function bloomAhab(g, p, x) {
+  if (x.bloom) return; x.bloom = true;
+  fxe(g, 'gas', { by: p.idx, pid: x.id });
+  log(g, `🔱 ${p.name}: 개화 E.G.O 가스하푼! 에이해브의 모습이 바뀌었습니다`);
+}
+// 뒤틀림 / E.G.O 개화
+function bloomEgo(g, p, x, key) {
+  x.type = 'ego'; x.ego = key || sample(EGO_KEYS); x.chain = 0; x.charge = 0; x.uses = 0;
+  fxe(g, 'ego', { by: p.idx, ego: x.ego, pid: x.id, name: EGO_NAME[x.ego] });
+  log(g, `🌸 ${p.name}: E.G.O 개화! <${EGO_NAME[x.ego]}>`);
+}
+function distortSurvive(g, owner, victims, killer) {
+  if (!has(owner, 'distort')) { ATKGRP = null; return victims; }
+  const atk = ATKGRP; ATKGRP = null;
+  const rest = []; let counter = false;
+  for (const x of victims) {
+    if (x.type === 'queen') { rest.push(x); continue; }
+    const r = Math.random();
+    if (r < 0.5) { x.type = 'distort'; counter = true; fxe(g, 'distort', { by: owner.idx, node: x.pos, pid: x.id }); log(g, `🌀 ${owner.name}의 말이 죽지 않고 뒤틀렸습니다!`); }
+    else if (r < 0.6) bloomEgo(g, owner, x);
+    else rest.push(x);
+  }
+  if (counter && atk && killer && killer !== owner && DEPTH < 2) {
+    const alive = atk.filter((x) => !x.done && x.pos > 0);
+    if (alive.length) { DEPTH++; log(g, `🌀 뒤틀림이 ${killer.name}의 말을 공격합니다!`); killStack(g, killer, alive, owner); DEPTH--; }
+  }
+  return rest;
+}
+let DEPTH = 0;
+// 해결사
+function fixerGain(g, p, x, n) {
+  while (n-- > 0) {
+    if ((x.lv || 0) < 8) { x.lv = (x.lv || 0) + 1; if (x.lv === 4) { fxe(g, 'lv5', { by: p.idx, pid: x.id }); log(g, `🎖 ${p.name}: 해결사가 5급이 되었습니다! 이동 +1, 뒤로 이동 가능`); } }
+    else x.ex = (x.ex || 0) + 1;
+  }
+  log(g, `🎖 ${p.name}: 해결사 ${9 - (x.lv || 0)}급${(x.ex || 0) ? ` (+${x.ex}/3)` : ''}`);
+  if ((x.ex || 0) >= 3 && !x.trait) becomeTrait(g, p, x, sample(['red', 'yellow', 'indigo']));
+}
+function fixerLose(x) { if (x.trait) return; if ((x.ex || 0) > 0) x.ex = 0; else x.lv = Math.max(0, (x.lv || 0) - 1); }
+function becomeTrait(g, p, x, trait) {
+  x.trait = trait; x.lv = 8; x.ex = 0;
+  fxe(g, 'trait', { by: p.idx, trait, pid: x.id, name: TRAIT_NAME[trait] });
+  log(g, `✨ ${p.name}: 해결사가 특색 <${TRAIT_NAME[trait]}>이(가) 되었습니다!`);
+  if (trait === 'red') { g.pool = p.idx; log(g, '🩸 모든 칸이 피 웅덩이로 잠겼습니다. 다른 플레이어는 윷과 모를 낼 수 없습니다'); }
+  if (trait === 'indigo') {
+    g.pond = true;
+    if (!has(p, 'lake')) p.augs.push('lake');
+    lim(p).lake = { rule: rnd(RULES.length) };
+    log(g, `🌊 ${p.name}: 대호수의 규칙을 획득하고 모든 칸이 연못이 되었습니다`);
+    for (let i = 0; i < 4; i++) spawnWhale(g, 'indigo', p.idx);
+  }
+  if (trait === 'yellow') x.cd = 0;
+  if (trait === 'black') { x.weapon = sample(WEAPONS); x.blackT = 3; log(g, `🖤 ${p.name}: 검은침묵... 3차례 뒤 소속의 말이 절반 죽습니다`); }
+}
+// 앞뒤 칸 (소유자 방향 기준)
+function aroundNodes(q, x, n, exact) {
+  const mir = has(q, 'tianma'); const out = [];
+  for (const d of [1, -1]) {
+    const mv = moveFor([x], d * n, mir); if (!mv) continue;
+    const ns = mv.nodes.filter((nn) => nn > 0);
+    if (exact) { if (!mv.finished && !mv.home && ns.length === n) out.push(ns[n - 1]); } else out.push(...ns);
+  }
+  return [...new Set(out)];
+}
+function nthNode(q, x, k) {
+  const mv = moveFor([x], k, has(q, 'tianma'));
+  if (!mv || mv.finished || mv.home || mv.nodes.length !== Math.abs(k)) return null;
+  return mv.nodes[mv.nodes.length - 1];
+}
+function rayNodes(q, x, d) {
+  const mir = has(q, 'tianma');
+  const v = { pos: mir ? mirNode(x.pos) : x.pos, route: x.route };
+  const first = d > 0 ? stepFrom(v, 1) : stepBack(v, 1);
+  if (!first || first.finished || first.home || !first.nodes.length) return [];
+  const a = v.pos, b = first.nodes[0];
+  for (const line of LINES) {
+    const i = line.indexOf(a), j = line.indexOf(b);
+    if (i < 0 || j < 0 || Math.abs(i - j) !== 1) continue;
+    const dir = j - i, out = [];
+    for (let k = j; k >= 0 && k < line.length; k += dir) { if (line[k] === 0) break; out.push(line[k]); }
+    return mir ? out.map(mirNode) : out;
+  }
+  return [];
+}
+const enemyStacksAt = (g, p, n) => { const r = []; for (const q of g.players) { if (q === p || !isActive(q)) continue; const st = q.pieces.filter((y) => !y.done && y.pos === n); if (st.length) r.push({ q, st }); } return r; };
+function hitNodes(g, p, nodes) {
+  let c = 0;
+  for (const n of nodes) for (const { q, st } of enemyStacksAt(g, p, n)) c += augKill(g, q, st, p);
+  return c;
+}
+// 빛
+function pullLight(g, L) {
+  const near = nodesWithin(L.node, 1);
+  for (const q of g.players) {
+    if (!isActive(q)) continue;
+    for (const x of q.pieces) {
+      if (x.done || x.pos <= 0) continue;
+      if (x.pos === L.node) { x.lit = L.id; continue; }
+      if (near.includes(x.pos)) { x.pos = L.node; setRoute(x, has(q, 'tianma') ? mirNode(L.node) : L.node); x.lit = L.id; }
+    }
+  }
+  fxe(g, 'light', { node: L.node });
+}
+function lightTick(g, p) {
+  for (const L of g.lights.slice()) {
+    if (L.owner !== p.idx) continue;
+    L.left--;
+    if (L.left <= 0) {
+      g.lights.splice(g.lights.indexOf(L), 1);
+      g.players.forEach((q) => q.pieces.forEach((x) => { if (x.lit === L.id) x.lit = null; }));
+      log(g, '💚 영롱한 초록빛이 사라졌습니다'); fxe(g, 'lightoff', { node: L.node });
+    } else pullLight(g, L);
+  }
+}
+// 라운드 시작(= 시작 플레이어의 차례로 돌아올 때): 고래 이동, 뒤틀림 이동
+function roundStart(g) {
+  const saved = g.tn;
+  g.tn = { queue: [], throws: 0, counts: {}, thrown: true, sys: true, moves: 0 };
+  for (const w of g.whales.slice()) {
+    const cand = nodesWithin(w.node, 2); if (!cand.length) continue;
+    w.node = sample(cand); fxe(g, 'whale', { node: w.node, act: 'move' });
+    whaleKill(g, w);
+  }
+  for (const q of g.players) {
+    if (!isActive(q)) continue;
+    const done = new Set();
+    for (const x of q.pieces.slice()) {
+      if (x.done || x.type !== 'distort' || x.pos <= 0 || done.has(x.id) || !isActive(q)) continue;
+      const grp = groupOf(q, x); grp.forEach((y) => done.add(y.id));
+      if (grp.some((y) => isFrozen(g, y))) continue;
+      const dirs = shuffle([1, -1]);
+      for (const d of dirs) {
+        const mv = moveFor(grp, d, has(q, 'tianma'));
+        if (mv && !mv.home && !mv.finished && mv.nodes.length) { applyMove(g, q, grp, d, '뒤틀림', { mv, noTrigger: true }); break; }
+      }
+    }
+  }
+  g.tn = saved;
+}
+// 무기 공격 (검은침묵)
+function weaponAttack(g, p, x, o) {
+  const w = x.weapon; const grp = groupOf(p, x); const mir = has(p, 'tianma');
+  const f = (k) => nthNode(p, x, k);
+  const noCap = { cap: { only: -1 }, noWhale: true };
+  let kills = 0, nodes = [];
+  const adv = (k) => {
+    const mv = moveFor(grp, k, mir);
+    if (!mv || mv.finished || mv.home) return false;
+    applyMove(g, p, grp, k, `${w} 전진`, { mv, cap: { only: -1 }, noTrigger: true });
+    return true;
+  };
+  const range = (list) => { nodes = list.filter(Boolean); if (!nodes.some((n) => enemyStacksAt(g, p, n).length)) throw E('범위 안에 적이 없습니다'); kills = hitNodes(g, p, nodes); };
+  switch (w) {
+    case '대검': range([f(1), f(2)]); break;
+    case '랜스&건틀릿': {
+      if (!adv(3)) throw E('3칸 전진할 수 없습니다');
+      const near = aroundNodes(p, x, 1).concat([x.pos]).filter((n) => enemyStacksAt(g, p, n).length);
+      const t = near.includes(Number(o.node)) ? Number(o.node) : near[0];
+      nodes = t ? [t] : []; if (t) kills = hitNodes(g, p, [t]);
+      break;
+    }
+    case '산탄총&리볼버': {
+      const d = o.dir === 'b' ? -1 : 1;
+      const n1 = nthNode(p, x, d), n2 = nthNode(p, x, 2 * d);
+      if (n1 && enemyStacksAt(g, p, n1).length) { nodes = [n1, n2].filter(Boolean); kills = hitNodes(g, p, nodes); }
+      else range([n2]);
+      break;
+    }
+    case '단검': {
+      let loops = 0;
+      while (loops++ < 5) {
+        if (!adv(1)) { if (loops === 1) throw E('앞으로 갈 수 없습니다'); break; }
+        const n = f(1); if (!n) break; nodes.push(n);
+        const c = hitNodes(g, p, [n]); kills += c;
+        if (c <= 0 || !p.alive) break;
+      }
+      break;
+    }
+    case '쌍검': range([f(1), f(-1)]); break;
+    case '태도': range([f(-1), f(-2)]); break;
+    case '도끼&메이스': range([f(3)]); break;
+    case '망치': range([f(2), f(-2)]); break;
+    default: throw E('무기가 없습니다');
+  }
+  fxe(g, 'weapon', { by: p.idx, name: w, nodes, from: x.pos, hit: kills });
+  log(g, `🗡 ${p.name}(검은침묵): ${w}! ${kills ? `적 말 ${kills}개 처치` : '명중 없음'} (추가 던지기 없음)`);
+}
+
 function lakeCheck(g, v, rule) {
   if (!isActive(v)) return;
   const tn = g.tn; if (!tn) return;
@@ -1548,14 +1939,24 @@ function settleInterrupts(g, granted) { g.interrupts.forEach((it) => { if (it.fr
 // 말이 적을 잡은 칸 처리 (applyMove / 흑수 배치 / 중지 / 부활 공용)
 function captureAt(g, p, group, np, opts) {
   opts = opts || {};
-  const res = { killed: 0, bonus: 0, owners: [] };
+  const res = { killed: 0, bonus: 0, owners: [], gain: 0 };
+  const egg = group.some((x) => x.type === 'sinclair' && x.egg > 0);
+  if (!egg && !opts.noWhale) whaleHit(g, p, group, np);
   if (group.some((x) => x.weak)) return res; // 쇠약한 혈귀는 적을 잡을 수 없음
+  if (egg) return res;                        // 알 상태는 적을 잡을 수 없음
+  const hits = [];
   for (const o of g.players) {
     if (o === p || !isActive(o)) continue;
     if (opts.only != null && o.idx !== opts.only) continue;
     const stack = o.pieces.filter((x) => !x.done && x.pos === np);
     if (!stack.length) continue;
     if (has(p, 'peace') || has(o, 'peace')) continue;
+    if (stack.some((x) => x.type === 'sinclair' && x.egg > 0)) continue;
+    if (stack.some((x) => x.type === 'ahab' && x.bloom)) {
+      log(g, `🔱 ${o.name}의 가스하푼이 공격을 되받아쳤습니다!`); fxe(g, 'reflect', { node: np });
+      killStack(g, p, group, o);
+      return res;
+    }
     if (stack.length === 1 && stack[0].type === 'lucio' && group.length === 1) {
       log(g, `🗡 ${o.name}의 루치오가 공격을 되받아쳤습니다!`);
       killStack(g, p, group, o);
@@ -1566,13 +1967,30 @@ function captureAt(g, p, group, np, opts) {
       log(g, `⏳ ${p.name}(T사): ${o.name}의 말이 시간 징수 상태가 되었습니다`);
       continue;
     }
-    EVADED = false;
+    hits.push({ o, st: stack, around: aroundNodes(o, stack[0], 1) });
+    const gain = stack.some((x) => x.type !== 'normal' && x.type !== 'distort') ? 2 : 1;
+    EVADED = false; ATKGRP = group;
     const k = killStack(g, o, stack, p);
+    ATKGRP = null;
     if (EVADED) { EVADED = false; log(g, `🔮 공격한 ${p.name}의 말이 예지에 걸려 죽습니다`); killStack(g, p, group, o); return res; }
     if (k > 0) {
-      res.killed += k; res.owners.push(o.idx);
+      res.killed += k; res.owners.push(o.idx); res.gain += gain;
       if (has(p, 'treason') && o.finished > p.finished) res.bonus++;
       if (has(o, 'jungji') && !opts.noReact) queueJungji(g, o, p, np);
+    }
+  }
+  // 필연적인 균열: 공격한 말의 앞뒤 칸도 공격
+  if (hits.length && group.some((x) => x.type === 'ego' && x.ego === 'rupture' && !x.done && x.pos === np)) {
+    const extra = new Set();
+    hits.forEach((h) => h.around.forEach((n) => extra.add(n)));
+    extra.delete(np);
+    for (const n of extra) for (const q of g.players) {
+      if (q === p || !isActive(q)) continue;
+      const st2 = q.pieces.filter((x) => !x.done && x.pos === n);
+      if (!st2.length) continue;
+      fxe(g, 'rupture', { node: n });
+      const k = augKill(g, q, st2, p);
+      if (k > 0) { res.killed += k; res.owners.push(q.idx); res.gain += 1; }
     }
   }
   return res;
@@ -1583,13 +2001,36 @@ function limOnCapture(g, p, group, cr) {
   if (has(p, 'lord') && group.some((x) => x.type === 'lord')) { l.lordMark = Math.min(2, (l.lordMark || 0) + 1); log(g, `👑 ${p.name}: 군주가 적을 잡아 흑수의 주인 ${l.lordMark}/2`); }
   if (has(p, 'hunt') && group.some((x) => x.type === 'hunt')) { l.coffin = (l.coffin || 0) + 1; log(g, `⚰ ${p.name}: 와일드헌트가 적을 잡아 관 ${l.coffin}`); }
   if (has(p, 'yakji')) { l.bio = Math.min(4, (l.bio || 0) + 1); log(g, `🧬 ${p.name}: 생체재료 ${l.bio}/4`); }
+  const sc = group.find((x) => x.type === 'sinclair' && x.egg <= 0 && x.form !== 'any');
+  if (sc) { sc.mark = (sc.mark || 0) + 1; log(g, `✒ ${p.name}: 싱클레어 표지 ${sc.mark}/3`); if (sc.mark >= 3) { sc.form = 'any'; fxe(g, 'anysin', { by: p.idx, pid: sc.id }); log(g, `🌌 ${p.name}: 어느 싱클레어가 되었습니다! 던진 결과 이내에서 자유롭게 이동`); } }
+  const fx = group.find((x) => x.type === 'fixer' && !x.trait);
+  if (fx) fixerGain(g, p, fx, cr.gain || 1);
   if (g.tn && g.cur === p.idx) { g.tn.cap = (g.tn.cap || 0) + cr.killed; if (g.tn.cap >= 2) lakeCheck(g, p, 1); }
 }
+const stockDelta = (v) => (v <= 0 ? -3 : v < 5 ? -1 : v >= 10 ? 3 : 1);
+const remOf = (q, x) => ROUTES[x.route].length - ROUTES[x.route].indexOf(vpos(q, x));
 function groupSteps(g, p, res, group) {
   let s = effSteps(p, res);
   if (s > 0) {
     if (has(p, 'yakji') && lim(p).art) s += 2;
     if (has(p, 'lamancha') && lim(p).land && group.some((x) => lim(p).land.includes(x.pos))) s += 1;
+    if (g.matthias) s += 1;
+    if (group.some((x) => x.type === 'ahab')) s += group.length - 1;
+    const sc = group.find((x) => x.type === 'sinclair'); if (sc && sc.egg <= 0) s += 1;
+    const fx = group.find((x) => x.type === 'fixer'); if (fx && (fx.lv || 0) >= 4) s += 1;
+    const br = group.find((x) => x.type === 'ego' && x.ego === 'breath'); if (br) s += Math.min(5, br.chain || 0);
+    if (lim(p).chargeUse > 0) s += lim(p).chargeUse;
+    if (has(p, 'stock') && lim(p).stock) s += stockDelta(lim(p).stock.v);
+    for (const q of g.players) {
+      if (q === p || !isActive(q)) continue;
+      const rf = q.pieces.find((x) => x.type === 'fixer' && x.trait === 'red' && !x.done && x.pos > 0);
+      if (rf && group.some((x) => x.pos > 0 && remOf(p, x) < remOf(q, rf))) s -= 2;
+    }
+    if (group.some((x) => x.bleed > 0)) s -= 1;
+    if (group.some((x) => x.sink)) s -= 1;
+    if (group.some((x) => x.harp > 0)) s -= 1;
+    if (s <= 0) return 0;
+    if (group.some((x) => x.type === 'sinclair' && x.egg > 0)) s = Math.min(s, 1);
   }
   if (group.some((x) => x.tax != null || x.weak)) s = Math.sign(s) * 1;
   return s;
@@ -1618,6 +2059,7 @@ function limStartTurn(g, p) {
     outside.forEach((x) => { if ((l.blood || 0) > 0) { l.blood--; x.weak = false; } else x.weak = true; });
     if (outside.some((x) => x.weak)) log(g, `🩸 ${p.name}: 피가 모자라 일부 혈귀가 쇠약해졌습니다 (이번 차례 한 칸만 이동, 잡기 불가)`);
   }
+  limStartTurn2(g, p);
   if (l.timers && l.timers.length) {
     l.timers.forEach((t) => { t.left--; });
     for (const t of l.timers.filter((tt) => tt.left <= 0)) {
@@ -1625,6 +2067,54 @@ function limStartTurn(g, p) {
       if (x && !x.done && x.pos > 0) { sendHome(x); log(g, `☠ ${p.name}: 부활했던 말이 다시 죽었습니다`); }
     }
     l.timers = l.timers.filter((t) => t.left > 0);
+  }
+}
+
+function limStartTurn2(g, p) {
+  const l = lim(p);
+  if (has(p, 'stock') && l.stock) {
+    const d = rnd(7) - 3; l.stock.v = Math.max(-5, Math.min(15, l.stock.v + d));
+    log(g, `📈 ${p.name}: ${l.stock.name}사 주가 ${d >= 0 ? '+' : ''}${d} → ${l.stock.v} (이동 ${stockDelta(l.stock.v) >= 0 ? '+' : ''}${stockDelta(l.stock.v)})`);
+    fxe(g, 'stockmove', { by: p.idx, v: l.stock.v, d });
+  }
+  lightTick(g, p);
+  for (const x of p.pieces.slice()) {
+    if (x.done) continue;
+    if (x.bleed > 0) x.bleed--;
+    if (x.type === 'sinclair' && x.egg > 0 && x.pos > 0) {
+      x.egg--; log(g, `🥚 ${p.name}: 싱클레어의 알 ${x.egg}`);
+      if (x.egg <= 0) { x.form = 'sin'; fxe(g, 'hatch', { by: p.idx, pid: x.id }); log(g, `🐣 ${p.name}: 알이 깨지고 싱클레어가 되었습니다! 이동 +1`); }
+    }
+    if (x.type === 'ego' && x.pos > 0) {
+      if (x.ego === 'charge') { x.charge = Math.min(10, (x.charge || 0) + 1); }
+      if (x.ego === 'sink') {
+        for (const n of aroundNodes(p, x, 1)) for (const { q, st } of enemyStacksAt(g, p, n)) { st.forEach((y) => { y.sink = true; }); fxe(g, 'sink', { node: n }); log(g, `🌑 ${q.name}의 말이 침잠했습니다 (다음 이동 -1)`); }
+      }
+    }
+    if (x.type === 'fixer' && x.trait) {
+      if (x.trait === 'yellow' && x.cd > 0) x.cd--;
+      if (x.trait === 'black') {
+        x.weapon = sample(WEAPONS);
+        if (x.blackT > 0 && --x.blackT === 0) {
+          const mine = p.pieces.filter((y) => !y.done && y.pos > 0);
+          if (has(p, 'jungji') || has(p, 'tsa') || has(p, 'yakji') || has(p, 'geomji')) {
+            const k = Math.max(1, Math.floor(mine.length / 2)); fxe(g, 'blacksilence', { by: p.idx });
+            log(g, `🖤 ${p.name}: 검은침묵! 소속의 말 ${Math.min(k, mine.length)}개가 사라집니다`);
+            shuffle(mine).slice(0, k).forEach((y) => { const gg = p.pieces.filter((z) => !z.done && z.pos === y.pos); if (gg.length && y.pos > 0) killStack(g, p, [y], null); });
+          } else log(g, `🖤 ${p.name}: 검은침묵... 소속 증강이 없어 아무 일도 없었습니다`);
+        }
+      }
+    }
+  }
+  // 화상: 내 차례가 시작될 때마다 1칸 후퇴
+  const burned = new Set();
+  for (const x of p.pieces.slice()) {
+    if (x.done || x.pos <= 0 || !(x.burn > 0) || burned.has(x.id) || !p.alive) continue;
+    const grp = groupOf(p, x); grp.forEach((y) => burned.add(y.id));
+    x.burn--; grp.forEach((y) => { if (y !== x && y.burn > 0) y.burn--; });
+    if (grp.some((y) => isFrozen(g, y))) continue;
+    const mv = moveFor(grp, -1, has(p, 'tianma'));
+    if (mv) { fxe(g, 'burn', { node: x.pos }); log(g, `🔥 ${p.name}: 화상으로 1칸 후퇴합니다`); applyMove(g, p, grp, -1, '화상 후퇴', { mv, noTrigger: true }); }
   }
 }
 function actInterrupt(g, p, o) {
@@ -1747,7 +2237,7 @@ function viewFor(g, me) {
   const vis = fogOn ? visibleNodes(me) : null;
   return {
     code: g.code, phase: g.phase, packs: g.packs || ['base'], chaos: g.chaos, ranking: g.ranking, round: g.round, cur: g.cur, winner: g.winner, reason: g.reason,
-    me: me.idx, ganTaek: g.ganTaek, poops: g.poops.map((q) => q.node), hpOn: g.hpOn, echo: g.echo,
+    me: me.idx, ganTaek: g.ganTaek, poops: g.poops.filter((q) => q.kind !== 'crack').map((q) => q.node), hpOn: g.hpOn, echo: g.echo,
     fog: g.fog ? { owner: g.fog.owner, left: g.fog.left } : null, final: g.final, ranks: g.ranks, coWinners: g.coWinners, planWin: g.planWin,
     party: g.party.filter((q) => q.owner === me.idx).map((q) => ({ node: q.node, kind: q.kind })),
     duels: g.duels.map((d) => ({ ch: d.ch, t: d.t, left: d.left })),
@@ -1756,11 +2246,15 @@ function viewFor(g, me) {
       augs: q.augs, used: q.used, npieces: q.pieces.length || q.npieces, sticks: q.sticks, finished: q.finished,
       pieces: q.pieces.map((x) => {
         const hidden = vis && q !== me && !x.done && x.pos > 0 && !vis.has(x.pos);
-        return { id: x.id, pos: hidden ? -2 : x.pos, route: x.route, done: x.done, type: x.type, shield: x.shield, frozen: x.frozen > g.round, yeji: x.yeji, hs: !!x.hs, tax: x.tax == null ? null : x.tax, weak: !!x.weak };
+        return { id: x.id, pos: hidden ? -2 : x.pos, route: x.route, done: x.done, type: x.type, shield: x.shield, frozen: x.frozen > g.round, yeji: x.yeji, hs: !!x.hs, tax: x.tax == null ? null : x.tax, weak: !!x.weak,
+          egg: x.egg, mark: x.mark, form: x.form, sac: x.sac, bloom: !!x.bloom, lv: x.lv, ex: x.ex, trait: x.trait || null, ego: x.ego || null, bleed: x.bleed || 0, sink: !!x.sink, burn: x.burn || 0, harp: x.harp || 0, lit: !!x.lit, charge: x.charge || 0, weapon: x.weapon || null, chain: x.chain || 0, uses: x.uses || 0, cd: x.cd || 0 };
       }),
       st: Object.assign(pubSt(q, q === me), { lim: pubLim(g, q, q === me) }),
     })),
-    tn: g.tn && g.phase === 'turn' ? { queue: g.tn.queue, throws: g.tn.throws, thrown: g.tn.thrown, goblin: !!g.tn.goblin, cannon: !!g.tn.cannon } : null,
+    tn: g.tn && g.phase === 'turn' ? { queue: g.tn.queue, throws: g.tn.throws, thrown: g.tn.thrown, goblin: !!g.tn.goblin, cannon: !!g.tn.cannon, harp: !!g.tn.harp, weaponUsed: !!g.tn.weaponUsed, egoUsed: g.tn.egoUsed || {} } : null,
+    whales: g.whales.map((w) => ({ node: w.node, kind: w.kind, imm: w.imm })), lights: g.lights.map((l) => ({ node: l.node, left: l.left, owner: l.owner })),
+    cracks: g.poops.filter((q) => q.kind === 'crack').map((q) => q.node), pond: !!g.pond, pool: g.pool, matthias: !!g.matthias,
+    fx: (g.fx || []).slice(-14), fxSeq: g.fxSeq || 0,
     pick: pk ? { kind: pk.kind, stage: pk.stage, picker: pk.cur, left: pk.left, done: pk.order.filter((i) => pk.left[i] <= 0 || !isActive(g.players[i])), sub: pubSub(pk.sub), banned: pk.banned.map((b) => b.id), pending: pk.queue.map((q) => q.idx), mine: pk.chosen[me.idx] || [], options: pk.stage === 'choose' ? (pk.opts[me.idx] || null) : null } : null,
     order: g.order || g.players.map((q) => q.idx),
     bags: g.bags.map((b) => ({ node: b.node, owner: b.owner })),
@@ -1770,8 +2264,8 @@ function viewFor(g, me) {
 }
 
 module.exports = {
-  AUGMENTS, PACKS, RULES, BY_ID, ROUTES, LINES, STEPS, RES, ROUND_PICKS,
+  AUGMENTS, PACKS, RULES, EGO_NAME, TRAIT_NAME, BY_ID, ROUTES, LINES, STEPS, RES, ROUND_PICKS,
   createGame, addPlayer, removePlayer, resetGame, startGame, setPacks,
   actPick, actSub, actGuess, actVote, forfeit, actThrow, actMove, actAbility, actInterrupt, viewFor,
-  _internal: { has, usable, stacksOf, picker, isActive, endTurn },
+  _internal: { has, usable, stacksOf, picker, isActive, endTurn, groupSteps, groupOf, mkPiece, bloomEgo, becomeTrait, roundStart, spawnWhale, WEAPONS, EGO_KEYS, fixerGain, lightTick, limStartTurn },
 };

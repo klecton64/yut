@@ -87,6 +87,85 @@ body.aiming svg[viewBox="0 0 100 100"]{touch-action:none;cursor:crosshair}
 .augrow{padding:10px 12px;margin-top:6px;border-radius:10px;background:var(--card2);border:1px solid var(--bd)}
 .augrow.pk-limbus{padding-bottom:10px}.augrow.pk-limbus::after{display:none}.augrow.pk-limbus::before{width:70px;height:70px;right:-14px;top:-14px}
 .augrow b{display:block}.augrow .d{font-size:13px;color:#c8cddb;line-height:1.45;margin-top:3px}
+
+/* ---- 능력 버튼 스킨 (컨셉별) ---- */
+.ab{position:relative;overflow:hidden;font-weight:800;letter-spacing:.2px;color:var(--tx2,#fff)!important;background:var(--bgi,linear-gradient(135deg,var(--c1,#333),var(--c2,#111)))!important;border:1.5px solid var(--bd2,#888)!important;text-shadow:0 1px 2px rgba(0,0,0,.65);box-shadow:0 0 10px var(--gl,transparent),inset 0 0 8px rgba(255,255,255,.12);transition:transform .12s,box-shadow .2s}
+.ab:hover:not(:disabled){transform:translateY(-1px) scale(1.03);box-shadow:0 0 18px var(--gl,#fff6),inset 0 0 10px rgba(255,255,255,.22)}
+.ab:disabled{filter:grayscale(.75) brightness(.7);box-shadow:none}
+.ab .ic{display:inline-block;margin-right:5px;filter:drop-shadow(0 0 3px var(--gl,#fff8))}
+.ab::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:abshine 3.2s infinite}
+.ab:disabled::after{display:none}
+@keyframes abshine{0%,70%{left:-60%}100%{left:130%}}
+.abrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.abgrp{font-size:12px;color:var(--mut);margin:10px 0 2px}
+
+/* ---- 전체화면 연출 ---- */
+#fx3{display:none;position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden;background:#000}
+#fx3 svg.art{position:absolute;inset:0;width:100%;height:100%;background:transparent!important;border-radius:0!important}
+#fx3 .ttl{position:absolute;left:0;right:0;bottom:14%;text-align:center;color:#fff;text-shadow:0 0 18px var(--tg,#fff),0 3px 10px #000;animation:ttlin 3s ease-out both}
+#fx3 .ttl small{display:block;font-size:clamp(12px,2.4vw,20px);letter-spacing:6px;opacity:.85;margin-bottom:6px}
+#fx3 .ttl b{display:block;font-size:clamp(30px,8vw,76px);font-weight:900;letter-spacing:3px;font-family:Georgia,'Nanum Myeongjo','Noto Serif KR',serif}
+#fx3 .ttl i{display:block;font-style:normal;font-size:clamp(12px,2.2vw,18px);opacity:.8;margin-top:8px}
+#fx3.show{display:block;animation:fx3in 3.2s ease-in-out both}
+@keyframes fx3in{0%{opacity:0}9%{opacity:1}86%{opacity:1}100%{opacity:0}}
+@keyframes ttlin{0%,12%{opacity:0;transform:scale(1.25);filter:blur(8px)}30%{opacity:1;transform:scale(1);filter:blur(0)}100%{opacity:1}}
+#fx3 .shake{animation:shk .12s infinite}
+@keyframes shk{0%{transform:translate(0,0)}25%{transform:translate(-.8px,.6px)}50%{transform:translate(.8px,-.6px)}75%{transform:translate(-.6px,-.8px)}100%{transform:translate(0,0)}}
+.k-open{transform-box:fill-box;transform-origin:center;animation:kopen 1.1s .15s cubic-bezier(.2,.9,.3,1) both}
+@keyframes kopen{0%{transform:scaleY(.02)}100%{transform:scaleY(1)}}
+.k-pulse{transform-box:fill-box;transform-origin:center;animation:kpulse 1.4s ease-in-out infinite}
+@keyframes kpulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.12);opacity:1}}
+.k-fall{animation:kfall 2.6s linear infinite}
+@keyframes kfall{0%{transform:translateY(-30px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(120px) rotate(300deg);opacity:0}}
+.k-rise{animation:krise 3s linear infinite}
+@keyframes krise{0%{transform:translateY(20px);opacity:0}15%{opacity:.9}100%{transform:translateY(-120px);opacity:0}}
+.k-draw{stroke-dasharray:var(--len,400);stroke-dashoffset:var(--len,400);animation:kdraw 1.4s ease-out forwards}
+@keyframes kdraw{to{stroke-dashoffset:0}}
+.k-flash{animation:kflash .5s ease-out both}
+@keyframes kflash{0%{opacity:1}100%{opacity:0}}
+.k-blink{animation:kblink .9s steps(2) infinite}
+@keyframes kblink{0%{opacity:0}50%{opacity:1}}
+.k-spin{transform-box:fill-box;transform-origin:center;animation:kspin 6s linear infinite}
+@keyframes kspin{to{transform:rotate(360deg)}}
+.k-harp{animation:kharp 1.25s cubic-bezier(.1,.7,.2,1) both}
+@keyframes kharp{0%{transform:translate(-120px,40px)}100%{transform:translate(0,0)}}
+.k-wave{animation:kwave 3.2s ease-in-out both}
+@keyframes kwave{0%{transform:translateY(110px)}100%{transform:translateY(0)}}
+.k-sway{animation:ksway 2.4s ease-in-out infinite alternate}
+@keyframes ksway{from{transform:translateX(-4px)}to{transform:translateX(4px)}}
+.k-whale{animation:kwhale 3s ease-in-out both}
+@keyframes kwhale{0%{transform:translate(-60px,20px) rotate(-12deg)}100%{transform:translate(130px,-10px) rotate(8deg)}}
+.k-ring{transform-box:fill-box;transform-origin:center;animation:kring 1.6s ease-out infinite}
+@keyframes kring{0%{transform:scale(.1);opacity:1}100%{transform:scale(2.6);opacity:0}}
+.k-tower{animation:ktower 2.6s ease-in both;transform-origin:50% 100%;transform-box:fill-box}
+@keyframes ktower{0%,40%{transform:rotate(0)}100%{transform:rotate(7deg) translateY(10px);opacity:.6}}
+.k-bolt{animation:kbolt 1.1s steps(1) infinite}
+@keyframes kbolt{0%{opacity:0}8%{opacity:1}14%{opacity:0}30%{opacity:1}36%{opacity:0}100%{opacity:0}}
+.k-flame{transform-box:fill-box;transform-origin:50% 100%;animation:kflame .7s ease-in-out infinite alternate}
+@keyframes kflame{from{transform:scaleY(.8) skewX(-4deg)}to{transform:scaleY(1.15) skewX(4deg)}}
+.k-egg{transform-box:fill-box;transform-origin:50% 100%;animation:kegg 1.4s ease-in-out both}
+@keyframes kegg{0%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(-7deg)}60%{transform:rotate(7deg)}100%{transform:rotate(0) scale(1.1)}}
+.k-burst{transform-box:fill-box;transform-origin:center;animation:kburst 1.6s .9s ease-out both}
+@keyframes kburst{0%{transform:scale(.2);opacity:0}30%{opacity:1}100%{transform:scale(3);opacity:0}}
+/* 보드 위 효과 */
+#fx4{display:none;position:fixed;inset:0;z-index:84;pointer-events:none}
+#fx4 svg{position:fixed;background:transparent!important;border:0!important;border-radius:0!important}
+.bfx-ring{transform-box:fill-box;transform-origin:center;animation:bring 1s ease-out forwards}
+@keyframes bring{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.8);opacity:0}}
+.bfx-line{stroke-dasharray:var(--len,150);stroke-dashoffset:var(--len,150);animation:kdraw .45s ease-out forwards,bfade .5s .5s forwards}
+@keyframes bfade{to{opacity:0}}
+.bfx-pop{transform-box:fill-box;transform-origin:center;animation:bpop 1.1s ease-out forwards}
+@keyframes bpop{0%{transform:scale(.3);opacity:0}25%{transform:scale(1.2);opacity:1}100%{transform:scale(1) translateY(-4px);opacity:0}}
+.bfx-lbl{position:fixed;top:64px;left:0;right:0;text-align:center;font-size:clamp(16px,3.2vw,26px);font-weight:800;color:#fff;text-shadow:0 2px 10px #000,0 0 14px var(--tg,#fff);animation:lblin 1.7s ease-out forwards}
+@keyframes lblin{0%{opacity:0;transform:translateY(-10px) scale(.9)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+/* 보드 위 고래·빛·균열 */
+.wh{animation:whbob 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes whbob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-1.2px) rotate(4deg)}}
+.lt{animation:ltpulse 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ltpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+.pc-tw{animation:pctw 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pctw{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+
 </style>
 </head>
 <body>
@@ -94,11 +173,13 @@ body.aiming svg[viewBox="0 0 100 100"]{touch-action:none;cursor:crosshair}
 <div id="toast"></div>
 <div id="fx"></div>
 <div id="fx2"></div>
+<div id="fx3"></div>
+<div id="fx4"></div>
 <button id="mute" onclick="toggleMute()" title="효과음"></button>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const VERSION = 'v1.10 (팩 보기 · 림버스 테마 · 림버스 컴퍼니 팩 · 증강팩 · 알까기 물리 · 동시 증강 선택 · 윷으로 순서 정하기 · 변신 말 장식 · 2026-10-31)';
+const VERSION = 'v1.11 (림버스 2차 · E.G.O 개화/특색 연출 · 능력 이펙트 · 컨셉 능력 버튼 · 2026-11-08)';
 const RES = ['백도', '도', '개', '걸', '윷', '모'];
 const COLORS = ['#e5484d', '#3e8ef7', '#30a46c', '#f5c518', '#a855f7', '#f97316'], COLOR_NAMES = ['빨강', '파랑', '초록', '노랑', '보라', '주황'];
 const LET = { lord: '군', lucio: '루', valen: '발', hunt: '헌', vanguard: '선', zealot: '광', marathon: '마', goblin: '깨', cannon: '포', pawn: '폰', kim: '김', queen: '후' };
@@ -106,7 +187,7 @@ let ws, meta = null, S = null, ui = { ri: 0, mode: null, abil: null, pid: null }
 let token = localStorage.getItem('yut_token');
 if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('yut_token', token); }
 const AUG = () => Object.fromEntries((meta ? meta.augments : []).map((a) => [a.id, a]));
-const resetUI = () => { ui.mode = null; ui.abil = null; ui.pid = null; };
+const resetUI = () => { ui.mode = null; ui.abil = null; ui.pid = null; ui.extra = null; ui.mv = null; };
 
 function connect(first) {
   ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
@@ -118,7 +199,7 @@ function connect(first) {
     const m = JSON.parse(ev.data);
     if (m.t === 'joined') { meta = m.meta; localStorage.setItem('yut_room', m.code); }
     else if (m.t === 'state') enqueueState(m.s);
-    else if (m.t === 'left') { fxQ.length = 0; lastSeq = null; lastFlickSeq = null; S = null; meta = null; resetUI(); localStorage.removeItem('yut_room'); render(); }
+    else if (m.t === 'left') { fxQ.length = 0; lastSeq = null; lastFlickSeq = null; lastFxSeq = null; S = null; meta = null; resetUI(); localStorage.removeItem('yut_room'); render(); }
     else if (m.t === 'err') { toast(m.msg); if (!S) { localStorage.removeItem('yut_room'); render(); } }
   };
   ws.onclose = () => { if (S) toast('연결이 끊어졌습니다. 새로고침하면 다시 들어갑니다'); };
@@ -146,6 +227,7 @@ async function drain() {
       try { await playFlick(f, ns); } catch (e) { document.body.classList.remove('fxhide'); const r2 = $('fx2'); if (r2) { r2.style.display = 'none'; r2.innerHTML = ''; } }
     } else if (lastFlickSeq === null || fs > lastFlickSeq) lastFlickSeq = fs;
     else if (!f) lastFlickSeq = 0;
+    try { await playFxEvents(ns); } catch (e) { const r3 = $('fx3'); if (r3) { r3.style.display = 'none'; r3.innerHTML = ''; } }
     applyState(ns);
   }
   fxBusy = false;
@@ -379,6 +461,7 @@ function boardSVG() {
   const me = S.players[S.me];
   let s = '<svg viewBox="0 0 100 100">';
   for (const line of meta.lines) s += `<polyline fill="none" stroke="#4a5368" stroke-width="1.1" points="${line.map((n) => nodeXY(n).join(',')).join(' ')}"/>`;
+  s += boardExtras(me);
   const hi = new Set();
   if (ui.mode === 'sel_n') {
     if (ui.abil === 'timetravel') {
@@ -404,6 +487,7 @@ function boardSVG() {
   (S.party || []).forEach((q) => { const [x, y] = nodeXY(q.node); s += `<text x="${x - 3}" y="${y + 5}" font-size="4" pointer-events="none">${{ kill: '💀', back: '⏪', fwd: '🎁' }[q.kind]}</text>`; });
   if (Array.isArray(me.st.garlic)) me.st.garlic.filter((n) => !me.st.garlicGot.includes(n)).forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x + 3}" y="${y - 2}" font-size="4" pointer-events="none">🧄</text>`; });
   if (Array.isArray(me.st.snipers)) me.st.snipers.forEach((n) => { const [x, y] = nodeXY(n); s += `<text x="${x - 3}" y="${y - 2}" font-size="4" pointer-events="none">🎯</text>`; });
+  s += boardOverlays();
   const byNode = {};
   S.players.forEach((p) => {
     const st = {};
@@ -420,9 +504,9 @@ function boardSVG() {
       const letter = ty ? LET[ty.type] || '' : '';
       const tt = ty ? ty.type : '';
       s += `<g data-a="piece" data-v="${lead.id}" style="cursor:pointer" opacity="${frozen ? 0.55 : 1}">
-        ${decoBack(tt, x, y)}<circle cx="${x}" cy="${y}" r="3.6" fill="${e.p.color}" stroke="${shield ? '#fff' : '#000'}" stroke-width="${shield ? 1 : 0.7}" ${shield ? 'stroke-dasharray="1.2 0.8"' : ''}/>
+        ${decoBack(tt, x, y)}${decoBack2(tt, x, y, ty)}<circle cx="${x}" cy="${y}" r="3.6" fill="${e.p.color}" stroke="${shield ? '#fff' : '#000'}" stroke-width="${shield ? 1 : 0.7}" ${shield ? 'stroke-dasharray="1.2 0.8"' : ''}/>
         ${e.list.length > 1 ? `<text x="${x}" y="${y + 1.3}" font-size="4" font-weight="700" fill="#000" text-anchor="middle">${e.list.length}</text>` : (letter ? `<text x="${x}" y="${y + 1.2}" font-size="3.2" font-weight="700" fill="#000" text-anchor="middle">${letter}</text>` : '')}
-        ${decoFront(tt, x, y)}${e.list.some((q) => q.hs) ? `<path pointer-events="none" d="M${x - 3} ${y - 2.2} L${x - 3.6} ${y - 5.2} L${x - 1.2} ${y - 3.2} Z M${x + 3} ${y - 2.2} L${x + 3.6} ${y - 5.2} L${x + 1.2} ${y - 3.2} Z" fill="#111" stroke="#fff" stroke-width="0.25"/>` : ''}${e.list.some((q) => q.tax != null) ? `<text x="${x - 5}" y="${y - 2.6}" font-size="3.4" pointer-events="none">⏳</text>` : ''}${e.list.some((q) => q.weak) ? `<text x="${x - 5}" y="${y + 5.4}" font-size="3.4" pointer-events="none">🩸</text>` : ''}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
+        ${decoFront(tt, x, y)}${decoFront2(tt, x, y, ty)}${statusMarks(e.list, x, y)}${e.list.some((q) => q.hs) ? `<path pointer-events="none" d="M${x - 3} ${y - 2.2} L${x - 3.6} ${y - 5.2} L${x - 1.2} ${y - 3.2} Z M${x + 3} ${y - 2.2} L${x + 3.6} ${y - 5.2} L${x + 1.2} ${y - 3.2} Z" fill="#111" stroke="#fff" stroke-width="0.25"/>` : ''}${e.list.some((q) => q.tax != null) ? `<text x="${x - 5}" y="${y - 2.6}" font-size="3.4" pointer-events="none">⏳</text>` : ''}${e.list.some((q) => q.weak) ? `<text x="${x - 5}" y="${y + 5.4}" font-size="3.4" pointer-events="none">🩸</text>` : ''}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
     });
   });
   if (S.fog) s += '<rect x="0" y="0" width="100" height="100" fill="#99a" opacity="0.07" pointer-events="none"/>';
@@ -498,12 +582,34 @@ const ABIL = {
   hunt: { k: 'now', can: (m) => m.st.lim.coffin > 0 && (m.st.lim.graves || []).length > 0 },
   ksa: { k: 'n', can: (m) => m.st.lim.amp > 0 && (m.st.lim.graves || []).length > 0, nodes: (m) => m.st.lim.graves || [], hint: ['부활시킬 무덤 칸을 클릭하세요 (무덤 칸이나 그 앞뒤 칸에 내 말이 있어야 합니다)'] },
   yakji: { k: 'yakji', pre: true, can: (m) => (m.st.lim.bio || 0) >= 4 },
+  light: { k: 'p', can: () => !(S.lights || []).some((l) => l.owner === S.me), hint: ['희생시킬 판 위의 내 말을 클릭하세요 (그 자리에 초록빛이 3차례 머뭅니다)'], confirm: '말 하나를 바쳐 영롱한 초록빛을 피웁니다. 사용할까요?' },
+  harpoon: { k: 'e', show: (m) => m.pieces.some((x) => x.type === 'ahab' && x.bloom && !x.done), can: () => !(S.tn && S.tn.harp), name: () => '작살 던지기', skin: () => 'ahab', hint: ['작살을 박을 상대 말을 클릭하세요 (그 말은 2번 이동할 때까지 이동 -1)'] },
+  ego: { k: 'p', show: (m) => m.pieces.some((x) => x.type === 'ego' && !x.done && EGO_ACT.includes(x.ego)), can: (m) => egoReady(m).length > 0,
+    name: (m) => { const x = egoReady(m)[0] || m.pieces.find((y) => y.type === 'ego' && EGO_ACT.includes(y.ego)); return EGO_NM[x.ego]; }, skin: (m) => { const x = egoReady(m)[0] || m.pieces.find((y) => y.type === 'ego' && EGO_ACT.includes(y.ego)); return 'ego_' + x.ego; }, hint: ['능력을 쓸 E.G.O 말을 클릭하세요'] },
+  trait: { k: 'trait', show: (m) => m.pieces.some((x) => x.type === 'fixer' && x.trait === 'yellow' && !x.done), can: (m) => m.pieces.some((x) => x.type === 'fixer' && x.trait === 'yellow' && x.pos > 0 && !(x.cd > 0)),
+    name: (m) => { const x = m.pieces.find((y) => y.type === 'fixer' && y.trait === 'yellow'); return `노란작살${x && x.cd > 0 ? ` (${x.cd}차례 뒤)` : ''}`; }, skin: () => 'yellow_dash', hint: ['노란작살 해결사를 클릭하세요'] },
+  weapon: { k: 'weapon', show: (m) => m.pieces.some((x) => x.type === 'fixer' && x.trait === 'black' && !x.done), can: (m) => !(S.tn && S.tn.weaponUsed) && m.pieces.some((x) => x.type === 'fixer' && x.trait === 'black' && x.pos > 0),
+    name: (m) => { const x = m.pieces.find((y) => y.type === 'fixer' && y.trait === 'black'); return `검은침묵 · ${(x && x.weapon) || '무기'}`; }, skin: () => 'weapon', hint: ['검은침묵의 말을 클릭하세요'] },
 };
+const EGO_ACT = ['bleed', 'tower', 'charge'];
+const EGO_NM = { bleed: '가시 돋친 입맞춤', tower: '무너지는 종루', charge: '폭풍의 전야' };
+const egoReady = (m) => m.pieces.filter((x) => x.type === 'ego' && !x.done && EGO_ACT.includes(x.ego) && !(S.tn && S.tn.egoUsed && S.tn.egoUsed[x.id]) && (x.ego === 'charge' ? x.charge > 0 : x.pos > 0 && (x.ego !== 'tower' || (x.uses || 0) < 3)));
+const STEPV = { '백도': -1, '도': 1, '개': 2, '걸': 3, '윷': 4, '모': 5 };
+function moveChoice(me, pid) {
+  const x = me.pieces.find((y) => y.id === pid); if (!x || !S.tn) return null;
+  const res = S.tn.queue[ui.ri]; const st = STEPV[res];
+  const grp = x.pos > 0 ? me.pieces.filter((y) => !y.done && y.pos === x.pos) : [x];
+  const any = grp.some((y) => y.type === 'sinclair' && y.form === 'any') && st > 1;
+  const back = grp.some((y) => y.type === 'fixer' && (y.lv || 0) >= 4) && st >= 3;
+  return any || back ? { any, back, st, res } : null;
+}
 const REPEAT = { goblin: 'goblin', cannon: 'cannon' }; // 턴마다 쓰는 능력 (tn 플래그)
 
 function abilHint() {
   const d = ABIL[ui.abil]; if (!d) return '';
   if (ui.mode === 'sel_side') return '속박할 면을 고르세요 (그 면 위의 모든 말이 2라운드 동안 움직이지 못합니다)';
+  if (ui.mode === 'sel_tm') return '노란작살: 3칸 돌진해 지나간 자리의 적을 모두 처치하거나, 작살을 던져 상대를 3칸 뒤로 끌고 옵니다';
+  if (ui.mode === 'sel_wd') return '산탄총을 쏠 방향을 고르세요';
   const step = ui.mode === 'sel_p' || ui.mode === 'sel_player' || ui.mode === 'sel_dead' ? 0 : 1;
   return d.hint[Math.min(step, d.hint.length - 1)];
 }
@@ -524,15 +630,19 @@ function controlsHTML(me) {
       tn.queue.map((r, i) => `<button class="res ${i === ui.ri ? 'sel' : ''}" data-a="ri" data-v="${i}">${r}</button>`).join('') + '</div>';
     if (tn.throws > 0) h += '<div class="mut">※ 던질 기회를 모두 쓴 뒤에 말을 움직일 수 있습니다</div>';
   }
-  const ab = me.augs.filter((id) => ABIL[id]);
+  const ab = me.augs.filter((id) => ABIL[id] && !ABIL[id].show);
+  ['harpoon', 'ego', 'trait', 'weapon'].forEach((k) => { if (ABIL[k].show(me)) ab.push(k); });
   if (ab.length) {
-    h += '<div class="row" style="margin-top:8px">' + ab.map((id) => {
-      const d = ABIL[id];
-      let off = !!me.used[id];
-      if (REPEAT[id] && tn[REPEAT[id]]) off = true;
-      if (d.pre && tn.thrown) off = true;
+    h += '<div class="abrow">' + ab.map((id) => {
+      const d = ABIL[id]; const extra = !!d.show;
+      let off = extra ? false : !!me.used[id];
+      if (!extra && REPEAT[id] && tn[REPEAT[id]]) off = true;
+      if (!extra && d.pre && tn.thrown) off = true;
       if (d.can && !d.can(me)) off = true;
-      return `<button data-a="abil" data-v="${id}" ${off ? 'disabled' : ''} title="${esc(A[id].desc)}">⚡ ${id === 'yakji' ? (me.st.lim.art ? '폐장' : '예술!') : esc(A[id].name)}</button>`;
+      const label = extra ? d.name(me) : (id === 'yakji' ? (me.st.lim.art ? '폐장' : '예술!') : A[id].name);
+      const sk = extra ? d.skin(me) : id;
+      const desc = extra ? label : A[id].desc;
+      return `<button class="ab" style="${skinStyle(sk)}" data-a="abil" data-v="${id}" ${off ? 'disabled' : ''} title="${esc(desc)}"><span class="ic">${skinIcon(sk)}</span>${esc(label)}</button>`;
     }).join('') + '</div>';
   }
   if (ui.mode) {
@@ -543,7 +653,14 @@ function controlsHTML(me) {
     if (ui.mode === 'sel_side') extra = ['R', 'L', 'T', 'B'].map((sd) => `<button data-a="side" data-v="${sd}">${{ R: '오른쪽', L: '왼쪽', T: '위쪽', B: '아래쪽' }[sd]} 면 속박</button>`).join('');
     if (ui.mode === 'sel_d') extra = '<button data-a="dir" data-v="1">도 (앞으로 1칸)</button><button data-a="dir" data-v="-1">백도 (뒤로 1칸)</button>';
     if (ui.abil === 'timetravel' && ui.mode === 'sel_n') extra = '<button data-a="tthome">대기칸으로</button>';
-    h += `<div class="hint">${abilHint()} <button data-a="cancel">취소</button> ${extra}</div>`;
+    if (ui.mode === 'sel_tm') extra = `<button class="ab" style="${skinStyle('yellow_dash')}" data-a="tmode" data-v="dash"><span class="ic">🔱</span>3칸 돌진</button><button class="ab" style="${skinStyle('yellow_drag')}" data-a="tmode" data-v="drag"><span class="ic">⚓</span>작살로 끌어오기</button>`;
+    if (ui.mode === 'sel_wd') extra = '<button data-a="wdir" data-v="f">앞으로</button><button data-a="wdir" data-v="b">뒤로</button>';
+    if (ui.mode === 'sel_mv' && ui.mv) {
+      const mv = ui.mv; extra = '<button class="pri" data-a="mvgo" data-v="">앞으로 (기본)</button>';
+      if (mv.any) extra += Array.from({ length: mv.st }, (_, i) => `<button data-a="mvgo" data-v="d${i + 1}">${i + 1}칸</button>`).join('');
+      if (mv.back) extra += `<button data-a="mvgo" data-v="back">⏪ 뒤로 ${mv.st - 2}칸</button>`;
+    }
+    h += `<div class="hint">${ui.mode === 'sel_mv' ? '이동 방식을 고르세요 (어느 싱클레어: 던진 결과 이내에서 원하는 칸수 · 5급 해결사: 뒤로 이동 가능)' : abilHint()} <button data-a="cancel">취소</button> ${extra}</div>`;
   }
   return h;
 }
@@ -579,6 +696,13 @@ function playerCards() {
     if (p.augs.includes('yakji')) badges.push(`🧬${lm.bio || 0}/4${lm.art ? ' · 🎨예술 완성' : ''}`);
     if (p.augs.includes('tsa') && p.st.bank) badges.push(`⏳보관 윷 ${p.st.bank}`);
     if (p.augs.includes('geomji')) badges.push(`🔎지령 ${lm.qdone || 0}/3`);
+    if (p.augs.includes('stock') && lm.stock) badges.push(`📈${esc(lm.stock.name)}사 ${lm.stock.v}`);
+    const ahb = p.pieces.find((x) => x.type === 'ahab'); if (ahb) badges.push(ahb.bloom ? '🔱가스하푼 개화' : `🔱희생 ${ahb.sac || 0}/3`);
+    const snc = p.pieces.find((x) => x.type === 'sinclair'); if (snc) badges.push(snc.egg > 0 ? `🥚알 ${snc.egg}` : snc.form === 'any' ? '🌌어느 싱클레어' : `✒표지 ${snc.mark || 0}/3`);
+    const fxr = p.pieces.find((x) => x.type === 'fixer'); if (fxr) badges.push(fxr.trait ? `🕴특색 ${{ red: '붉은시선', yellow: '노란작살', indigo: '쪽빛노인', black: '검은침묵' }[fxr.trait]}${fxr.weapon ? ' · ' + esc(fxr.weapon) : ''}` : `🕴${9 - (fxr.lv || 0)}급${(fxr.lv || 0) >= 8 ? ` (특색까지 ${fxr.ex || 0}/3)` : ''}`);
+    p.pieces.filter((x) => x.type === 'ego' && !x.done).forEach((x) => badges.push(`🌸${{ bleed: '가시 돋친 입맞춤', breath: '무한한 궤적', tower: '무너지는 종루', rupture: '필연적인 균열', sink: '가라앉은 독백', charge: '폭풍의 전야', burn: '꺼지지 않는 장례식' }[x.ego] || ''}${x.ego === 'charge' ? ' ⚡' + (x.charge || 0) : ''}${x.ego === 'tower' ? ' ' + (x.uses || 0) + '/3' : ''}`));
+    if (p.pieces.some((x) => x.type === 'distort' && !x.done)) badges.push('🌀뒤틀림');
+    (S.lights || []).forEach((l) => { if (l.owner === p.idx) badges.push(`💚초록빛 ${l.left}`); });
     if (p.hp != null) badges.push(`❤${p.hp}`);
     if (p.st.skip) badges.push(`⏭${p.st.skip}`);
     if (p.st.leechTo != null) badges.push(`🪱${esc(S.players[p.st.leechTo].name)}와 운명공동체`);
@@ -621,7 +745,10 @@ function pickModal() {
     h += `<p style="font-size:17px">⏳ <b>${esc(pickerP.name)}</b> 님의 효과를 처리하는 중...</p>`;
     if (pk.pending.length) h += `<div class="mut">대기: ${[...new Set(pk.pending)].map((i) => esc(S.players[i].name)).join(', ')}</div>`;
   } else if (sub) {
-    if (sub.type === 'player') {
+    if (sub.type === 'stock') {
+      h += `<p>📈 절호의 찬스자나요! 주식 하나를 고르세요. 5에서 시작해 내 차례마다 -3~+3 변동하며, 0 이하 -3 · 5 미만 -1 · 5 이상 +1 · 10 이상 +3 만큼 내 이동이 바뀝니다.</p><div class="row">` +
+        [['W', '#3e8ef7'], ['L', '#30a46c'], ['T', '#f5c518'], ['H', '#e5484d']].map(([k, c]) => `<button class="ab" style="--c1:#10141c;--c2:${c};--bd2:${c};--gl:${c}" data-a="sub" data-v="${k}"><span class="ic">📈</span>${k}사</button>`).join('') + '</div>';
+    } else if (sub.type === 'player') {
       h += `<p>${esc(A[sub.aug].name)}: 대상 플레이어를 고르세요</p><div class="row">` +
         others.map((p) => `<button data-a="sub" data-v="${p.idx}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('') + '</div>';
     } else if (sub.type === 'augment') {
@@ -757,6 +884,9 @@ document.addEventListener('click', (e) => {
   else if (a === 'packback') { packView = null; render(); }
   else if (a === 'side') sendAbil({ side: v });
   else if (a === 'skipint') send({ t: 'interrupt', skip: true });
+  else if (a === 'tmode') { if (v === 'dash') sendAbil({ pid: ui.pid, mode: 'dash' }); else { ui.extra = { mode: 'drag' }; ui.mode = 'sel_e'; render(); } }
+  else if (a === 'wdir') sendAbil({ pid: ui.pid, dir: v });
+  else if (a === 'mvgo') { const pid = ui.pid, ri = ui.ri; resetUI(); send({ t: 'move', ri, pid, back: v === 'back' ? true : undefined, dist: /^d\d+$/.test(v) ? +v.slice(1) : undefined }); }
   else if (a === 'abil') {
     const d = ABIL[v];
     if (d.confirm && !confirm(d.confirm)) return;
@@ -764,22 +894,26 @@ document.addEventListener('click', (e) => {
     if (d.k === 'yakji') { if (!me.st.lim.art) { if (confirm('예술! 이번 차례를 쓰고 예술작품을 완성합니다 (내 모든 말 이동 +2). 사용할까요?')) send({ t: 'ability', a: 'yakji' }); return; } ui.abil = 'yakji'; ui.mode = 'sel_side'; render(); return; }
     if (d.needThrow && S.tn.throws <= 0) return toast('던지기 기회가 있을 때만 사용할 수 있습니다');
     ui.abil = v; ui.pid = null;
-    ui.mode = d.k === 'n' ? 'sel_n' : d.k === 'player' ? 'sel_player' : d.k === 'dead' ? 'sel_dead' : 'sel_p';
+    ui.mode = d.k === 'n' ? 'sel_n' : d.k === 'player' ? 'sel_player' : d.k === 'dead' ? 'sel_dead' : d.k === 'e' ? 'sel_e' : 'sel_p';
     render();
   } else if (a === 'piece') {
     if (S && S.interrupt && S.interrupt.owner === S.me) { if (me.pieces.some((x) => x.id === v)) send({ t: 'interrupt', pid: v }); else toast('판 위의 내 말을 클릭하세요'); return; }
     if (!S || S.phase !== 'turn' || S.cur !== S.me) return;
     if (ui.mode === 'sel_e') {
       if (me.pieces.some((x) => x.id === v)) return toast('상대의 말을 클릭하세요');
-      return sendAbil({ pid: ui.pid, tpid: v });
+      return sendAbil(Object.assign({ pid: ui.pid, tpid: v }, ui.extra || {}));
     }
     if (!me.pieces.some((x) => x.id === v)) return; // 남의 말
     if (ui.mode === 'sel_p') {
       const k = ABIL[ui.abil].k;
       if (k === 'p') return sendAbil({ pid: v });
+      if (k === 'trait') { ui.pid = v; ui.mode = 'sel_tm'; render(); return; }
+      if (k === 'weapon') { const wx = me.pieces.find((y) => y.id === v); if (wx && wx.weapon === '산탄총&리볼버') { ui.pid = v; ui.mode = 'sel_wd'; render(); return; } return sendAbil({ pid: v }); }
       ui.pid = v; ui.mode = k === 'pn' ? 'sel_n' : k === 'pe' ? 'sel_e' : k === 'fl' ? 'aim' : 'sel_d'; render(); return;
     }
     if (ui.mode) return;
+    const mc = moveChoice(me, v);
+    if (mc) { ui.mode = 'sel_mv'; ui.pid = v; ui.mv = mc; render(); return; }
     send({ t: 'move', ri: ui.ri, pid: v });
   } else if (a === 'node') {
     if (ui.mode === 'sel_n') sendAbil({ pid: ui.pid, node: +v, target: +v });
@@ -795,6 +929,288 @@ document.addEventListener('change', (e) => {
     send({ t: 'packs', ids });
   }
 });
+
+// ================= 림버스 2차: 능력 버튼 스킨 · 새 말 외형 · 연출 =================
+// 능력 버튼 스킨: [아이콘, 색1, 색2, 테두리, 글로우, (배경 덮어쓰기)]
+const SKIN = {
+  timetravel: ['⏳', '#2a2f6b', '#6a3fa8', '#9aa6ff', '#7f8bff'], shield: ['🛡', '#1c5f8a', '#59b6e8', '#d6f1ff', '#59b6e8'],
+  sacrifice: ['🩸', '#3b0509', '#8c1420', '#ff6a6a', '#d1202f'], sniper: ['🎯', '#2f3a1f', '#6c2a1e', '#e86a4a', '#e8563a'],
+  baduk: ['⚫', '#101010', '#3a3a3a', '#f0f0f0', '#fff', 'repeating-conic-gradient(#141414 0 25%,#2b2b2b 0 50%) 0 0/16px 16px'],
+  handfast: ['✋', '#7a5a00', '#e8b923', '#fff3b0', '#ffd23f'], chalice: ['🏆', '#1d0a2b', '#4b1d63', '#c58aff', '#a24bff'],
+  fog: ['🌫', '#4a5160', '#8a93a3', '#dfe5f0', '#aab2c0'], lastdance: ['💃', '#2b0a22', '#c2185b', '#ff8fc0', '#ff3d8b'],
+  truck: ['🚚', '#c96a00', '#2b2b2b', '#ffd23f', '#ff9800', 'repeating-linear-gradient(45deg,#ffcc00 0 10px,#222 10px 20px)'],
+  combo: ['🤖', '#1b3a8a', '#d12a2a', '#ffe14d', '#ffe14d', 'linear-gradient(90deg,#1b3a8a 0 33%,#e8b923 33% 66%,#d12a2a 66%)'],
+  flick: ['🪨', '#3a3f48', '#767c88', '#d0d4dc', '#9aa2b0'], goblin: ['👹', '#1e4a2c', '#3a3a3f', '#8de08d', '#4cc46a'],
+  cannon: ['💣', '#4a3510', '#8a6a2a', '#e8c46a', '#d9a640'], domain: ['🌀', '#1a0a3a', '#4a1a8a', '#b58aff', '#8f4aff'],
+  aim: ['🥢', '#5a3a1c', '#b98a45', '#f3dca8', '#d9a85a'], necro: ['💀', '#06200f', '#1a5a2a', '#7dff9b', '#38d46a'],
+  lord: ['🐺', '#4a0a12', '#b3182b', '#e8be6e', '#ff3b4b'], hunt: ['⚰', '#2a1a10', '#5a3a22', '#d9c08a', '#b98a45'],
+  ksa: ['💉', '#0b4a52', '#e8f4f4', '#6ee0e8', '#37c9d6', 'linear-gradient(135deg,#0b4a52,#1f9aa6 60%,#e8f4f4)'], yakji: ['🎨', '#6a1050', '#e8b923', '#ffe9a0', '#ff6ad1'],
+  ahab: ['🔱', '#0e3d3a', '#2a7f78', '#bff5ee', '#4ad9c9', 'linear-gradient(135deg,#0b2a2f,#2a7f78 60%,#d8fff9)'],
+  light: ['💚', '#0b3a1a', '#3ddc84', '#d8ffe5', '#6bffa8', 'radial-gradient(circle at 50% 120%,#7bffb0,#0b3a1a 70%)'],
+  ego_bleed: ['🌹', '#3a0510', '#a3122b', '#ff7a8f', '#ff2a4a'], ego_tower: ['🔔', '#232038', '#5a4a8a', '#c9b8ff', '#9a85ff'], ego_charge: ['⚡', '#1a0a3a', '#e8c923', '#fff08a', '#ffe14d'],
+  yellow_dash: ['🔱', '#5a4300', '#ffd23f', '#fff3b0', '#ffd23f'], yellow_drag: ['⚓', '#4a3a00', '#c9a000', '#ffe98a', '#ffcf33'],
+  weapon: ['🗡', '#050505', '#2b2b30', '#f2f2f2', '#ffffff', 'linear-gradient(135deg,#000,#1d1d22 70%,#444)'],
+};
+const SKIN_DEF = ['⚡', '#2b3244', '#3a4560', '#9fb0d0', '#7a90c0'];
+function skinStyle(k) {
+  const s = SKIN[k] || SKIN_DEF;
+  return `--c1:${s[1]};--c2:${s[2]};--bd2:${s[3]};--gl:${s[4]};${s[5] ? `--bgi:${s[5]};` : ''}`;
+}
+const skinIcon = (k) => (SKIN[k] || SKIN_DEF)[0];
+
+// ---- 새 말 외형 ----
+const EGO_COL = { bleed: '#ff2a4a', breath: '#3de0ff', tower: '#a88bff', rupture: '#bcd8ff', sink: '#2a6ad9', charge: '#ffe14d', burn: '#ff7a1a' };
+LET.ahab = '해'; LET.sinclair = '싱'; LET.distort = '뒤'; LET.ego = '꽃'; LET.fixer = '결';
+ICON.ahab = '🔱'; ICON.sinclair = '🥚'; ICON.distort = '🌀'; ICON.ego = '🌸'; ICON.fixer = '🕴';
+function decoBack2(t, x, y, p) {
+  p = p || {};
+  switch (t) {
+    case 'ahab': {
+      const harp = `<line x1="${x + 4.6}" y1="${y + 4.6}" x2="${x + 4.6}" y2="${y - 7.4}" stroke="#cfd6df" stroke-width="0.7" stroke-linecap="round"/><path d="M${x + 4.6} ${y - 8.6} L${x + 3.5} ${y - 6.6} L${x + 5.7} ${y - 6.6} Z" fill="#e8eef5" stroke="#222" stroke-width="0.25"/><circle cx="${x + 4.6}" cy="${y - 5.2}" r="0.9" fill="#ff8a1a" class="lt"/>`;
+      if (p.bloom) return `<g pointer-events="none"><path d="M${x - 5.4} ${y - 1} Q${x - 8.4} ${y - 4} ${x - 6.2} ${y - 7} L${x - 3.6} ${y - 3.6} Z" fill="#f4f6fa" stroke="#6a7aa0" stroke-width="0.35"/><path d="M${x - 6.4} ${y - 4.6} l1 1.6 M${x - 5.6} ${y - 2.8} l1.6 0.6" stroke="#d1202f" stroke-width="0.35"/><circle cx="${x - 5}" cy="${y + 2.4}" r="0.9" fill="#a24bff"/><circle cx="${x - 3}" cy="${y + 3.6}" r="0.9" fill="#3ddc84"/><circle cx="${x - 1}" cy="${y + 4.6}" r="0.9" fill="#3ea8ff"/>${harp}</g>`;
+      return `<g pointer-events="none">${harp}<rect x="${x - 3.6}" y="${y + 3}" width="1.6" height="3.4" fill="#3b2b12" stroke="#d9b24a" stroke-width="0.3"/></g>`;
+    }
+    case 'sinclair':
+      if (p.egg > 0) return `<g pointer-events="none"><ellipse cx="${x}" cy="${y}" rx="5.2" ry="6.2" fill="#f4efe0" stroke="#8a7a50" stroke-width="0.45" opacity="0.95"/>${p.egg <= 2 ? `<path d="M${x - 3} ${y - 1} l1.6 1.4 l1.2 -1.6 l1.4 1.6 l1.6 -1.4" fill="none" stroke="#5a4a28" stroke-width="0.4"/>` : ''}${p.egg <= 1 ? `<path d="M${x - 1} ${y - 5.6} l-0.8 2.4 l1.6 1 l-0.8 2.2" fill="none" stroke="#5a4a28" stroke-width="0.4"/>` : ''}</g>`;
+      if (p.form === 'any') return `<g pointer-events="none"><circle cx="${x}" cy="${y}" r="5.6" fill="none" stroke="#ffd23f" stroke-width="0.7" stroke-dasharray="1 0.8" class="k-spin"/><path d="M${x + 1.4} ${y - 3} Q${x + 7.6} ${y - 5.8} ${x + 5.6} ${y + 1.4}" fill="none" stroke="#d9a840" stroke-width="1.1"/><line x1="${x - 5.4}" y1="${y + 4.6}" x2="${x - 5.4}" y2="${y - 7.2}" stroke="#8a7a5a" stroke-width="0.8"/><path d="M${x - 5.4} ${y - 7.2} l-1.6 1.4 l1.6 0.8 l1.6 -0.8 Z" fill="#cfd6df" stroke="#333" stroke-width="0.25"/></g>`;
+      return `<g pointer-events="none"><path d="M${x - 3.6} ${y - 2.2} L${x - 5.2} ${y + 4.2} L${x - 1.6} ${y + 3} Z M${x + 3.6} ${y - 2.2} L${x + 5.2} ${y + 4.2} L${x + 1.6} ${y + 3} Z" fill="#5f7a50" stroke="#222" stroke-width="0.35"/></g>`;
+    case 'distort':
+      return `<g pointer-events="none"><circle cx="${x}" cy="${y}" r="5.3" fill="none" stroke="#b44bff" stroke-width="0.8" stroke-dasharray="2.2 1.2" class="k-spin"/><circle cx="${x}" cy="${y}" r="6.3" fill="none" stroke="#ff3dbf" stroke-width="0.4" stroke-dasharray="0.8 1.6" class="k-spin"/></g>`;
+    case 'ego': {
+      const c = EGO_COL[p.ego] || '#fff';
+      const base = `<circle cx="${x}" cy="${y}" r="5.4" fill="none" stroke="${c}" stroke-width="0.8" stroke-dasharray="1.4 0.8" class="k-spin"/>`;
+      const extra = {
+        bleed: `<path d="M${x - 5} ${y + 3} q-2 -3 0 -6 M${x + 5} ${y + 3} q2 -3 0 -6" stroke="#8a1020" fill="none" stroke-width="0.6"/><circle cx="${x - 5.6}" cy="${y - 3}" r="0.7" fill="#ff2a4a"/><circle cx="${x + 5.6}" cy="${y - 3}" r="0.7" fill="#ff2a4a"/>`,
+        breath: `<path d="M${x} ${y} C${x + 3} ${y - 5} ${x + 7} ${y - 5} ${x + 7} ${y} C${x + 7} ${y + 5} ${x + 3} ${y + 5} ${x} ${y} C${x - 3} ${y - 5} ${x - 7} ${y - 5} ${x - 7} ${y} C${x - 7} ${y + 5} ${x - 3} ${y + 5} ${x} ${y}" fill="none" stroke="#3de0ff" stroke-width="0.55"/>`,
+        tower: `<path d="M${x - 1.6} ${y - 4.4} h3.2 v-1.4 l-1.6 -1.4 l-1.6 1.4 Z" fill="#a88bff" stroke="#222" stroke-width="0.3"/><circle cx="${x}" cy="${y - 3.2}" r="0.6" fill="#ffe9a0"/>`,
+        rupture: `<path d="M${x - 6} ${y - 2} l3 2 l-2 2.6 M${x + 6} ${y + 2} l-3 -2 l2 -2.6" stroke="#fff" stroke-width="0.5" fill="none"/>`,
+        sink: `<ellipse cx="${x}" cy="${y + 5}" rx="5.8" ry="1.5" fill="none" stroke="#2a6ad9" stroke-width="0.5"/><ellipse cx="${x}" cy="${y + 6.6}" rx="4" ry="1" fill="none" stroke="#2a6ad9" stroke-width="0.4"/>`,
+        charge: `<path d="M${x + 5} ${y - 6.4} l-2.2 3.2 h1.8 l-2 3.2" fill="none" stroke="#ffe14d" stroke-width="0.8" stroke-linejoin="round"/>${p.charge ? `<text x="${x + 6.6}" y="${y - 3.4}" font-size="3" fill="#ffe14d" font-weight="700">${p.charge}</text>` : ''}`,
+        burn: `<path d="M${x - 4.6} ${y + 4} q-1 -3 1 -5 q0.4 1.6 1.4 1.8 q-0.2 -2.6 1.6 -4 q0.6 3.2 2.2 3.6 q1.2 1.4 -0.6 3.6 Z" fill="#ff7a1a" stroke="#6a1a00" stroke-width="0.3" class="k-flame"/>`,
+      }[p.ego] || '';
+      return `<g pointer-events="none">${base}${extra}</g>`;
+    }
+    case 'fixer': return `<g pointer-events="none"><rect x="${x - 2.2}" y="${y + 3.4}" width="4.4" height="2.6" rx="0.4" fill="#16181f" stroke="#888" stroke-width="0.25"/><path d="M${x - 0.6} ${y + 3.4} L${x} ${y + 5.8} L${x + 0.6} ${y + 3.4} Z" fill="${{ red: '#e02b2b', yellow: '#ffd23f', indigo: '#4a3ad9', black: '#fff' }[p.trait] || '#c22'}"/></g>`;
+    default: return '';
+  }
+}
+function decoFront2(t, x, y, p) {
+  p = p || {};
+  switch (t) {
+    case 'ahab': return p.bloom ? '' : `<g pointer-events="none"><path d="M${x - 3.6} ${y - 2.4} Q${x - 3} ${y - 6.2} ${x + 1} ${y - 5.2} L${x + 3.6} ${y - 3.2} L${x + 3.2} ${y - 2.2} Z" fill="#2f6b43" stroke="#14301f" stroke-width="0.35"/><rect x="${x - 4.2}" y="${y - 2.8}" width="8.4" height="0.9" rx="0.4" fill="#d9b24a" transform="rotate(-8 ${x} ${y})"/></g>`;
+    case 'sinclair':
+      if (p.egg > 0) return '';
+      return `<g pointer-events="none"><path d="M${x - 3} ${y - 2.4} Q${x} ${y - 4.8} ${x + 3} ${y - 2.4}" fill="none" stroke="#c9d6a8" stroke-width="0.8"/><ellipse cx="${x + 3.8}" cy="${y - 3.4}" rx="1.1" ry="0.8" fill="#111" stroke="#555" stroke-width="0.2"/><path d="M${x + 4.8} ${y - 3.4} l0.9 0.2 l-0.9 0.4 Z" fill="#e8a020"/>${p.form !== 'any' ? `<text x="${x + 5}" y="${y + 5.6}" font-size="2.6" fill="#ffd23f" font-weight="700">${(p.mark || 0)}/3</text>` : ''}</g>`;
+    case 'distort': return `<g pointer-events="none"><circle cx="${x - 1}" cy="${y - 1}" r="0.9" fill="#fff"/><circle cx="${x + 1.4}" cy="${y - 0.6}" r="1.3" fill="#fff"/><circle cx="${x - 1}" cy="${y - 1}" r="0.4" fill="#000"/><circle cx="${x + 1.4}" cy="${y - 0.6}" r="0.6" fill="#000"/></g>`;
+    case 'ego': return `<text pointer-events="none" x="${x}" y="${y - 4.4}" font-size="3.6" text-anchor="middle">🌸</text>`;
+    case 'fixer': {
+      const g9 = 9 - (p.lv || 0);
+      const mark = p.trait ? { red: `<ellipse cx="${x}" cy="${y - 5.6}" rx="2.4" ry="1.3" fill="#fff" stroke="#900" stroke-width="0.3"/><circle cx="${x}" cy="${y - 5.6}" r="0.9" fill="#d11"/>`, yellow: `<line x1="${x - 4.6}" y1="${y + 4}" x2="${x + 4.6}" y2="${y - 6}" stroke="#ffd23f" stroke-width="0.8"/><path d="M${x + 4.6} ${y - 6.9} l-1.5 1.1 l1.9 1 Z" fill="#fff3b0"/>`, indigo: `<path d="M${x - 3.6} ${y - 2.6} Q${x} ${y - 7.2} ${x + 3.6} ${y - 2.6} Z" fill="#3a2fa8" stroke="#111" stroke-width="0.3"/><path d="M${x - 4} ${y + 5} q1 -1 2 0 q1 1 2 0 q1 -1 2 0 q1 1 2 0" fill="none" stroke="#6a8aff" stroke-width="0.5"/>`, black: `<path d="M${x - 3.6} ${y - 2} Q${x} ${y - 7.4} ${x + 3.6} ${y - 2} Z" fill="#0a0a0a" stroke="#ddd" stroke-width="0.3"/><line x1="${x - 5}" y1="${y - 5}" x2="${x + 5}" y2="${y + 3}" stroke="#fff" stroke-width="0.35"/>` }[p.trait] : '';
+      return `<g pointer-events="none">${mark}<text x="${x + 4.4}" y="${y + 5.8}" font-size="2.7" fill="${p.trait ? '#ffd23f' : '#fff'}" font-weight="800" stroke="#000" stroke-width="0.15">${p.trait ? '특색' : g9 + '급'}</text></g>`;
+    }
+    default: return '';
+  }
+}
+// 상태 표시 (출혈·화상·침잠·작살·빛·희생 스택)
+function statusMarks(list, x, y) {
+  let o = ''; let k = 0;
+  const add = (ch) => { o += `<text x="${x - 5.6 + k * 2.6}" y="${y - 5.8}" font-size="2.9" pointer-events="none">${ch}</text>`; k++; };
+  if (list.some((q) => q.bleed > 0)) add('🩸');
+  if (list.some((q) => q.burn > 0)) add('🔥');
+  if (list.some((q) => q.sink)) add('🌊');
+  if (list.some((q) => q.harp > 0)) add('⚓');
+  if (list.some((q) => q.lit)) add('💚');
+  const ah = list.find((q) => q.type === 'ahab'); if (ah && !ah.bloom) o += `<text x="${x - 5.6}" y="${y + 5.8}" font-size="2.6" fill="#7fe0d0" font-weight="700" pointer-events="none">희${ah.sac || 0}/3</text>`;
+  const sc = list.find((q) => q.type === 'sinclair' && q.egg > 0); if (sc) o += `<text x="${x - 5.6}" y="${y + 5.8}" font-size="2.6" fill="#fff" font-weight="700" pointer-events="none">알${sc.egg}</text>`;
+  return o;
+}
+// 보드 위 고래·빛·균열·연못/피 웅덩이
+function boardExtras(me) {
+  let s = '';
+  if (S.pond) s += '<rect x="0" y="0" width="100" height="100" fill="#2a63c9" opacity="0.13" pointer-events="none"/>';
+  if (S.pool != null) s += '<rect x="0" y="0" width="100" height="100" fill="#b01020" opacity="0.15" pointer-events="none"/>';
+  return s;
+}
+function boardOverlays() {
+  let s = '';
+  (S.lights || []).forEach((l) => { const [x, y] = nodeXY(l.node); s += `<g pointer-events="none"><circle cx="${x}" cy="${y}" r="7.4" fill="#6bffa8" opacity="0.22" class="lt"/><circle cx="${x}" cy="${y}" r="3.6" fill="#caffdf" opacity="0.8" class="lt"/><text x="${x}" y="${y + 1.4}" font-size="4.2" text-anchor="middle">💚</text><text x="${x}" y="${y - 8}" font-size="2.8" text-anchor="middle" fill="#b9ffd2" font-weight="700">${l.left}</text></g>`; });
+  (S.cracks || []).forEach((n) => { const [x, y] = nodeXY(n); s += `<path pointer-events="none" d="M${x - 2.6} ${y - 3} l1.4 2 l-1.6 1.4 l1.8 1.6 l-1 2" fill="none" stroke="#a88bff" stroke-width="0.7"/><path pointer-events="none" d="M${x + 2.6} ${y - 3} l-1.2 2 l1.4 1.6 l-1.4 1.4" fill="none" stroke="#a88bff" stroke-width="0.5"/>`; });
+  (S.whales || []).forEach((w) => { const [x, y] = nodeXY(w.node); const ind = w.kind === 'indigo'; s += `<g pointer-events="none" class="wh"><ellipse cx="${x}" cy="${y + 2.6}" rx="6.4" ry="1.4" fill="${ind ? '#3a5fd9' : '#2a8fb0'}" opacity="0.5"/><text x="${x}" y="${y + 2}" font-size="8" text-anchor="middle" ${ind ? 'style="filter:hue-rotate(40deg)"' : ''}>🐋</text></g>`; });
+  return s;
+}
+
+// ---- 효과음 ----
+Object.assign(sfx, {
+  bell() { tone(392, 0, 1.2, 'sine', 0.2); tone(588, 0, 1, 'sine', 0.12); tone(784, 0.02, 0.8, 'sine', 0.08); },
+  zap() { noise(0, 0.25, 0.4, 3200); tone(900, 0, 0.18, 'sawtooth', 0.15, 80); },
+  boom() { noise(0, 0.5, 0.5, 200); tone(90, 0, 0.5, 'sine', 0.35, 40); },
+  chime() { [659, 880, 1175, 1568].forEach((f, i) => tone(f, i * 0.09, 0.5, 'sine', 0.13)); },
+  slash() { noise(0, 0.18, 0.4, 4200); tone(1400, 0, 0.14, 'sawtooth', 0.1, 300); },
+  water() { tone(300, 0, 0.5, 'sine', 0.14, 700); noise(0.05, 0.4, 0.15, 900); },
+  low() { tone(70, 0, 1.6, 'sine', 0.35, 45); tone(105, 0.1, 1.4, 'triangle', 0.14, 60); },
+  crack() { noise(0, 0.12, 0.5, 5000); tone(220, 0.05, 0.3, 'square', 0.08, 60); },
+  fire() { noise(0, 0.9, 0.28, 600); tone(120, 0, 0.9, 'sawtooth', 0.1, 70); },
+  pop() { tone(500, 0, 0.12, 'triangle', 0.2, 900); },
+  heart() { tone(110, 0, 0.18, 'sine', 0.4); tone(110, 0.28, 0.22, 'sine', 0.4); tone(70, 0.6, 1.0, 'sine', 0.3, 40); },
+  harp() { noise(0, 0.3, 0.3, 2800); tone(260, 0, 0.5, 'sawtooth', 0.12, 1200); },
+});
+// ---- 전체화면 연출 ----
+const FXA = {
+  red: () => ({ bg: 'radial-gradient(circle at 50% 50%,#5a0000,#140000 70%)', tg: '#ff2a2a', snd: 'low', art: `
+    <rect width="100" height="100" fill="#8a0010" opacity="0.35" class="k-pulse"/>
+    <g class="k-open"><path d="M2 46 Q50 6 98 46 Q50 86 2 46Z" fill="#fff4f0" stroke="#ff2a2a" stroke-width="0.8"/>
+    <circle cx="50" cy="46" r="17" fill="#b0001a" stroke="#400" stroke-width="0.8"/><circle cx="50" cy="46" r="10" fill="#e8182c"/><ellipse cx="50" cy="46" rx="3.2" ry="12.5" fill="#050000"/><circle cx="44" cy="40" r="3" fill="#fff" opacity="0.8"/></g>
+    ${Array.from({ length: 18 }, (_, i) => `<ellipse class="k-fall" style="animation-delay:${(i * 0.17).toFixed(2)}s" cx="${6 + i * 5.4}" cy="${(i * 7) % 40}" rx="0.6" ry="1.6" fill="#b0001a"/>`).join('')}` }),
+  yellow: () => ({ bg: 'linear-gradient(160deg,#0a0800,#4a3600 60%,#ffd23f)', tg: '#ffd23f', snd: 'harp', art: `
+    ${Array.from({ length: 9 }, (_, i) => `<line class="bfx-line" style="--len:140;animation-delay:${(i * 0.05).toFixed(2)}s" x1="0" y1="${20 + i * 9}" x2="140" y2="${i * 9 - 14}" stroke="#ffe98a" stroke-width="0.5" opacity="0.7"/>`).join('')}
+    <g class="k-harp"><g transform="rotate(-20 50 50)"><line x1="-10" y1="50" x2="92" y2="50" stroke="#e8e0c0" stroke-width="2"/><path d="M92 50 L78 40 L82 50 L78 60 Z" fill="#fff6c0" stroke="#7a5a00" stroke-width="0.7"/><path d="M80 50 L70 44 M80 50 L70 56" stroke="#ffd23f" stroke-width="1.2"/></g></g>
+    <circle cx="50" cy="50" r="6" fill="none" stroke="#fff" stroke-width="1" class="k-burst"/><circle cx="50" cy="50" r="6" fill="none" stroke="#ffd23f" stroke-width="2" class="k-burst" style="animation-delay:1.1s"/>` }),
+  indigo: () => ({ bg: 'linear-gradient(180deg,#0a0a2a,#1a1f6a 70%,#2a3fa8)', tg: '#7f9bff', snd: 'water', art: `
+    <g class="k-whale"><g transform="translate(0 30)"><path d="M0 40 Q20 10 55 18 Q80 22 90 6 Q86 24 100 34 Q82 38 70 44 Q40 56 0 40Z" fill="#0a0f3a" stroke="#4a62d9" stroke-width="0.6"/><circle cx="22" cy="28" r="1.4" fill="#9bb0ff"/></g></g>
+    ${[0, 1, 2].map((i) => `<path class="k-wave" style="animation-delay:${i * 0.25}s;animation-duration:${3 - i * 0.3}s" d="M0 ${60 + i * 12} Q12 ${52 + i * 12} 25 ${60 + i * 12} T50 ${60 + i * 12} T75 ${60 + i * 12} T100 ${60 + i * 12} V110 H0Z" fill="${['#2a3fa8', '#1f2f8a', '#141f5a'][i]}" opacity="0.85"/>`).join('')}
+    ${Array.from({ length: 16 }, (_, i) => `<circle class="k-rise" style="animation-delay:${(i * 0.19).toFixed(2)}s" cx="${5 + i * 6}" cy="${85 + (i % 4) * 4}" r="${0.6 + (i % 3) * 0.5}" fill="none" stroke="#bcd0ff" stroke-width="0.3"/>`).join('')}` }),
+  black: () => ({ bg: '#000', tg: '#fff', snd: 'slash', art: `
+    ${[[8, 12, 92, 70], [90, 8, 14, 80], [4, 52, 96, 30], [30, 0, 70, 100], [96, 40, 6, 62], [10, 90, 90, 18]].map((l, i) => `<line class="k-draw" style="--len:140;animation-delay:${(0.2 + i * 0.22).toFixed(2)}s;animation-duration:.35s" x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="#fff" stroke-width="0.45"/>`).join('')}
+    <rect width="100" height="100" fill="#fff" class="k-flash" style="animation-delay:1.7s;animation-duration:.25s"/>
+    <text x="50" y="52" font-size="7" fill="#fff" text-anchor="middle" opacity="0.55" class="k-blink">…</text>` }),
+  bleed: () => ({ bg: 'radial-gradient(circle,#3a0510,#0a0104 75%)', tg: '#ff2a4a', snd: 'slash', art: `
+    ${['M-5 95 C20 70 10 50 40 45 S70 30 62 5', 'M105 92 C80 70 92 52 62 46 S34 30 42 4', 'M-5 20 C25 30 20 55 48 52', 'M105 25 C75 38 80 60 52 52'].map((d, i) => `<path class="k-draw" style="--len:220;animation-delay:${i * 0.18}s" d="${d}" fill="none" stroke="#2a8a3a" stroke-width="1.1"/>`).join('')}
+    <g class="k-open"><circle cx="50" cy="50" r="9" fill="#a3122b" stroke="#400" stroke-width="0.5"/><path d="M50 41 q6 3 6 9 q-1 6 -6 9 q-5 -3 -6 -9 q0 -6 6 -9Z" fill="#d1202f"/><circle cx="50" cy="50" r="3" fill="#ff7a8f"/></g>
+    ${Array.from({ length: 22 }, (_, i) => `<ellipse class="k-fall" style="animation-delay:${(i * 0.13).toFixed(2)}s" cx="${(i * 11) % 100}" cy="${(i * 13) % 30}" rx="1.4" ry="0.9" fill="#ff2a4a"/>`).join('')}` }),
+  breath: () => ({ bg: 'radial-gradient(circle,#06323f,#010b10 75%)', tg: '#3de0ff', snd: 'chime', art: `
+    <path class="k-draw" style="--len:330;animation-duration:2s" d="M50 50 C70 14 96 14 96 50 C96 86 70 86 50 50 C30 14 4 14 4 50 C4 86 30 86 50 50" fill="none" stroke="#3de0ff" stroke-width="1.6" stroke-linecap="round"/>
+    <path class="k-draw" style="--len:330;animation-duration:2s;animation-delay:.3s" d="M50 50 C70 14 96 14 96 50 C96 86 70 86 50 50 C30 14 4 14 4 50 C4 86 30 86 50 50" fill="none" stroke="#fff" stroke-width="0.4"/>
+    ${Array.from({ length: 12 }, (_, i) => `<circle class="k-pulse" style="animation-delay:${(i * 0.12).toFixed(2)}s" cx="${6 + i * 8}" cy="${50 + Math.sin(i) * 26}" r="0.9" fill="#aaf3ff"/>`).join('')}` }),
+  tower: () => ({ bg: 'linear-gradient(180deg,#14101f,#2a2140 70%,#0c0912)', tg: '#a88bff', snd: 'bell', art: `
+    <g class="shake"><g class="k-tower"><rect x="42" y="30" width="16" height="62" fill="#0d0a18" stroke="#6a5aa0" stroke-width="0.5"/><path d="M40 30 L50 12 L60 30Z" fill="#0d0a18" stroke="#6a5aa0" stroke-width="0.5"/><path d="M44 38 h12 v8 q-6 6 -12 0Z" fill="#a88bff" opacity="0.9"/><circle cx="50" cy="48" r="1.6" fill="#ffe9a0"/></g></g>
+    ${['M50 56 l-3 8 l4 6 l-2 10', 'M54 62 l4 6 l-3 8', 'M46 76 l-4 6'].map((d, i) => `<path class="k-draw" style="--len:60;animation-delay:${0.6 + i * 0.3}s" d="${d}" fill="none" stroke="#fff" stroke-width="0.7"/>`).join('')}
+    ${Array.from({ length: 14 }, (_, i) => `<rect class="k-fall" style="animation-delay:${(i * 0.2).toFixed(2)}s" x="${30 + (i * 7) % 40}" y="${20 + (i * 5) % 30}" width="2" height="2" fill="#6a5aa0"/>`).join('')}
+    ${[0, 1, 2].map((i) => `<circle class="k-ring" style="animation-delay:${i * 0.5}s" cx="50" cy="48" r="8" fill="none" stroke="#c9b8ff" stroke-width="0.6"/>`).join('')}` }),
+  rupture: () => ({ bg: 'radial-gradient(circle,#101a36,#04060f 75%)', tg: '#bcd8ff', snd: 'crack', art: `
+    ${[[50, 50, 6, 4], [50, 50, 94, 12], [50, 50, 96, 70], [50, 50, 70, 98], [50, 50, 20, 96], [50, 50, 2, 62], [50, 50, 30, 2]].map((l, i) => `<polyline class="k-draw" style="--len:130;animation-delay:${(i * 0.12).toFixed(2)}s;animation-duration:.5s" points="${l[0]},${l[1]} ${(l[0] + l[2]) / 2 + (i % 2 ? 5 : -5)},${(l[1] + l[3]) / 2 + (i % 3 ? -4 : 6)} ${l[2]},${l[3]}" fill="none" stroke="#e8f2ff" stroke-width="0.7"/>`).join('')}
+    <circle cx="50" cy="50" r="5" fill="#fff" class="k-burst" style="animation-delay:.1s"/>
+    ${Array.from({ length: 10 }, (_, i) => `<path class="k-fall" style="animation-delay:${(i * 0.25).toFixed(2)}s" d="M${8 + i * 9} ${10 + (i % 3) * 12} l4 2 l-2 4Z" fill="#bcd8ff" opacity="0.7"/>`).join('')}` }),
+  sink: () => ({ bg: 'linear-gradient(180deg,#0b2a5a,#02070f 80%)', tg: '#2a6ad9', snd: 'water', art: `
+    ${[0, 1, 2, 3].map((i) => `<ellipse class="k-ring" style="animation-delay:${i * 0.4}s" cx="50" cy="28" rx="14" ry="4" fill="none" stroke="#6aa0ff" stroke-width="0.5"/>`).join('')}
+    <g class="k-sway"><circle cx="50" cy="58" r="6" fill="#0a1a3a" stroke="#4a7ae0" stroke-width="0.5" opacity="0.9"/><path d="M44 58 q6 14 12 0" fill="none" stroke="#4a7ae0" stroke-width="0.4"/></g>
+    ${Array.from({ length: 18 }, (_, i) => `<circle class="k-rise" style="animation-delay:${(i * 0.16).toFixed(2)}s;animation-duration:${2.4 + (i % 3) * 0.5}s" cx="${4 + i * 5.4}" cy="${95}" r="${0.5 + (i % 3) * 0.4}" fill="none" stroke="#8ab4ff" stroke-width="0.3"/>`).join('')}
+    <rect width="100" height="100" fill="#000" opacity="0.4"/>` }),
+  charge: () => ({ bg: 'radial-gradient(circle at 50% 30%,#2a1458,#07040f 75%)', tg: '#ffe14d', snd: 'zap', art: `
+    <ellipse cx="30" cy="16" rx="30" ry="10" fill="#1a1030"/><ellipse cx="72" cy="12" rx="32" ry="12" fill="#150b28"/>
+    ${[[50, 18, 40, 44, 56, 46, 42, 82], [20, 14, 28, 36, 20, 40, 30, 70], [80, 14, 70, 38, 78, 40, 66, 78]].map((b, i) => `<polyline class="k-bolt" style="animation-delay:${(i * 0.37).toFixed(2)}s" points="${b[0]},${b[1]} ${b[2]},${b[3]} ${b[4]},${b[5]} ${b[6]},${b[7]}" fill="none" stroke="#fff3a0" stroke-width="1.5" stroke-linejoin="round"/>`).join('')}
+    <rect width="100" height="100" fill="#fff" opacity="0" class="k-bolt" style="animation-delay:.1s"/>
+    <circle cx="50" cy="52" r="8" fill="#ffe14d" opacity="0.5" class="k-pulse"/>` }),
+  burn: () => ({ bg: 'linear-gradient(180deg,#0a0300,#2a0a00 70%,#7a2a00)', tg: '#ff9a3a', snd: 'fire', art: `
+    ${Array.from({ length: 11 }, (_, i) => `<path class="k-flame" style="animation-delay:${(i * 0.09).toFixed(2)}s" d="M${i * 9.6} 100 q-3 -${18 + (i % 4) * 7} 3 -${30 + (i % 3) * 10} q1 12 5 16 q3 6 -2 ${14 + (i % 4) * 7}Z" fill="${['#ff7a1a', '#ffb02a', '#ff4a0a'][i % 3]}" opacity="0.9"/>`).join('')}
+    ${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<ellipse cx="50" cy="42" rx="3.2" ry="9" fill="#f4f2ee" stroke="#c9c4b8" stroke-width="0.3" transform="rotate(${i * 45} 50 46)" class="k-open" style="animation-delay:${0.2 + i * 0.05}s"/>`).join('')}
+    <circle cx="50" cy="46" r="2.6" fill="#ffd23f"/>
+    ${Array.from({ length: 20 }, (_, i) => `<circle class="k-rise" style="animation-delay:${(i * 0.14).toFixed(2)}s" cx="${(i * 13) % 100}" cy="95" r="0.5" fill="#ffb02a"/>`).join('')}` }),
+  gas: () => ({ bg: 'radial-gradient(circle at 50% 40%,#0d3a30,#020a08 75%)', tg: '#7fffd0', snd: 'harp', art: `
+    <g class="k-open"><path d="M10 100 Q14 60 38 46 L56 32 L66 38 L48 56 Q36 70 38 100Z" fill="#f4f6fa" stroke="#6a7aa0" stroke-width="0.6"/>
+    ${['M26 84 l6 -10', 'M30 66 l8 -4', 'M40 52 l6 6'].map((d) => `<path d="${d}" stroke="#d1202f" stroke-width="0.7" fill="none"/>`).join('')}
+    <line x1="52" y1="38" x2="104" y2="6" stroke="#cfe0f0" stroke-width="1.6"/><path d="M104 5 L92 6 L98 14 Z" fill="#fff" stroke="#6a7aa0" stroke-width="0.5"/></g>
+    ${[['#a24bff', 70, 62], ['#3ddc84', 78, 76], ['#3ea8ff', 86, 90]].map((c, i) => `<circle class="k-pulse" style="animation-delay:${i * 0.2}s" cx="${c[1]}" cy="${c[2]}" r="5" fill="${c[0]}" opacity="0.8"/>`).join('')}
+    ${Array.from({ length: 16 }, (_, i) => `<circle class="k-rise" style="animation-delay:${(i * 0.17).toFixed(2)}s" cx="${50 + (i * 9) % 50}" cy="100" r="${1 + (i % 3)}" fill="#7fffd0" opacity="0.35"/>`).join('')}` }),
+  hatch: () => ({ bg: 'radial-gradient(circle,#2a2410,#050402 75%)', tg: '#ffe9a0', snd: 'crack', art: `
+    <g class="k-egg"><ellipse cx="50" cy="52" rx="17" ry="22" fill="#f4efe0" stroke="#8a7a50" stroke-width="0.7"/>
+    <path class="k-draw" style="--len:90;animation-delay:.5s" d="M38 46 l6 5 l4 -6 l5 6 l6 -5 l5 5" fill="none" stroke="#5a4a28" stroke-width="0.8"/>
+    <path class="k-draw" style="--len:60;animation-delay:.9s" d="M50 32 l-3 8 l6 4 l-3 8" fill="none" stroke="#5a4a28" stroke-width="0.8"/></g>
+    <circle cx="50" cy="52" r="10" fill="#fff6c0" class="k-burst"/><rect width="100" height="100" fill="#fff" class="k-flash" style="animation-delay:1.1s;animation-duration:.5s"/>
+    ${Array.from({ length: 14 }, (_, i) => `<line class="k-burst" style="animation-delay:${1 + (i % 3) * 0.05}s" x1="50" y1="52" x2="${50 + Math.cos(i * 0.45) * 60}" y2="${52 + Math.sin(i * 0.45) * 60}" stroke="#ffe9a0" stroke-width="0.4"/>`).join('')}` }),
+  anysin: () => ({ bg: 'radial-gradient(circle,#4a3500,#0a0700 75%)', tg: '#ffd23f', snd: 'chime', art: `
+    ${Array.from({ length: 16 }, (_, i) => `<line class="k-spin" style="animation-duration:${8 + i}s" x1="50" y1="50" x2="${50 + Math.cos(i * 0.4) * 70}" y2="${50 + Math.sin(i * 0.4) * 70}" stroke="#ffd23f" stroke-width="0.4" opacity="0.5"/>`).join('')}
+    <circle cx="50" cy="48" r="16" fill="none" stroke="#ffd23f" stroke-width="0.8" stroke-dasharray="2 1.4" class="k-spin"/>
+    <g class="k-sway"><path d="M30 52 Q40 28 50 44 Q60 28 70 52 Q60 46 50 62 Q40 46 30 52Z" fill="#0a0a0a" stroke="#ffd23f" stroke-width="0.6"/><circle cx="50" cy="42" r="2.4" fill="#0a0a0a" stroke="#ffd23f" stroke-width="0.4"/><path d="M52 41 l3 1 l-3 1Z" fill="#e8a020"/></g>` }),
+  matthias: () => ({ bg: 'radial-gradient(circle,#f4f2ee,#a9c6e8 80%)', tg: '#fff', snd: 'chime', art: `
+    ${Array.from({ length: 18 }, (_, i) => `<line class="k-spin" style="animation-duration:${10 + i}s" x1="50" y1="50" x2="${50 + Math.cos(i * 0.35) * 80}" y2="${50 + Math.sin(i * 0.35) * 80}" stroke="#fff" stroke-width="0.8" opacity="0.6"/>`).join('')}
+    <g class="k-sway"><path d="M50 48 Q30 24 14 38 Q28 40 36 52 Q44 58 50 54 Q56 58 64 52 Q72 40 86 38 Q70 24 50 48Z" fill="#fff" stroke="#8aa6c8" stroke-width="0.6"/><circle cx="50" cy="50" r="3" fill="#fff" stroke="#8aa6c8" stroke-width="0.5"/></g>
+    ${Array.from({ length: 12 }, (_, i) => `<path class="k-fall" style="animation-delay:${(i * 0.22).toFixed(2)}s" d="M${8 + i * 8} ${(i * 9) % 30} q3 -2 6 0 q-3 4 -6 0Z" fill="#9bd08a"/>`).join('')}` }),
+};
+const TRAIT_FX = { red: ['붉은시선', '모든 칸이 피 웅덩이로 잠긴다', '#ff2a2a'], yellow: ['노란작살', '작살이 모든 것을 꿰뚫는다', '#ffd23f'], indigo: ['쪽빛노인', '대호수가 깨어난다', '#7f9bff'], black: ['검은침묵', '…', '#fff'] };
+let fx3Busy = false;
+async function screenFx(key, tag, title, sub) {
+  const root = $('fx3'); if (!root) return;
+  const a = (FXA[key] || FXA.gas)();
+  root.className = ''; root.style.background = a.bg; root.style.setProperty('--tg', a.tg);
+  root.innerHTML = `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">${a.art}</svg><div class="ttl"><small>${esc(tag)}</small><b>${esc(title)}</b>${sub ? `<i>${esc(sub)}</i>` : ''}</div>`;
+  root.style.display = 'block'; void root.offsetWidth; root.classList.add('show');
+  play(sfx[a.snd] || sfx.chime);
+  await sleep(3250);
+  root.className = ''; root.style.display = 'none'; root.innerHTML = '';
+}
+// ---- 보드 위 짧은 효과 ----
+function boardRoot() {
+  const board = document.querySelector('#app svg[viewBox="0 0 100 100"]'); const root = $('fx4'); if (!board || !root) return null;
+  const r = board.getBoundingClientRect(); root.style.display = 'block';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 100 100');
+  svg.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`; root.appendChild(svg);
+  return svg;
+}
+function boardLabel(text, color) {
+  const root = $('fx4'); if (!root) return; root.style.display = 'block';
+  const d = document.createElement('div'); d.className = 'bfx-lbl'; d.style.setProperty('--tg', color || '#fff'); d.textContent = text; root.appendChild(d);
+  setTimeout(() => { d.remove(); }, 1800);
+}
+function boardFx(inner, ms) {
+  const svg = boardRoot(); if (!svg) return;
+  svg.innerHTML = inner; setTimeout(() => { svg.remove(); const root = $('fx4'); if (root && !root.children.length) root.style.display = 'none'; }, ms || 1300);
+}
+const nxy = (n) => nodeXY(n);
+function ringsAt(n, col, k) { const [x, y] = nxy(n); return [0, 1, 2].map((i) => `<circle class="bfx-ring" style="animation-delay:${i * 0.15}s" cx="${x}" cy="${y}" r="${k || 6}" fill="none" stroke="${col}" stroke-width="0.9"/>`).join(''); }
+function lineThrough(nodes, col, w) { if (!nodes || nodes.length < 2) return ''; const pts = nodes.map((n) => nxy(n).join(',')).join(' '); return `<polyline class="bfx-line" style="--len:300" points="${pts}" fill="none" stroke="${col}" stroke-width="${w || 1.6}" stroke-linecap="round" stroke-linejoin="round"/>`; }
+function popAt(n, ch, size) { const [x, y] = nxy(n); return `<text class="bfx-pop" x="${x}" y="${y}" font-size="${size || 9}" text-anchor="middle">${ch}</text>`; }
+function playMini(ev, ns) {
+  const nm = (i) => (ns.players[i] ? ns.players[i].name : '');
+  switch (ev.kind) {
+    case 'whale': boardFx(ringsAt(ev.node, '#6ac8ff', 8) + popAt(ev.node, '🐋', 12), 1400); play(sfx.water); boardLabel(ev.act === 'spawn' ? '🐋 고래가 나타났다' : ev.act === 'dive' ? '🐋 고래가 잠수했다' : '🐋 고래가 헤엄친다', '#6ac8ff'); break;
+    case 'whalehit': boardFx(ringsAt(ev.node, '#ff4a4a', 9) + popAt(ev.node, '💥', 11), 1200); play(sfx.boom); break;
+    case 'whalecatch': boardFx(ringsAt(ev.node, '#7fffd0', 9) + popAt(ev.node, '🔱', 12), 1300); play(sfx.harp); boardLabel('🔱 고래를 잡았다!', '#7fffd0'); break;
+    case 'sacrifice': boardFx(ringsAt(ev.node, '#d1202f', 6) + popAt(ev.node, '🩸', 8), 1100); play(sfx.pop); break;
+    case 'reflect': boardFx(ringsAt(ev.node, '#7fffd0', 10) + popAt(ev.node, '🔱', 10), 1100); play(sfx.slash); boardLabel('🔱 가스하푼이 공격을 되받아쳤다', '#7fffd0'); break;
+    case 'slash': boardFx(lineThrough([ev.from, ...(ev.nodes || [])].filter((n, i, a2) => a2.indexOf(n) === i), '#ff2a4a', 2) + ringsAt(ev.from, '#ff2a4a', 6) + (ev.nodes || []).map((n) => popAt(n, '🌹', 6)).join(''), 1200); play(sfx.slash); boardLabel('🌹 참격!', '#ff2a4a'); break;
+    case 'crack': boardFx(ringsAt(ev.node, '#a88bff', 9) + popAt(ev.node, '🔔', 9), 1300); play(sfx.bell); break;
+    case 'charge': boardLabel(`⚡ 충전 ${ev.n} 방출!`, '#ffe14d'); play(sfx.zap); break;
+    case 'weapon': boardFx(lineThrough([ev.from, ...(ev.nodes || [])], '#fff', 1.4) + (ev.nodes || []).map((n) => ringsAt(n, '#fff', 5)).join('') + (ev.nodes || []).map((n) => popAt(n, '✖', 7)).join(''), 1300); play(sfx.slash); boardLabel(`🗡 ${ev.name}${ev.hit ? ` — ${ev.hit}명 처치` : ''}`, '#fff'); break;
+    case 'dash': boardFx(lineThrough([ev.from, ...(ev.nodes || [])], '#ffd23f', 2.4) + (ev.nodes || []).map((n) => ringsAt(n, '#ffd23f', 5)).join(''), 1200); play(sfx.harp); boardLabel('🔱 노란작살 돌진!', '#ffd23f'); break;
+    case 'drag': boardFx(lineThrough([ev.from, ev.node], '#ffd23f', 1.2) + ringsAt(ev.node, '#ffd23f', 6) + popAt(ev.node, '⚓', 9), 1200); play(sfx.harp); boardLabel('⚓ 작살에 끌려간다', '#ffd23f'); break;
+    case 'harpoon': boardFx(ringsAt(ev.node, '#7fffd0', 6) + popAt(ev.node, '🔱', 10), 1200); play(sfx.harp); boardLabel('🔱 작살이 박혔다', '#7fffd0'); break;
+    case 'light': boardFx(ringsAt(ev.node, '#6bffa8', 9) + popAt(ev.node, '💚', 11), 1500); play(sfx.chime); boardLabel('💚 영롱한 초록빛', '#6bffa8'); break;
+    case 'lightoff': boardFx(ringsAt(ev.node, '#6bffa8', 6), 900); break;
+    case 'rupture': boardFx(ringsAt(ev.node, '#bcd8ff', 6) + popAt(ev.node, '💠', 8), 1000); play(sfx.crack); break;
+    case 'burn': boardFx(ringsAt(ev.node, '#ff7a1a', 6) + popAt(ev.node, '🔥', 9), 1100); play(sfx.fire); break;
+    case 'sink': boardFx(ringsAt(ev.node, '#2a6ad9', 6) + popAt(ev.node, '🌊', 8), 1000); play(sfx.water); break;
+    case 'distort': boardFx(ringsAt(ev.node, '#b44bff', 8) + popAt(ev.node, '🌀', 10), 1300); play(sfx.low); boardLabel('🌀 뒤틀렸다…', '#b44bff'); break;
+    case 'lv5': boardLabel(`🎖 ${nm(ev.by)}의 해결사가 5급! 이동 +1 · 뒤로 이동 가능`, '#ffd23f'); play(sfx.chime); break;
+    case 'stock': boardLabel(`📈 ${nm(ev.by)}이(가) 주식을 샀다`, '#ffd23f'); play(sfx.pop); break;
+    case 'stockmove': if (ev.by === (S && S.me)) boardLabel(`📈 주가 ${ev.d >= 0 ? '▲' : '▼'}${Math.abs(ev.d)} → ${ev.v}`, ev.d >= 0 ? '#ff6b6b' : '#6bb5ff'); break;
+    case 'blacksilence': boardLabel('🖤 검은침묵… 소속의 말이 사라진다', '#fff'); play(sfx.low); break;
+    default: break;
+  }
+}
+const SCREEN_FX = (ev, ns) => {
+  const nm = ns.players[ev.by] ? ns.players[ev.by].name : '';
+  switch (ev.kind) {
+    case 'trait': { const t = TRAIT_FX[ev.trait]; return [ev.trait, '특 색 발 현', t[0], `${nm} — ${t[1]}`]; }
+    case 'ego': return [ev.ego, 'E . G . O 개 화', ev.name, nm];
+    case 'gas': return ['gas', 'E . G . O 개 화', '가스하푼', `${nm}의 에이해브`];
+    case 'hatch': return ['hatch', '알 을 깨 고', '싱클레어', `${nm}의 싱클레어가 부화했다`];
+    case 'anysin': return ['anysin', '표 지 3 / 3', '어느 싱클레어', `${nm} — 자유로운 이동`];
+    case 'matthias': return ['matthias', '', '평화를 빕니다', `${nm}: 모든 말 +1 · 이동 +1`];
+    default: return null;
+  }
+};
+let lastFxSeq = null;
+async function playFxEvents(ns) {
+  const evs = (ns.fx || []).filter((e) => lastFxSeq !== null && e.seq > lastFxSeq).sort((a, b) => a.seq - b.seq);
+  if (ns.fxSeq != null) lastFxSeq = ns.fxSeq;
+  if (document.hidden) return;
+  for (const ev of evs) {
+    const sc = SCREEN_FX(ev, ns);
+    if (sc) { try { await screenFx(sc[0], sc[1], sc[2], sc[3]); } catch (e) { const r = $('fx3'); if (r) { r.style.display = 'none'; r.innerHTML = ''; } } }
+    else { try { playMini(ev, ns); } catch (e) { /* */ } await sleep(260); }
+  }
+}
+
 connect(true);
 render();
 </script>

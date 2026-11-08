@@ -85,7 +85,7 @@ wss.on('connection', (ws) => {
         case 'pick': G.actPick(g, p, m.id); break;
         case 'sub': G.actSub(g, p, m.value); break;
         case 'throw': G.actThrow(g, p, { choose: m.choose, coin: !!m.coin }); break;
-        case 'move': G.actMove(g, p, m.ri, m.pid); break;
+        case 'move': G.actMove(g, p, m.ri, m.pid, m); break;
         case 'interrupt': G.actInterrupt(g, p, m); break;
         case 'ability': G.actAbility(g, p, m.a, m); break;
         case 'rematch': if (g.phase !== 'ended') throw new Error('게임이 끝나지 않았습니다'); G.resetGame(g); break;
@@ -107,4 +107,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => console.log(`증강 윷놀이 v1.10 서버 실행 중: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.11 서버 실행 중: http://localhost:${PORT}`));
