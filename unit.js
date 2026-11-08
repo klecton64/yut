@@ -601,18 +601,40 @@ t('싱클레어: 표지 3개면 어느 싱클레어, 던진 결과 이내 자유
   G.actMove(g, a, 0, '0_0', { dist: 2 });
   assert.strictEqual(x.pos, 3);  // 걸(3)+1=4 이내에서 2칸 선택 → 1+2=3
 }) ;
-t('뒤틀림: 죽을 때 뒤틀림/개화/사망 중 하나, 뒤틀림이면 공격자를 공격', () => {
+t('뒤틀림: 30% 뒤틀림(말은 대기칸으로, 맵에 개체 생성) / 10% 개화 / 60% 사망, 뒤틀림이면 공격자를 공격', () => {
   let sawDistort = 0, sawEgo = 0, sawDeath = 0;
-  for (let i = 0; i < 300; i++) {
+  for (let i = 0; i < 600; i++) {
     const g = setup(2, [['distort'], []]);
     const a = g.players[0], b = g.players[1]; put(a, 0, 7); put(b, 0, 6);
     g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1; G.actMove(g, b, 0, '1_0');
     const x = a.pieces[0];
-    if (x.type === 'distort') { sawDistort++; assert.strictEqual(b.pieces[0].pos, 0); }
+    if (g.distorts.length) { sawDistort++; assert.strictEqual(x.type, 'normal'); assert.strictEqual(x.pos, 0); assert([6, 7, 8].includes(g.distorts[0].node)); assert.strictEqual(b.pieces[0].pos, 0); }
     else if (x.type === 'ego') { sawEgo++; assert(x.ego); }
     else { sawDeath++; assert.strictEqual(x.pos, 0); }
   }
-  assert(sawDistort > 80 && sawEgo > 5 && sawDeath > 60, `${sawDistort}/${sawEgo}/${sawDeath}`);
+  assert(sawDistort > 120 && sawDistort < 260 && sawEgo > 20 && sawDeath > 250, `${sawDistort}/${sawEgo}/${sawDeath}`);
+});
+t('뒤틀림: 대기칸으로 돌아온 말이 다시 죽으면 다시 판정(뒤틀림 가능)', () => {
+  let again = 0;
+  for (let i = 0; i < 300; i++) {
+    const g = setup(2, [['distort'], []]); const a = g.players[0], b = g.players[1];
+    put(a, 0, 7); put(b, 0, 6); g.tn.throws = 0; g.tn.queue = ['도']; g.cur = 1; G.actMove(g, b, 0, '1_0');
+    if (g.distorts.length) { g.distorts = []; put(a, 0, 9); put(b, 1, 8); g.phase = 'turn'; g.cur = 1; g.tn = { queue: ['도'], throws: 0, counts: {}, thrown: true }; G.actMove(g, b, 0, '1_1'); if (g.distorts.length) again++; }
+  }
+  assert(again > 0);
+});
+t('뒤틀림 개체: 라운드 시작에 앞뒤 1칸 이동하며 이동 이벤트를 남기고, 말이 있으면 덮침', () => {
+  const g = setup(2, [['distort'], []]); const a = g.players[0], b = g.players[1];
+  put(b, 0, 7); put(b, 1, 5); put(b, 2, 6); g.distorts.push({ id: 1, node: 6, orig: 0 }); g.did = 1;
+  const seq = g.fxSeq || 0; I.roundStart(g);
+  const mv = g.fx.find((e) => e.kind === 'distmove'); assert(mv && mv.from === 6 && [5, 7].includes(mv.to) && g.distorts[0].node === mv.to);
+  assert.strictEqual(b.pieces.filter((x) => x.pos === mv.to).length, 0);   // 도착 칸의 말은 죽음
+});
+t('뒤틀림 개체: 그 칸에 도착(공격)하면 사라지고, 해결사는 등급 +1', () => {
+  const g = setup(2, [[], ['fixer']]); const b = g.players[1];
+  b.pieces[0].type = 'fixer'; b.pieces[0].lv = 0; put(b, 0, 4); g.distorts.push({ id: 1, node: 5, orig: 0 }); g.cur = 1;
+  g.tn.throws = 0; g.tn.queue = ['도']; G.actMove(g, b, 0, '1_0');
+  assert.strictEqual(g.distorts.length, 0); assert.strictEqual(b.pieces[0].lv, 1);
 });
 t('EGO 가시 돋친 입맞춤: 앞뒤 직선에 출혈, 출혈은 이동 -1', () => {
   const g = setup(2, [['distort'], []]);
@@ -711,12 +733,30 @@ t('검은침묵: 무기 능력으로 범위 안의 적을 처치 (추가 던지�
   G.actAbility(g, a, 'weapon', { pid: '0_0' });
   assert.strictEqual(b.pieces[0].pos, 0); assert.strictEqual(g.tn.throws, th);
 });
-t('주식: 값에 따라 이동 증감, 0 이하 이동은 불가', () => {
+const mkt = (g, v) => { g.stocks = {}; ['W', 'L', 'T', 'H'].forEach((k) => { g.stocks[k] = { v, d: 0, h: [v] }; }); };
+t('주식: 선택한 종목의 시장 값에 따라 이동 증감, 0 이하 이동은 불가', () => {
   const g = setup(2, [['stock'], []]);
-  const a = g.players[0]; a.st.lim.stock = { name: 'W', v: 12 }; put(a, 0, 1);
-  assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 4);
-  a.st.lim.stock.v = 3; assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 0); assert.strictEqual(I.groupSteps(g, a, '개', [a.pieces[0]]), 1);
-  a.st.lim.stock.v = 0; assert.strictEqual(I.groupSteps(g, a, '윷', [a.pieces[0]]), 1);
+  const a = g.players[0]; a.st.lim.stock = { name: 'W' }; put(a, 0, 1);
+  mkt(g, 12); assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 4);
+  mkt(g, 3); assert.strictEqual(I.groupSteps(g, a, '도', [a.pieces[0]]), 0); assert.strictEqual(I.groupSteps(g, a, '개', [a.pieces[0]]), 1);
+  mkt(g, 0); assert.strictEqual(I.groupSteps(g, a, '윷', [a.pieces[0]]), 1);
+});
+t('주식: 라운드마다 4종목이 -2~+2 범위로 변동', () => {
+  const g = setup(2, [['stock'], []]); g.players[0].st.lim.stock = { name: 'T' }; mkt(g, 5);
+  for (let i = 0; i < 80; i++) { const before = JSON.stringify(Object.values(g.stocks).map((s) => s.v)); I.roundStart(g); Object.values(g.stocks).forEach((s) => { assert(Math.abs(s.d) <= 2); assert(s.v >= -3 && s.v <= 15); }); }
+});
+t('주식: 이번 차례를 쓰고 다른 종목으로 갈아타기', () => {
+  const g = setup(2, [['stock'], []]); const a = g.players[0]; a.st.lim.stock = { name: 'W' }; mkt(g, 5);
+  assert.throws(() => G.actAbility(g, a, 'stockswap', { value: 'W' }), /이미 보유/);
+  g.tn.throws = 1; G.actAbility(g, a, 'stockswap', { value: 'H' });
+  assert.strictEqual(a.st.lim.stock.name, 'H'); assert.strictEqual(g.cur, 1);
+});
+t('자동 건너뜀: 폰만 있고 백도가 나오면 차례가 자동으로 넘어감 / 골인 시 팡파르 이벤트', () => {
+  const g = setup(2, [['pawn'], []]); const a = g.players[0];
+  a.pieces.forEach((x) => { x.type = 'pawn'; put(a, a.pieces.indexOf(x), 3); });
+  g.tn.throws = 0; g.tn.queue = ['백도']; assert(G.unstick(g)); assert.strictEqual(g.cur, 1);
+  const g2 = setup(2, [[], []]); const b = g2.players[0]; put(b, 0, 19); g2.tn.throws = 0; g2.tn.queue = ['걸']; G.actMove(g2, b, 0, '0_0');
+  assert(g2.fx.some((e) => e.kind === 'goal'));
 });
 t('초록빛: 말을 바치면 주변 말이 끌려오고 조종 불가, 3차례 뒤 소멸', () => {
   const g = setup(2, [['light'], []]);

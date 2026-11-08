@@ -166,6 +166,18 @@ body.aiming svg[viewBox="0 0 100 100"]{touch-action:none;cursor:crosshair}
 .pc-tw{animation:pctw 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes pctw{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
 
+
+/* v1.12 */
+#fabs{position:fixed;left:10px;bottom:10px;z-index:130;display:none;gap:6px}
+#fabs button{padding:7px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.25);background:rgba(20,22,28,.85);color:#fff;font-size:13px;cursor:pointer}
+#fabs button.arm{background:#b3182b;border-color:#ff8a8a}
+.pkm{position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:12px}
+.pkbox{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.cf{position:fixed;top:-16px;width:9px;height:14px;z-index:140;pointer-events:none;animation:cff 2.6s linear forwards}
+@keyframes cff{to{transform:translateY(112vh) rotate(900deg)}}
+.stk{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.stk>div{flex:1 1 70px;min-width:70px;padding:6px 7px;border-radius:9px;background:var(--card2);border:1px solid var(--bd);font-size:12px}
+.stk>div.mine{border-color:#ffd23f;box-shadow:0 0 0 1px #ffd23f inset}
+.stk b{font-size:15px}.stk .up{color:#ff6b6b}.stk .dn{color:#6bb5ff}
 </style>
 </head>
 <body>
@@ -179,7 +191,7 @@ body.aiming svg[viewBox="0 0 100 100"]{touch-action:none;cursor:crosshair}
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const VERSION = 'v1.11 (림버스 2차 · E.G.O 개화/특색 연출 · 능력 이펙트 · 컨셉 능력 버튼 · 2026-11-08)';
+const VERSION = 'v1.13 (뒤틀림 재판정 · 뒤틀림 개편 · 주식 시장 · 묘비 · 골인 팡파르 · 나가기 수정 · 2026-11-09)';
 const RES = ['백도', '도', '개', '걸', '윷', '모'];
 const COLORS = ['#e5484d', '#3e8ef7', '#30a46c', '#f5c518', '#a855f7', '#f97316'], COLOR_NAMES = ['빨강', '파랑', '초록', '노랑', '보라', '주황'];
 const LET = { lord: '군', lucio: '루', valen: '발', hunt: '헌', vanguard: '선', zealot: '광', marathon: '마', goblin: '깨', cannon: '포', pawn: '폰', kim: '김', queen: '후' };
@@ -502,11 +514,11 @@ function boardSVG() {
       const frozen = e.list.some((q) => q.frozen), shield = e.list.some((q) => q.shield);
       const ty = e.list.find((q) => q.type !== 'normal');
       const letter = ty ? LET[ty.type] || '' : '';
-      const tt = ty ? ty.type : '';
-      s += `<g data-a="piece" data-v="${lead.id}" style="cursor:pointer" opacity="${frozen ? 0.55 : 1}">
+      const tt = ty ? ty.type : ''; const rv = Math.max(0, ...e.list.map((q) => q.rv || 0));
+      s += `<g data-a="piece" data-v="${lead.id}" style="cursor:pointer${rv ? ';filter:saturate(.3) brightness(.85)' : ''}" opacity="${frozen ? 0.55 : 1}">
         ${decoBack(tt, x, y)}${decoBack2(tt, x, y, ty)}<circle cx="${x}" cy="${y}" r="3.6" fill="${e.p.color}" stroke="${shield ? '#fff' : '#000'}" stroke-width="${shield ? 1 : 0.7}" ${shield ? 'stroke-dasharray="1.2 0.8"' : ''}/>
         ${e.list.length > 1 ? `<text x="${x}" y="${y + 1.3}" font-size="4" font-weight="700" fill="#000" text-anchor="middle">${e.list.length}</text>` : (letter ? `<text x="${x}" y="${y + 1.2}" font-size="3.2" font-weight="700" fill="#000" text-anchor="middle">${letter}</text>` : '')}
-        ${decoFront(tt, x, y)}${decoFront2(tt, x, y, ty)}${statusMarks(e.list, x, y)}${e.list.some((q) => q.hs) ? `<path pointer-events="none" d="M${x - 3} ${y - 2.2} L${x - 3.6} ${y - 5.2} L${x - 1.2} ${y - 3.2} Z M${x + 3} ${y - 2.2} L${x + 3.6} ${y - 5.2} L${x + 1.2} ${y - 3.2} Z" fill="#111" stroke="#fff" stroke-width="0.25"/>` : ''}${e.list.some((q) => q.tax != null) ? `<text x="${x - 5}" y="${y - 2.6}" font-size="3.4" pointer-events="none">⏳</text>` : ''}${e.list.some((q) => q.weak) ? `<text x="${x - 5}" y="${y + 5.4}" font-size="3.4" pointer-events="none">🩸</text>` : ''}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
+        ${decoFront(tt, x, y)}${decoFront2(tt, x, y, ty)}${statusMarks(e.list, x, y)}${rv ? `<text pointer-events="none" x="${x + 4.2}" y="${y + 5.8}" font-size="3.4" font-weight="800" fill="#fff" stroke="#000" stroke-width="0.5" paint-order="stroke">⏳${rv}</text>` : ''}${e.list.some((q) => q.hs) ? `<path pointer-events="none" d="M${x - 3} ${y - 2.2} L${x - 3.6} ${y - 5.2} L${x - 1.2} ${y - 3.2} Z M${x + 3} ${y - 2.2} L${x + 3.6} ${y - 5.2} L${x + 1.2} ${y - 3.2} Z" fill="#111" stroke="#fff" stroke-width="0.25"/>` : ''}${e.list.some((q) => q.tax != null) ? `<text x="${x - 5}" y="${y - 2.6}" font-size="3.4" pointer-events="none">⏳</text>` : ''}${e.list.some((q) => q.weak) ? `<text x="${x - 5}" y="${y + 5.4}" font-size="3.4" pointer-events="none">🩸</text>` : ''}${frozen ? `<text x="${x + 2.6}" y="${y - 2.6}" font-size="3.6">❄</text>` : ''}</g>`;
     });
   });
   if (S.fog) s += '<rect x="0" y="0" width="100" height="100" fill="#99a" opacity="0.07" pointer-events="none"/>';
@@ -591,6 +603,7 @@ const ABIL = {
   weapon: { k: 'weapon', show: (m) => m.pieces.some((x) => x.type === 'fixer' && x.trait === 'black' && !x.done), can: (m) => !(S.tn && S.tn.weaponUsed) && m.pieces.some((x) => x.type === 'fixer' && x.trait === 'black' && x.pos > 0),
     name: (m) => { const x = m.pieces.find((y) => y.type === 'fixer' && y.trait === 'black'); return `검은침묵 · ${(x && x.weapon) || '무기'}`; }, skin: () => 'weapon', hint: ['검은침묵의 말을 클릭하세요'] },
 };
+ABIL.stockswap = { k: 'stock', show: (m) => m.augs.includes('stock') && !!m.st.lim.stock, can: () => !!(S.tn && !S.tn.thrown), name: () => '종목 갈아타기 (차례 소모)', skin: () => 'stock', hint: ['갈아탈 종목을 고르세요'] };
 const EGO_ACT = ['bleed', 'tower', 'charge'];
 const EGO_NM = { bleed: '가시 돋친 입맞춤', tower: '무너지는 종루', charge: '폭풍의 전야' };
 const egoReady = (m) => m.pieces.filter((x) => x.type === 'ego' && !x.done && EGO_ACT.includes(x.ego) && !(S.tn && S.tn.egoUsed && S.tn.egoUsed[x.id]) && (x.ego === 'charge' ? x.charge > 0 : x.pos > 0 && (x.ego !== 'tower' || (x.uses || 0) < 3)));
@@ -631,7 +644,7 @@ function controlsHTML(me) {
     if (tn.throws > 0) h += '<div class="mut">※ 던질 기회를 모두 쓴 뒤에 말을 움직일 수 있습니다</div>';
   }
   const ab = me.augs.filter((id) => ABIL[id] && !ABIL[id].show);
-  ['harpoon', 'ego', 'trait', 'weapon'].forEach((k) => { if (ABIL[k].show(me)) ab.push(k); });
+  ['harpoon', 'ego', 'trait', 'weapon', 'stockswap'].forEach((k) => { if (ABIL[k].show(me)) ab.push(k); });
   if (ab.length) {
     h += '<div class="abrow">' + ab.map((id) => {
       const d = ABIL[id]; const extra = !!d.show;
@@ -654,6 +667,7 @@ function controlsHTML(me) {
     if (ui.mode === 'sel_d') extra = '<button data-a="dir" data-v="1">도 (앞으로 1칸)</button><button data-a="dir" data-v="-1">백도 (뒤로 1칸)</button>';
     if (ui.abil === 'timetravel' && ui.mode === 'sel_n') extra = '<button data-a="tthome">대기칸으로</button>';
     if (ui.mode === 'sel_tm') extra = `<button class="ab" style="${skinStyle('yellow_dash')}" data-a="tmode" data-v="dash"><span class="ic">🔱</span>3칸 돌진</button><button class="ab" style="${skinStyle('yellow_drag')}" data-a="tmode" data-v="drag"><span class="ic">⚓</span>작살로 끌어오기</button>`;
+    if (ui.mode === 'sel_stock') extra = ['W', 'L', 'T', 'H'].filter((k) => !(me.st.lim.stock && me.st.lim.stock.name === k)).map((k) => `<button class="ab" style="${skinStyle('stock')}" data-a="stockto" data-v="${k}"><span class="ic">📈</span>${k}사 (${S.stocks ? S.stocks[k].v : '-'})</button>`).join('');
     if (ui.mode === 'sel_wd') extra = '<button data-a="wdir" data-v="f">앞으로</button><button data-a="wdir" data-v="b">뒤로</button>';
     if (ui.mode === 'sel_mv' && ui.mv) {
       const mv = ui.mv; extra = '<button class="pri" data-a="mvgo" data-v="">앞으로 (기본)</button>';
@@ -818,7 +832,7 @@ function lobbyHTML() {
   <label><input type="checkbox" data-a="ranking" ${S.ranking ? 'checked' : ''} ${host ? '' : 'disabled'}> 🏅 순위전 (한 명이 이겨도 끝나지 않고 순위를 끝까지 가림 · 계획대로/동메달/취~소 증강 등장)</label></div>
   <div class="card"><b>📦 증강팩</b> <span class="mut">${host ? '(여러 개 선택 가능)' : '(방장이 선택)'}</span>
   ${(meta.packs || []).map((k) => `<div style="margin-top:6px"><label><input type="checkbox" data-a="pack" data-v="${k.id}" ${(S.packs || []).includes(k.id) ? 'checked' : ''} ${host ? '' : 'disabled'}> ${esc(k.name)} <span class="mut">· 증강 ${meta.augments.filter((a) => a.pack === k.id && a.cat !== 'hidden').length}개 — ${esc(k.desc)}</span></label></div>`).join('')}</div>
-  <div style="margin-bottom:10px"><button data-a="leave">🚪 방 나가기</button></div>
+  <div style="margin-bottom:10px"><button data-a="leave">🚪 방 나가기</button> <button data-a="rpacks">📦 팩 설명</button></div>
   ${host ? `<button class="pri" data-a="start" ${S.players.length < 2 ? 'disabled' : ''}>게임 시작 (${S.players.length}/6)</button>` : '<div class="mut">방장이 시작하기를 기다리는 중...</div>'}<div class="mut" style="margin-top:14px">버전 ${VERSION}</div></div>`;
 }
 function gameHTML() {
@@ -826,7 +840,7 @@ function gameHTML() {
   let status = '';
   if (S.phase === 'turn') status = `<b>${esc(S.players[S.cur].name)}</b>의 차례`;
   else if (S.phase === 'pick') status = '증강 선택 중';
-  let h = `<div class="wrap"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>🎲 ${esc(S.code)} · ${S.round}라운드${S.chaos ? ' · 🌀혼돈' : ''}${S.ranking ? ' · 🏅순위전' : ''}</b><span>${status} <button data-a="leave" style="padding:4px 10px;margin-left:8px">🚪 나가기</button></span></div>`;
+  let h = `<div class="wrap"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>🎲 ${esc(S.code)} · ${S.round}라운드${S.chaos ? ' · 🌀혼돈' : ''}${S.ranking ? ' · 🏅순위전' : ''}</b><span>${status} <button data-a="rpacks" style="padding:4px 10px;margin-left:8px">📦 팩 설명</button> <button data-a="leave" style="padding:4px 10px;margin-left:4px">🚪 나가기</button></span></div>`;
   const banners = [];
   if (S.fog) banners.push(`🌫 안개 (${esc(S.players[S.fog.owner].name)}의 능력) - ${S.fog.owner === S.me ? '나는 전부 보입니다' : '내 말 근처만 보입니다'}`);
   if (S.echo) banners.push('🔁 메아리: 모든 플레이어가 차례를 두 번씩');
@@ -844,7 +858,7 @@ function gameHTML() {
     h += `<div style="margin-top:8px"><button class="pri" data-a="rematch">다시 하기</button></div></div>`;
   }
   h += `<div class="grid"><div>${boardSVG()}<div class="card" style="margin-top:10px"><b>${myTurn ? '내 차례' : '대기 중'}</b>${myTurn ? controlsHTML(me) : ''}</div></div>
-  <div>${playerCards()}<div class="card"><div class="mut">진행 기록</div><div class="log" id="log">${S.log.map((l) => `<div>${esc(l)}</div>`).join('')}</div></div></div></div></div>`;
+  <div>${playerCards()}<div class="card"><div class="mut">진행 기록</div><div class="log" id="log">${S.log.map((l) => `<div>${esc(l)}</div>`).join('')}</div></div>${stockPanel()}</div></div></div>`;
   if (S.phase === 'pick') h += pickModal();
   return h;
 }
@@ -853,6 +867,7 @@ function render() {
   if (!S) app.innerHTML = landingHTML();
   else if (S.phase === 'lobby') app.innerHTML = lobbyHTML();
   else app.innerHTML = gameHTML();
+  if (S && rpk) { const old = document.querySelector('.pkbox'); const st = old ? old.scrollTop : 0; app.insertAdjacentHTML('beforeend', packModalHTML()); const nb = document.querySelector('.pkbox'); if (nb) nb.scrollTop = st; }
   document.body.classList.toggle('aiming', ui.mode === 'aim');
   if ($('log')) $('log').scrollTop = 1e9;
 }
@@ -869,6 +884,11 @@ document.addEventListener('click', (e) => {
     else send({ t: 'create', name, token });
   } else if (a === 'start') send({ t: 'start' });
   else if (a === 'rematch') send({ t: 'rematch' });
+  else if (a === 'leave') askLeave(el);
+  else if (a === 'rpacks') { rpk = (meta && meta.packs && meta.packs[0] ? meta.packs[0].id : null); render(); }
+  else if (a === 'rpackset') { rpk = v; render(); }
+  else if (a === 'rpackx') { rpk = null; render(); }
+  else if (a === 'stockto') sendAbil({ value: v });
   else if (a === 'pick') send({ t: 'pick', id: v });
   else if (a === 'sub') send({ t: 'sub', value: /^\d+$/.test(v) ? +v : v });
   else if (a === 'guess') send({ t: 'guess', value: +v });
@@ -894,7 +914,7 @@ document.addEventListener('click', (e) => {
     if (d.k === 'yakji') { if (!me.st.lim.art) { if (confirm('예술! 이번 차례를 쓰고 예술작품을 완성합니다 (내 모든 말 이동 +2). 사용할까요?')) send({ t: 'ability', a: 'yakji' }); return; } ui.abil = 'yakji'; ui.mode = 'sel_side'; render(); return; }
     if (d.needThrow && S.tn.throws <= 0) return toast('던지기 기회가 있을 때만 사용할 수 있습니다');
     ui.abil = v; ui.pid = null;
-    ui.mode = d.k === 'n' ? 'sel_n' : d.k === 'player' ? 'sel_player' : d.k === 'dead' ? 'sel_dead' : d.k === 'e' ? 'sel_e' : 'sel_p';
+    ui.mode = d.k === 'n' ? 'sel_n' : d.k === 'player' ? 'sel_player' : d.k === 'dead' ? 'sel_dead' : d.k === 'e' ? 'sel_e' : d.k === 'stock' ? 'sel_stock' : 'sel_p';
     render();
   } else if (a === 'piece') {
     if (S && S.interrupt && S.interrupt.owner === S.me) { if (me.pieces.some((x) => x.id === v)) send({ t: 'interrupt', pid: v }); else toast('판 위의 내 말을 클릭하세요'); return; }
@@ -951,6 +971,7 @@ const SKIN = {
   yellow_dash: ['🔱', '#5a4300', '#ffd23f', '#fff3b0', '#ffd23f'], yellow_drag: ['⚓', '#4a3a00', '#c9a000', '#ffe98a', '#ffcf33'],
   weapon: ['🗡', '#050505', '#2b2b30', '#f2f2f2', '#ffffff', 'linear-gradient(135deg,#000,#1d1d22 70%,#444)'],
 };
+SKIN.stock = ['📈', '#0b1a3a', '#3e8ef7', '#cfe3ff', '#3e8ef7'];
 const SKIN_DEF = ['⚡', '#2b3244', '#3a4560', '#9fb0d0', '#7a90c0'];
 function skinStyle(k) {
   const s = SKIN[k] || SKIN_DEF;
@@ -1036,6 +1057,8 @@ function boardOverlays() {
   (S.lights || []).forEach((l) => { const [x, y] = nodeXY(l.node); s += `<g pointer-events="none"><circle cx="${x}" cy="${y}" r="7.4" fill="#6bffa8" opacity="0.22" class="lt"/><circle cx="${x}" cy="${y}" r="3.6" fill="#caffdf" opacity="0.8" class="lt"/><text x="${x}" y="${y + 1.4}" font-size="4.2" text-anchor="middle">💚</text><text x="${x}" y="${y - 8}" font-size="2.8" text-anchor="middle" fill="#b9ffd2" font-weight="700">${l.left}</text></g>`; });
   (S.cracks || []).forEach((n) => { const [x, y] = nodeXY(n); s += `<path pointer-events="none" d="M${x - 2.6} ${y - 3} l1.4 2 l-1.6 1.4 l1.8 1.6 l-1 2" fill="none" stroke="#a88bff" stroke-width="0.7"/><path pointer-events="none" d="M${x + 2.6} ${y - 3} l-1.2 2 l1.4 1.6 l-1.4 1.4" fill="none" stroke="#a88bff" stroke-width="0.5"/>`; });
   (S.whales || []).forEach((w) => { const [x, y] = nodeXY(w.node); const ind = w.kind === 'indigo'; s += `<g pointer-events="none" class="wh"><ellipse cx="${x}" cy="${y + 2.6}" rx="6.4" ry="1.4" fill="${ind ? '#3a5fd9' : '#2a8fb0'}" opacity="0.5"/><text x="${x}" y="${y + 2}" font-size="8" text-anchor="middle" ${ind ? 'style="filter:hue-rotate(40deg)"' : ''}>🐋</text></g>`; });
+  S.players.forEach((p) => { ((p.st.lim && p.st.lim.graves) || []).forEach((n) => { const [x, y] = nodeXY(n); s += `<g pointer-events="none"><path d="M${x - 6.4} ${y + 5.2} v-4.2 a2 2 0 0 1 4 0 v4.2 z" fill="${p.color}" stroke="#111" stroke-width="0.45"/><path d="M${x - 4.4} ${y + 0.2} v2.6 M${x - 5.5} ${y + 1.3} h2.2" stroke="#fff" stroke-width="0.5" opacity="0.85"/><rect x="${x - 7}" y="${y + 5.2}" width="5.2" height="0.8" rx="0.4" fill="#222"/></g>`; }); });
+  (S.distorts || []).forEach((d) => { const [x, y] = nodeXY(d.node); s += `<g pointer-events="none" class="wh"><circle cx="${x}" cy="${y}" r="4.6" fill="#2a0a3a" stroke="#b44bff" stroke-width="0.7" opacity="0.9"/><path d="M${x - 2.4} ${y - 1} q2.4 -3 4.6 -0.4 q1.6 2.6 -1.2 3.6 q-2.6 0.6 -2.4 -1.6 q0.6 -1 1.6 -0.6" fill="none" stroke="#e0b0ff" stroke-width="0.6"/><text x="${x}" y="${y + 6.8}" font-size="2.6" fill="#e0b0ff" text-anchor="middle" font-weight="700">뒤틀림</text></g>`; });
   return s;
 }
 
@@ -1161,6 +1184,7 @@ function lineThrough(nodes, col, w) { if (!nodes || nodes.length < 2) return '';
 function popAt(n, ch, size) { const [x, y] = nxy(n); return `<text class="bfx-pop" x="${x}" y="${y}" font-size="${size || 9}" text-anchor="middle">${ch}</text>`; }
 function playMini(ev, ns) {
   const nm = (i) => (ns.players[i] ? ns.players[i].name : '');
+  if (ev.kind === 'whale' && ev.from) { slideFx(ev.from, ev.node, '🐋', '#6ac8ff'); play(sfx.water); boardLabel('🐋 고래가 헤엄친다', '#6ac8ff'); return; }
   switch (ev.kind) {
     case 'whale': boardFx(ringsAt(ev.node, '#6ac8ff', 8) + popAt(ev.node, '🐋', 12), 1400); play(sfx.water); boardLabel(ev.act === 'spawn' ? '🐋 고래가 나타났다' : ev.act === 'dive' ? '🐋 고래가 잠수했다' : '🐋 고래가 헤엄친다', '#6ac8ff'); break;
     case 'whalehit': boardFx(ringsAt(ev.node, '#ff4a4a', 9) + popAt(ev.node, '💥', 11), 1200); play(sfx.boom); break;
@@ -1182,8 +1206,12 @@ function playMini(ev, ns) {
     case 'distort': boardFx(ringsAt(ev.node, '#b44bff', 8) + popAt(ev.node, '🌀', 10), 1300); play(sfx.low); boardLabel('🌀 뒤틀렸다…', '#b44bff'); break;
     case 'lv5': boardLabel(`🎖 ${nm(ev.by)}의 해결사가 5급! 이동 +1 · 뒤로 이동 가능`, '#ffd23f'); play(sfx.chime); break;
     case 'stock': boardLabel(`📈 ${nm(ev.by)}이(가) 주식을 샀다`, '#ffd23f'); play(sfx.pop); break;
-    case 'stockmove': if (ev.by === (S && S.me)) boardLabel(`📈 주가 ${ev.d >= 0 ? '▲' : '▼'}${Math.abs(ev.d)} → ${ev.v}`, ev.d >= 0 ? '#ff6b6b' : '#6bb5ff'); break;
+    case 'stockmove': boardLabel('📈 주식 시장이 움직였다', '#ffd23f'); break;
     case 'blacksilence': boardLabel('🖤 검은침묵… 소속의 말이 사라진다', '#fff'); play(sfx.low); break;
+    case 'slide': slideFx(ev.from, ev.to, ev.ic, ev.col || '#fff'); play(sfx.whoosh); break;
+    case 'distmove': slideFx(ev.from, ev.to, '🌀', '#b44bff'); play(sfx.low); boardLabel('🌀 뒤틀림이 움직인다…', '#b44bff'); break;
+    case 'distortkill': boardFx(ringsAt(ev.node, '#e0b0ff', 8) + popAt(ev.node, '✨', 10), 1100); play(sfx.pop); break;
+    case 'goal': play(sfx.fanfare); confetti(); boardLabel(`🎉 ${nm(ev.by)} 골인!${ev.n > 1 ? ' ×' + ev.n : ''}`, '#ffd23f'); break;
     default: break;
   }
 }
@@ -1207,9 +1235,62 @@ async function playFxEvents(ns) {
   for (const ev of evs) {
     const sc = SCREEN_FX(ev, ns);
     if (sc) { try { await screenFx(sc[0], sc[1], sc[2], sc[3]); } catch (e) { const r = $('fx3'); if (r) { r.style.display = 'none'; r.innerHTML = ''; } } }
-    else { try { playMini(ev, ns); } catch (e) { /* */ } await sleep(260); }
+    else { try { playMini(ev, ns); } catch (e) { /* */ } await sleep(ev.kind === 'slide' ? 950 : ev.kind === 'distmove' ? 1000 : ev.kind === 'goal' ? 1500 : (ev.kind === 'whale' && ev.from) ? 1000 : 260); }
   }
 }
+
+// ---- v1.12 ----
+Object.assign(sfx, {
+  fanfare() { [[523, 0], [523, 0.13], [523, 0.26], [659, 0.4], [784, 0.66], [659, 0.86], [784, 1.0], [1047, 1.2]].forEach(([f, t]) => { tone(f, t, 0.3, 'sawtooth', 0.15); tone(f / 2, t, 0.3, 'square', 0.07); }); noise(1.2, 0.5, 0.22, 5000); },
+});
+function confetti() {
+  const cols = ['#ff4d6d', '#ffd23f', '#4dd2ff', '#7dff9b', '#c58aff', '#ff9f43'];
+  for (let i = 0; i < 70; i++) {
+    const d = document.createElement('div'); d.className = 'cf';
+    d.style.left = Math.random() * 100 + 'vw'; d.style.background = cols[i % cols.length]; d.style.animationDelay = Math.random() * 0.5 + 's'; d.style.animationDuration = 2 + Math.random() * 1.4 + 's';
+    d.style.transform = `rotate(${Math.random() * 360}deg)`; document.body.appendChild(d); setTimeout(() => d.remove(), 4200);
+  }
+}
+function slideFx(from, to, ic, col) {
+  const [x1, y1] = nxy(from), [x2, y2] = nxy(to);
+  boardFx(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1" stroke-dasharray="1.5 1.2" opacity="0.7"/><g><circle r="3.8" fill="${col}" stroke="#fff" stroke-width="0.6" opacity="0.92"/><text y="1.5" font-size="4.4" text-anchor="middle">${ic}</text><animateTransform attributeName="transform" type="translate" from="${x1} ${y1}" to="${x2} ${y2}" dur="0.8s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/></g>` + ringsAt(to, col, 6), 1600);
+}
+const SD = (v) => (v <= 0 ? -3 : v < 5 ? -1 : v >= 10 ? 3 : 1);
+function stockPanel() {
+  if (!S || !S.stocks) return '';
+  const me = S.players[S.me]; const mine = me && me.st.lim && me.st.lim.stock ? me.st.lim.stock.name : null;
+  const owners = {}; S.players.forEach((p) => { if (p.st.lim && p.st.lim.stock) (owners[p.st.lim.stock.name] = owners[p.st.lim.stock.name] || []).push(p.name); });
+  return `<div class="card"><div class="mut">📈 주식 시장 <span style="font-size:11px">(라운드마다 -2~+2 · 0 이하 -3 / 5 미만 -1 / 5 이상 +1 / 10 이상 +3)</span></div><div class="stk">` + ['W', 'L', 'T', 'H'].map((k) => {
+    const t = S.stocks[k]; const h = t.h || [t.v]; const mn = Math.min(...h, 0), mx = Math.max(...h, 10);
+    const pts = h.map((v, i) => `${(i / Math.max(1, h.length - 1)) * 60},${20 - ((v - mn) / (mx - mn || 1)) * 18}`).join(' ');
+    const up = t.d > 0, dn = t.d < 0; const ef = SD(t.v);
+    return `<div class="${mine === k ? 'mine' : ''}"><div><b>${k}사</b> ${mine === k ? '<span style="color:#ffd23f">보유</span>' : ''}</div><div><b class="${up ? 'up' : dn ? 'dn' : ''}">${t.v}</b> <span class="${up ? 'up' : dn ? 'dn' : ''}">${up ? '▲' : dn ? '▼' : '–'}${Math.abs(t.d)}</span></div><svg viewBox="0 0 60 22" style="height:22px;background:none;border-radius:0"><polyline points="${pts}" fill="none" stroke="${up ? '#ff6b6b' : dn ? '#6bb5ff' : '#9aa'}" stroke-width="1.6"/></svg><div class="mut" style="font-size:11px">이동 ${ef >= 0 ? '+' : ''}${ef}${owners[k] ? ' · ' + owners[k].map(esc).join(',') : ''}</div></div>`;
+  }).join('') + '</div></div>';
+}
+let rpk = null;
+function packModalHTML() {
+  if (!meta || !meta.packs) return '';
+  const k = meta.packs.find((x) => x.id === rpk) || meta.packs[0];
+  return `<div class="pkm"><div class="pkbox"><div class="row" style="justify-content:space-between"><b>📦 증강팩 설명</b><button data-a="rpackx">✕ 닫기</button></div><div class="row" style="margin:8px 0">${meta.packs.map((x) => `<button data-a="rpackset" data-v="${x.id}" class="${x.id === k.id ? 'pri' : ''}">${esc(x.name)}</button>`).join('')}</div>${packListHTML(k, meta)}</div></div>`;
+}
+let leaveArm = 0;
+function doLeave() {
+  send({ t: 'leave' });
+  setTimeout(() => { if (S) { fxQ.length = 0; lastSeq = null; lastFlickSeq = null; lastFxSeq = null; S = null; meta = null; rpk = null; resetUI(); try { localStorage.removeItem('yut_room'); } catch (e) { /* */ } render(); } }, 1500);
+}
+function askLeave(el) {
+  const now = Date.now();
+  if (now - leaveArm < 3500) { leaveArm = 0; doLeave(); return; }
+  leaveArm = now; toast('한 번 더 누르면 방을 나갑니다');
+  if (el) { const t = el.textContent; el.textContent = '정말 나가기?'; el.classList.add('arm'); setTimeout(() => { if (el.isConnected) { el.textContent = t; el.classList.remove('arm'); } }, 3500); }
+}
+(function () {
+  const f = document.createElement('div'); f.id = 'fabs';
+  f.innerHTML = '<button id="fab-pk">📦 팩</button><button id="fab-lv">🚪 나가기</button>'; document.body.appendChild(f);
+  $('fab-pk').onclick = () => { rpk = (rpk ? null : (meta && meta.packs && meta.packs[0] ? meta.packs[0].id : null)); render(); };
+  $('fab-lv').onclick = (e) => askLeave(e.currentTarget);
+  setInterval(() => { f.style.display = S ? 'flex' : 'none'; }, 300);
+})();
 
 connect(true);
 render();

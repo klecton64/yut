@@ -69,9 +69,10 @@ wss.on('connection', (ws) => {
       const { room, p } = ws.ctx; const g = room.g;
       switch (m.t) {
         case 'leave': {
-          room.conns.delete(p); ws.ctx = null;
-          if (g.phase === 'lobby') G.removePlayer(g, p); else { p.connected = false; G.forfeit(g, p); }
-          send(ws, { t: 'left' });
+          room.conns.delete(p); ws.ctx = null; p.connected = false;
+          send(ws, { t: 'left' });   // 나가기는 어떤 상황에서도 먼저 성공 처리
+          try { if (g.phase === 'lobby') G.removePlayer(g, p); else G.forfeit(g, p); } catch (e) { console.error('leave error', e.message); }
+          try { G.unstick(g); } catch (e) { /* */ }
           if (room.conns.size === 0) setTimeout(() => { if (room.conns.size === 0) rooms.delete(g.code); }, 30 * 60 * 1000);
           broadcast(room);
           return;
@@ -91,6 +92,7 @@ wss.on('connection', (ws) => {
         case 'rematch': if (g.phase !== 'ended') throw new Error('게임이 끝나지 않았습니다'); G.resetGame(g); break;
         default: return;
       }
+      try { G.unstick(g); } catch (e2) { /* */ }
       broadcast(room);
     } catch (e) {
       send(ws, { t: 'err', msg: e.message });
@@ -107,4 +109,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => console.log(`증강 윷놀이 v1.11 서버 실행 중: http://localhost:${PORT}`));
+// 막힌 차례 자동 해소(안전장치)
+setInterval(() => { for (const room of rooms.values()) { try { if (G.unstick(room.g)) broadcast(room); } catch (e) { /* */ } } }, 3000);
+
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.13 서버 실행 중: http://localhost:${PORT}`));

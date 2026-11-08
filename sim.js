@@ -72,7 +72,7 @@ function stepBot(g) {
     tries.push(['lord', {}], ['hunt', {}], ['yakji', { side: sample(['R', 'L', 'T', 'B']) }]);
     (p.st.lim.graves || []).forEach((gv) => tries.push(['ksa', { node: gv.node }]));
     mine.forEach((x) => {
-      tries.push(['ego', { pid: x.id }], ['weapon', { pid: x.id, dir: sample(['f', 'b']), node: 1 + Math.floor(Math.random() * 28) }], ['light', { pid: x.id }],
+      tries.push(['ego', { pid: x.id }], ['weapon', { pid: x.id, dir: sample(['f', 'b']), node: 1 + Math.floor(Math.random() * 28) }], ['light', { pid: x.id }], ['stockswap', { value: sample(['W', 'L', 'T', 'H']) }],
         ['trait', { pid: x.id, mode: 'dash' }]);
       foes.forEach((q) => q.pieces.filter((y) => !y.done && y.pos > 0).forEach((y) => { tries.push(['harpoon', { tpid: y.id }], ['trait', { pid: x.id, mode: 'drag', tpid: y.id }]); }));
     });
@@ -80,7 +80,7 @@ function stepBot(g) {
     foes.forEach((q) => tries.push(['aim', { target: q.idx }]));
     dead.forEach((q) => tries.push(['necro', { target: q.idx }]));
     const [a, o] = sample(tries);
-    if (p.augs.includes(a) || ['ego', 'weapon', 'trait'].includes(a)) { try { G.actAbility(g, p, a, o); return; } catch (e) { /* 무시 */ } }
+    if (p.augs.includes(a) || ['ego', 'weapon', 'trait', 'stockswap'].includes(a)) { try { G.actAbility(g, p, a, o); return; } catch (e) { /* 무시 */ } }
   }
   if (tn.throws > 0) {
     const o = {};
