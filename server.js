@@ -112,4 +112,4 @@ wss.on('connection', (ws) => {
 // 막힌 차례 자동 해소(안전장치)
 setInterval(() => { for (const room of rooms.values()) { try { if (G.unstick(room.g)) broadcast(room); } catch (e) { /* */ } } }, 3000);
 
-server.listen(PORT, () => console.log(`증강 윷놀이 v1.13 서버 실행 중: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.15 서버 실행 중: http://localhost:${PORT}`));
