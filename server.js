@@ -11,7 +11,6 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
 
 const server = http.createServer((req, res) => {
   let f = req.url.split('?')[0];
-  if (f === '/api/meta') { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' }); return res.end(JSON.stringify({ augments: G.AUGMENTS, packs: G.PACKS, rules: G.RULES })); }
   if (f === '/') f = '/index.html';
   const full = path.normalize(path.join(PUB, f));
   if (!full.startsWith(PUB)) { res.writeHead(403); return res.end(); }
@@ -43,7 +42,7 @@ function attach(room, p, ws) {
   if (old && old !== ws) { old.ctx = null; try { old.close(); } catch (e) { /* */ } }
   room.conns.set(p, ws); p.connected = true;
   ws.ctx = { room, p };
-  send(ws, { t: 'joined', code: room.g.code, token: p.token, meta: { augments: G.AUGMENTS, packs: G.PACKS, rules: G.RULES, routes: G.ROUTES, lines: G.LINES } });
+  send(ws, { t: 'joined', code: room.g.code, token: p.token, meta: { augments: G.AUGMENTS, packs: G.PACKS, routes: G.ROUTES, lines: G.LINES } });
 }
 
 wss.on('connection', (ws) => {
@@ -69,10 +68,9 @@ wss.on('connection', (ws) => {
       const { room, p } = ws.ctx; const g = room.g;
       switch (m.t) {
         case 'leave': {
-          room.conns.delete(p); ws.ctx = null; p.connected = false;
-          send(ws, { t: 'left' });   // 나가기는 어떤 상황에서도 먼저 성공 처리
-          try { if (g.phase === 'lobby') G.removePlayer(g, p); else G.forfeit(g, p); } catch (e) { console.error('leave error', e.message); }
-          try { G.unstick(g); } catch (e) { /* */ }
+          room.conns.delete(p); ws.ctx = null;
+          if (g.phase === 'lobby') G.removePlayer(g, p); else { p.connected = false; G.forfeit(g, p); }
+          send(ws, { t: 'left' });
           if (room.conns.size === 0) setTimeout(() => { if (room.conns.size === 0) rooms.delete(g.code); }, 30 * 60 * 1000);
           broadcast(room);
           return;
@@ -86,13 +84,11 @@ wss.on('connection', (ws) => {
         case 'pick': G.actPick(g, p, m.id); break;
         case 'sub': G.actSub(g, p, m.value); break;
         case 'throw': G.actThrow(g, p, { choose: m.choose, coin: !!m.coin }); break;
-        case 'move': G.actMove(g, p, m.ri, m.pid, m); break;
-        case 'interrupt': G.actInterrupt(g, p, m); break;
+        case 'move': G.actMove(g, p, m.ri, m.pid); break;
         case 'ability': G.actAbility(g, p, m.a, m); break;
         case 'rematch': if (g.phase !== 'ended') throw new Error('게임이 끝나지 않았습니다'); G.resetGame(g); break;
         default: return;
       }
-      try { G.unstick(g); } catch (e2) { /* */ }
       broadcast(room);
     } catch (e) {
       send(ws, { t: 'err', msg: e.message });
@@ -109,7 +105,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-// 막힌 차례 자동 해소(안전장치)
-setInterval(() => { for (const room of rooms.values()) { try { if (G.unstick(room.g)) broadcast(room); } catch (e) { /* */ } } }, 3000);
-
-server.listen(PORT, () => console.log(`증강 윷놀이 v1.15 서버 실행 중: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`증강 윷놀이 v1.8 서버 실행 중: http://localhost:${PORT}`));
